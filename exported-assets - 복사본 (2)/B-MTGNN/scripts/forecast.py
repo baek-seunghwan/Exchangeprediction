@@ -131,7 +131,20 @@ def generate_forecast(data_file: str, model_path: str, method: str = "gnn"):
     print("=" * 60)
 
     print("📊 데이터 로드 중...")
-    df = pd.read_csv(data_file, index_col=0)
+    df = pd.read_csv(data_file, index_col=0, parse_dates=True)
+    date_index = df.index
+
+    # 날짜 인덱스 파싱/검증 (실패 시 월간 range로 대체)
+    if not pd.api.types.is_datetime64_any_dtype(date_index):
+        parsed = pd.to_datetime(date_index, errors="coerce")
+        if parsed.isna().any():
+            print("⚠️ 날짜 인덱스 파싱 실패, 기본 월간 범위로 대체합니다.")
+            date_index = pd.date_range(start="2011-01", periods=len(df), freq="MS")
+        else:
+            date_index = parsed
+    elif date_index.isna().any():
+        print("⚠️ 날짜 인덱스에 NaT가 포함되어 기본 월간 범위로 대체합니다.")
+        date_index = pd.date_range(start="2011-01", periods=len(df), freq="MS")
 
     # 기초 통화 매핑(표시용)
     currency_map = {
@@ -186,9 +199,10 @@ def generate_forecast(data_file: str, model_path: str, method: str = "gnn"):
 
     pred_mat = _parse_model_output(out, horizon=horizon, num_nodes=num_nodes)  # [H,N]
 
-    # 날짜 구성
-    dates = pd.date_range(start="2011-01", periods=len(df_fx), freq="MS")
-    forecast_dates = pd.date_range(start=dates[-1], periods=horizon + 1, freq="MS")[1:]
+    # 날짜 구성 (CSV 인덱스 재사용, 실패 시 월간 range)
+    actual_dates = pd.DatetimeIndex(date_index)
+    start_forecast = actual_dates[-1] + pd.offsets.MonthBegin(1)
+    forecast_dates = pd.date_range(start=start_forecast, periods=horizon, freq="MS")
 
     forecasts = {}
     # actual은 “스케일된 값”으로 저장(플롯 일관성). 원하면 역변환도 가능.
@@ -199,7 +213,7 @@ def generate_forecast(data_file: str, model_path: str, method: str = "gnn"):
             "scaler_scale": float(meta["scaler_scale"][j]),
             "actual": data_scaled[:, j],
             "forecast": pred_mat[:, j],
-            "actual_dates": dates,
+            "actual_dates": actual_dates,
             "forecast_dates": forecast_dates,
             "params": {
                 "method": "standard_scaler(train-only)",
