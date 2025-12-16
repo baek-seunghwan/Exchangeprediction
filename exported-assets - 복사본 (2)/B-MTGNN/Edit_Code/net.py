@@ -9,13 +9,15 @@ fixed_seed=123
 
 # Modified for Exchange Rate Forecasting
 class gtnet(nn.Module):
-    def __init__(self, gcn_true, buildA_true, gcn_depth, num_nodes, device, predefined_A=None, static_feat=None, dropout=0.3, subgraph_size=15, node_dim=40, dilation_exponential=1, conv_channels=32, residual_channels=32, skip_channels=64, end_channels=128, seq_length=12, in_dim=1, out_dim=8, layers=3, propalpha=0.05, tanhalpha=3, layer_norm_affline=True):
+    def __init__(self, gcn_true, buildA_true, gcn_depth, num_nodes, device, predefined_A=None, static_feat=None, dropout=0.3, subgraph_size=15, node_dim=40, dilation_exponential=1, conv_channels=32, residual_channels=32, skip_channels=64, end_channels=128, seq_length=12, in_dim=1, out_dim=8, layers=3, propalpha=0.05, tanhalpha=3, layer_norm_affline=True, attn_heads: int = 4, feature_gru_hidden: int = 32):
         super(gtnet, self).__init__()
         self.gcn_true = gcn_true
         self.buildA_true = buildA_true
         self.num_nodes = num_nodes
         self.dropout = dropout
         self.predefined_A = predefined_A
+        self.feature_extractor = FeatureExtractor(in_channels=in_dim, hidden_channels=residual_channels, gru_hidden=feature_gru_hidden, num_layers=1, dropout=dropout)
+        feature_channels = feature_gru_hidden
         self.filter_convs = nn.ModuleList()
         self.gate_convs = nn.ModuleList()
         self.residual_convs = nn.ModuleList()
@@ -23,10 +25,11 @@ class gtnet(nn.Module):
         self.gconv1 = nn.ModuleList()
         self.gconv2 = nn.ModuleList()
         self.norm = nn.ModuleList()
-        self.start_conv = nn.Conv2d(in_channels=in_dim,
+        self.start_conv = nn.Conv2d(in_channels=feature_channels,
                                     out_channels=residual_channels,
                                     kernel_size=(1, 1))
         self.gc = graph_constructor(num_nodes, subgraph_size, node_dim, device, alpha=tanhalpha, static_feat=static_feat)
+        self.temporal_attn = TemporalAttentionBlock(embed_dim=residual_channels, num_heads=attn_heads, dropout=dropout)
 
         self.seq_length = seq_length
         kernel_size = 7
@@ -82,11 +85,11 @@ class gtnet(nn.Module):
                                              kernel_size=(1,1),
                                              bias=True)
         if self.seq_length > self.receptive_field:
-            self.skip0 = nn.Conv2d(in_channels=in_dim, out_channels=skip_channels, kernel_size=(1, self.seq_length), bias=True)
+            self.skip0 = nn.Conv2d(in_channels=feature_channels, out_channels=skip_channels, kernel_size=(1, self.seq_length), bias=True)
             self.skipE = nn.Conv2d(in_channels=residual_channels, out_channels=skip_channels, kernel_size=(1, self.seq_length-self.receptive_field+1), bias=True)
 
         else:
-            self.skip0 = nn.Conv2d(in_channels=in_dim, out_channels=skip_channels, kernel_size=(1, self.receptive_field), bias=True)
+            self.skip0 = nn.Conv2d(in_channels=feature_channels, out_channels=skip_channels, kernel_size=(1, self.receptive_field), bias=True)
             self.skipE = nn.Conv2d(in_channels=residual_channels, out_channels=skip_channels, kernel_size=(1, 1), bias=True)
 
 
@@ -132,8 +135,12 @@ class gtnet(nn.Module):
         #             print('] total=',counter)
         # sys.exit()
 
-        x = self.start_conv(input)
-        skip = self.skip0(F.dropout(input, self.dropout, training=self.training))
+        enriched = self.feature_extractor(input)
+        x = self.start_conv(enriched)
+        attn_in = x.permute(0, 2, 3, 1).contiguous()
+        attn_out = self.temporal_attn(attn_in)
+        x = (attn_out + attn_in).permute(0, 3, 1, 2).contiguous()
+        skip = self.skip0(F.dropout(enriched, self.dropout, training=self.training))
 
         for i in range(self.layers):
             residual = x
