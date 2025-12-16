@@ -1,3 +1,5 @@
+from typing import Optional, Tuple
+
 from .layer import *
 import torch
 import sys
@@ -32,6 +34,7 @@ class gtnet(nn.Module):
         self.temporal_attn = TemporalAttentionBlock(embed_dim=residual_channels, num_heads=attn_heads, dropout=dropout)
 
         self.seq_length = seq_length
+        self.horizon = out_dim
         kernel_size = 7
         if dilation_exponential>1:
             self.receptive_field = int(1+(kernel_size-1)*(dilation_exponential**layers-1)/(dilation_exponential-1))
@@ -170,6 +173,28 @@ class gtnet(nn.Module):
         x = F.relu(self.end_conv_1(x))
         x = self.end_conv_2(x)
 
+        # Canonicalize to [B, H, N]
+        if x.dim() == 4 and x.shape[-1] == 1:
+            x = x[..., 0]
+        if x.dim() == 4 and x.shape[-1] != 1:
+            x = x.mean(dim=-1)
+        if x.dim() != 3:
+            raise RuntimeError(f"Unexpected output shape {tuple(x.shape)}")
+
+        if self.predict_delta_output:
+            # Treat model output as per-step deltas and anchor to the last observed level
+            last = input[:, 0, :, -1]  # [B, N]
+            delta = torch.tanh(x) * self.delta_scale  # [B, H, N]
+            x = last.unsqueeze(1) + torch.cumsum(delta, dim=1)
+
+            if self.clamp_range is not None:
+                lo, hi = self.clamp_range
+                x = torch.clamp(x, lo, hi)
+
+            if self.usd_anchor_idx is not None and 0 <= self.usd_anchor_idx < self.num_nodes:
+                anchor = last[:, self.usd_anchor_idx].unsqueeze(1)
+                x[:, :, self.usd_anchor_idx] = anchor
+
         return x
     
 
@@ -190,11 +215,15 @@ class gtnet(nn.Module):
             outs = []
             for _ in range(int(mc_samples)):
                 outs.append(self.forward(input, idx))
-            outs = torch.stack(outs, dim=0)  # [S, B, H, N, 1]
+            outs = torch.stack(outs, dim=0)  # [S, B, H, N] or [S, B, H, N, 1]
             mean = outs.mean(dim=0)
             q_lo, q_hi = quantiles
             lower = torch.quantile(outs, q_lo, dim=0)
             upper = torch.quantile(outs, q_hi, dim=0)
+            if mean.dim() == 3:
+                mean = mean.unsqueeze(-1)
+                lower = lower.unsqueeze(-1)
+                upper = upper.unsqueeze(-1)
             return mean, lower, upper
         finally:
             self.train(was_training)

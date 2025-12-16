@@ -114,7 +114,11 @@ def load_gnn_checkpoint(model_path: str, device: torch.device):
         layers=5,
         propalpha=0.05,
         tanhalpha=3,
-        layer_norm_affline=True
+        layer_norm_affline=True,
+        predict_delta_output=bool(ckpt.get("predict_delta_output", True)),
+        delta_scale=float(ckpt.get("delta_scale", 0.05)),
+        clamp_range=ckpt.get("clamp_range", None),
+        usd_anchor_idx=int(ckpt.get("usd_anchor_idx", 0)),
     ).to(device)
 
     model.load_state_dict(ckpt["model_state_dict"])

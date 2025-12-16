@@ -259,6 +259,10 @@ def train_model(
         "horizon": horizon,
         "scaler_mean": scaler.mean_.astype(np.float32),
         "scaler_scale": scaler.scale_.astype(np.float32),
+        "predict_delta_output": predict_delta_output,
+        "delta_scale": float(delta_scale),
+        "clamp_range": clamp_range,
+        "usd_anchor_idx": int(usd_anchor_idx),
     }
     torch.save(save_obj, model_save_path)
     print(f"💾 모델(state_dict) 저장: {model_save_path}")
