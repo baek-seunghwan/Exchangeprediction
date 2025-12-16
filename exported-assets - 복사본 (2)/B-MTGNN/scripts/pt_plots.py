@@ -1,7 +1,5 @@
 from pathlib import Path
-from typing import Union
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
@@ -24,40 +22,13 @@ def _make_forecast_ci(forecast: np.ndarray, base_sigma: float):
     band = 1.96 * base_sigma * grow
     return forecast - band, forecast + band
 
-
-def _coerce_plot_dates(values, label: str, periods: int, fallback_start: Union[str, pd.Timestamp]):
-    try:
-        idx = pd.DatetimeIndex(values)
-    except Exception:
-        idx = pd.to_datetime(values, errors="coerce")
-
-    if isinstance(idx, pd.Index) and idx.isna().any():
-        print(f"⚠️ {label}를 datetime으로 해석하지 못해 기본 월간 범위를 사용합니다.")
-        idx = pd.date_range(start=fallback_start, periods=periods, freq="MS")
-
-    if len(idx) != periods:
-        raise ValueError(f"{label} 길이({len(idx)})가 데이터({periods})와 일치하지 않습니다.")
-
-    return pd.DatetimeIndex(idx)
-
-
 def plot_fx_subplots_realrate(forecasts: dict, output_path: str, dpi: int = 240):
     _ensure_dir(Path(output_path).parent)
 
     # 날짜 기준
     usd = forecasts["USD"]
-    actual_dates = _coerce_plot_dates(
-        usd["actual_dates"],
-        label="actual_dates",
-        periods=len(usd["actual"]),
-        fallback_start=pd.Timestamp("2011-01-01"),
-    )
-    forecast_dates = _coerce_plot_dates(
-        usd["forecast_dates"],
-        label="forecast_dates",
-        periods=len(usd["forecast"]),
-        fallback_start=actual_dates[-1] + pd.offsets.MonthBegin(1),
-    )
+    actual_dates = usd["actual_dates"]
+    forecast_dates = usd["forecast_dates"]
     split_date = forecast_dates[0]
 
     # 통화 목록(USD 제외)
