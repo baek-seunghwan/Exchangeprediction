@@ -120,11 +120,7 @@ def train_model(
     seq_length: int = 12,   # 월별 데이터면 12(1년) 추천
     horizon: int = 36,       # 36개월 예측
     use_diff_data: bool = True,
-    shape_loss_weight: float = 0.2,
-    usd_anchor_idx: int = 0,
-    predict_delta_output: bool = True,
-    delta_scale: float = 0.05,
-    clamp_range=None,
+    shape_loss_weight: float = 0.2
 ):
     print("=" * 60)
     print("🚀 GNN(MTGNN) 모델 학습 시작")
@@ -190,11 +186,7 @@ def train_model(
         tanhalpha=3,
         layer_norm_affline=True,
         attn_heads=4,
-        feature_gru_hidden=48,
-        predict_delta_output=predict_delta_output,
-        delta_scale=delta_scale,
-        clamp_range=clamp_range,
-        usd_anchor_idx=usd_anchor_idx,
+        feature_gru_hidden=48
     ).to(device)
 
     optimizer = Adam(model.parameters(), lr=learning_rate)
@@ -226,13 +218,7 @@ def train_model(
             with torch.set_grad_enabled(train_mode):
                 out = model(x)
                 out = adapt_output_to_y(out, y)
-                # exclude USD (anchor) from loss to stabilize baseline
-                mask = torch.ones_like(y)
-                if 0 <= usd_anchor_idx < y.size(2):
-                    mask[:, :, usd_anchor_idx] = 0.0
-
-                diff = (out - y) * mask
-                mse_loss = (diff ** 2).sum() / (mask.sum() + 1e-9)
+                mse_loss = criterion(out, y)
                 y_diff = y[:, 1:, :] - y[:, :-1, :]
                 out_diff = out[:, 1:, :] - out[:, :-1, :]
                 # correlation-based shape loss (directional + volatility alignment)
