@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.optim import Adam
 from sklearn.preprocessing import StandardScaler as SKStandardScaler
 
@@ -113,11 +114,13 @@ def train_model(
     model_save_path: str,
     epochs: int = 50,
     batch_size: int = 32,
-    learning_rate: float = 0.001,
+    learning_rate: float = 5e-4,
     train_ratio: float = 0.6,
     valid_ratio: float = 0.2,
     seq_length: int = 12,   # 월별 데이터면 12(1년) 추천
-    horizon: int = 36       # 36개월 예측
+    horizon: int = 36,       # 36개월 예측
+    use_diff_data: bool = True,
+    shape_loss_weight: float = 0.2
 ):
     print("=" * 60)
     print("🚀 GNN(MTGNN) 모델 학습 시작")
@@ -135,6 +138,9 @@ def train_model(
         raise RuntimeError(f"[FATAL] 논문 설정은 5노드여야 합니다. 현재 num_nodes={num_nodes}, fx_cols={fx_cols}")
 
     df_fx = df[fx_cols].apply(pd.to_numeric, errors="coerce").ffill().bfill().fillna(0.0)
+    if use_diff_data:
+        df_fx = df_fx.diff().iloc[1:].fillna(0.0)
+        print(f"[INFO] Differencing enabled -> training on returns-like series, T={len(df_fx)}")
 
     # time split 기준으로 scaler fit: window 생성 전에, row 기준으로 train 범위 잡기
     T = len(df_fx)
@@ -164,7 +170,7 @@ def train_model(
         device=device,            # ✅ 너희 gtnet은 device 인자가 필수로 들어감
         predefined_A=None,
         static_feat=None,
-        dropout=0.3,
+        dropout=0.35,
         subgraph_size=min(20, num_nodes),
         node_dim=40,
         dilation_exponential=1,
@@ -178,11 +184,13 @@ def train_model(
         layers=5,
         propalpha=0.05,
         tanhalpha=3,
-        layer_norm_affline=True
+        layer_norm_affline=True,
+        attn_heads=4,
+        feature_gru_hidden=48
     ).to(device)
 
     optimizer = Adam(model.parameters(), lr=learning_rate)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=learning_rate * 0.1)
     criterion = nn.MSELoss()
 
     def run_epoch(split_name, X_np, Y_np, train_mode: bool):
@@ -210,7 +218,15 @@ def train_model(
             with torch.set_grad_enabled(train_mode):
                 out = model(x)
                 out = adapt_output_to_y(out, y)
-                loss = criterion(out, y)
+                mse_loss = criterion(out, y)
+                y_diff = y[:, 1:, :] - y[:, :-1, :]
+                out_diff = out[:, 1:, :] - out[:, :-1, :]
+                # correlation-based shape loss (directional + volatility alignment)
+                out_norm = F.normalize(out_diff.reshape(out_diff.size(0), -1), dim=1, eps=1e-6)
+                y_norm = F.normalize(y_diff.reshape(y_diff.size(0), -1), dim=1, eps=1e-6)
+                cos_sim = (out_norm * y_norm).sum(dim=1)
+                shape_loss = (1 - cos_sim).mean()
+                loss = mse_loss + shape_loss_weight * shape_loss
 
                 if train_mode:
                     loss.backward()
