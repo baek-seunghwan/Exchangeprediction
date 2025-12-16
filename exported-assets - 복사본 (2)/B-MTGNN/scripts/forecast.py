@@ -5,8 +5,10 @@
 """
 
 from pathlib import Path
+import re
 import sys
 import os
+from typing import Optional
 
 # ---------------------------------------------------------------------
 # Path bootstrap
@@ -121,6 +123,57 @@ def load_gnn_checkpoint(model_path: str, device: torch.device):
     return model, ckpt
 
 
+def _try_parse_dates(values) -> Optional[pd.DatetimeIndex]:
+    """Attempt several date formats, otherwise return None."""
+    tried = ["%Y-M%m", "%Y-%m", "%Y/%m", "%Y-%m-%d", None]
+    for fmt in tried:
+        parsed = pd.to_datetime(values, format=fmt, errors="coerce")
+        if not parsed.isna().any():
+            return pd.DatetimeIndex(parsed)
+    return None
+
+
+def _coerce_date_index(df_raw: pd.DataFrame):
+    """Extract/parse a datetime index from CSV content, with safe fallbacks."""
+
+    # 1) 우선적으로 명시적 날짜 컬럼 사용
+    date_col = None
+    for col in df_raw.columns:
+        if str(col).lower() in {"date", "month", "time", "period"} or str(col).lower().startswith("date"):
+            date_col = col
+            break
+
+    if date_col is None and df_raw.columns[0].lower().startswith("unnamed"):
+        # pandas가 index를 저장한 전형적인 케이스
+        date_col = df_raw.columns[0]
+
+    drop_cols = []
+    date_source = None
+
+    if date_col is not None:
+        date_source = df_raw[date_col]
+        drop_cols.append(date_col)
+    else:
+        date_source = df_raw.index
+
+    parsed = _try_parse_dates(date_source)
+
+    if parsed is None or parsed.isna().any():
+        # 문자열에서 연/월 힌트를 추출해서 시작월을 추정
+        start = "2011-01"
+        first = str(next((x for x in date_source if pd.notna(x)), ""))
+        m = re.search(r"(20\d{2}).*?(\d{2})", first)
+        if m:
+            start = f"{m.group(1)}-{m.group(2)}"
+
+        print("⚠️ 날짜 인덱스 파싱 실패, 기본 월간 범위로 대체합니다.")
+        parsed = pd.date_range(start=start, periods=len(df_raw), freq="MS")
+
+    df_fixed = df_raw.drop(columns=drop_cols).copy()
+    df_fixed.index = pd.DatetimeIndex(parsed)
+    return df_fixed, df_fixed.index
+
+
 def generate_forecast(data_file: str, model_path: str, method: str = "gnn"):
     """
     환율 예측 생성 (GNN만: 실패 시 예외)
@@ -131,20 +184,8 @@ def generate_forecast(data_file: str, model_path: str, method: str = "gnn"):
     print("=" * 60)
 
     print("📊 데이터 로드 중...")
-    df = pd.read_csv(data_file, index_col=0, parse_dates=True)
-    date_index = df.index
-
-    # 날짜 인덱스 파싱/검증 (실패 시 월간 range로 대체)
-    if not pd.api.types.is_datetime64_any_dtype(date_index):
-        parsed = pd.to_datetime(date_index, errors="coerce")
-        if parsed.isna().any():
-            print("⚠️ 날짜 인덱스 파싱 실패, 기본 월간 범위로 대체합니다.")
-            date_index = pd.date_range(start="2011-01", periods=len(df), freq="MS")
-        else:
-            date_index = parsed
-    elif date_index.isna().any():
-        print("⚠️ 날짜 인덱스에 NaT가 포함되어 기본 월간 범위로 대체합니다.")
-        date_index = pd.date_range(start="2011-01", periods=len(df), freq="MS")
+    raw = pd.read_csv(data_file)
+    df, date_index = _coerce_date_index(raw)
 
     # 기초 통화 매핑(표시용)
     currency_map = {
