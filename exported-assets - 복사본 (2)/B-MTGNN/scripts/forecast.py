@@ -5,8 +5,10 @@
 """
 
 from pathlib import Path
+import re
 import sys
 import os
+from typing import Optional
 
 # ---------------------------------------------------------------------
 # Path bootstrap
@@ -112,13 +114,68 @@ def load_gnn_checkpoint(model_path: str, device: torch.device):
         layers=5,
         propalpha=0.05,
         tanhalpha=3,
-        layer_norm_affline=True
+        layer_norm_affline=True,
+        predict_delta_output=bool(ckpt.get("predict_delta_output", True)),
+        delta_scale=float(ckpt.get("delta_scale", 0.05)),
+        clamp_range=ckpt.get("clamp_range", None),
+        usd_anchor_idx=int(ckpt.get("usd_anchor_idx", 0)),
     ).to(device)
 
     model.load_state_dict(ckpt["model_state_dict"])
     model.eval()
 
     return model, ckpt
+
+
+def _try_parse_dates(values) -> Optional[pd.DatetimeIndex]:
+    """Attempt several date formats, otherwise return None."""
+    tried = ["%Y-M%m", "%Y-%m", "%Y/%m", "%Y-%m-%d", None]
+    for fmt in tried:
+        parsed = pd.to_datetime(values, format=fmt, errors="coerce")
+        if not parsed.isna().any():
+            return pd.DatetimeIndex(parsed)
+    return None
+
+
+def _coerce_date_index(df_raw: pd.DataFrame):
+    """Extract/parse a datetime index from CSV content, with safe fallbacks."""
+
+    # 1) 우선적으로 명시적 날짜 컬럼 사용
+    date_col = None
+    for col in df_raw.columns:
+        if str(col).lower() in {"date", "month", "time", "period"} or str(col).lower().startswith("date"):
+            date_col = col
+            break
+
+    if date_col is None and df_raw.columns[0].lower().startswith("unnamed"):
+        # pandas가 index를 저장한 전형적인 케이스
+        date_col = df_raw.columns[0]
+
+    drop_cols = []
+    date_source = None
+
+    if date_col is not None:
+        date_source = df_raw[date_col]
+        drop_cols.append(date_col)
+    else:
+        date_source = df_raw.index
+
+    parsed = _try_parse_dates(date_source)
+
+    if parsed is None or parsed.isna().any():
+        # 문자열에서 연/월 힌트를 추출해서 시작월을 추정
+        start = "2011-01"
+        first = str(next((x for x in date_source if pd.notna(x)), ""))
+        m = re.search(r"(20\d{2}).*?(\d{2})", first)
+        if m:
+            start = f"{m.group(1)}-{m.group(2)}"
+
+        print("⚠️ 날짜 인덱스 파싱 실패, 기본 월간 범위로 대체합니다.")
+        parsed = pd.date_range(start=start, periods=len(df_raw), freq="MS")
+
+    df_fixed = df_raw.drop(columns=drop_cols).copy()
+    df_fixed.index = pd.DatetimeIndex(parsed)
+    return df_fixed.sort_index(), df_fixed.index.sort_values()
 
 
 def generate_forecast(data_file: str, model_path: str, method: str = "gnn"):
@@ -131,7 +188,8 @@ def generate_forecast(data_file: str, model_path: str, method: str = "gnn"):
     print("=" * 60)
 
     print("📊 데이터 로드 중...")
-    df = pd.read_csv(data_file, index_col=0)
+    raw = pd.read_csv(data_file)
+    df, date_index = _coerce_date_index(raw)
 
     # 기초 통화 매핑(표시용)
     currency_map = {
@@ -186,9 +244,13 @@ def generate_forecast(data_file: str, model_path: str, method: str = "gnn"):
 
     pred_mat = _parse_model_output(out, horizon=horizon, num_nodes=num_nodes)  # [H,N]
 
-    # 날짜 구성
-    dates = pd.date_range(start="2011-01", periods=len(df_fx), freq="MS")
-    forecast_dates = pd.date_range(start=dates[-1], periods=horizon + 1, freq="MS")[1:]
+    # 날짜 구성 (CSV 인덱스 재사용, 실패 시 월간 range)
+    actual_dates = pd.DatetimeIndex(date_index).sort_values()
+    inferred_freq = actual_dates.inferred_freq or pd.infer_freq(actual_dates)
+    freq = pd.tseries.frequencies.to_offset(inferred_freq or "MS")
+
+    start_forecast = actual_dates[-1] + freq
+    forecast_dates = pd.date_range(start=start_forecast, periods=horizon, freq=freq)
 
     forecasts = {}
     # actual은 “스케일된 값”으로 저장(플롯 일관성). 원하면 역변환도 가능.
@@ -199,7 +261,7 @@ def generate_forecast(data_file: str, model_path: str, method: str = "gnn"):
             "scaler_scale": float(meta["scaler_scale"][j]),
             "actual": data_scaled[:, j],
             "forecast": pred_mat[:, j],
-            "actual_dates": dates,
+            "actual_dates": actual_dates,
             "forecast_dates": forecast_dates,
             "params": {
                 "method": "standard_scaler(train-only)",

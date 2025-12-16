@@ -6,6 +6,46 @@ import numbers
 import torch.nn.functional as F
 
 
+class TemporalAttentionBlock(nn.Module):
+    """Multi-head temporal attention with residual connection and layer-norm."""
+
+    def __init__(self, embed_dim: int, num_heads: int = 4, dropout: float = 0.1):
+        super().__init__()
+        self.attn = nn.MultiheadAttention(embed_dim=embed_dim, num_heads=num_heads, dropout=dropout, batch_first=True)
+        self.norm = nn.LayerNorm(embed_dim)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: [B, N, L, C] -> treat N*B as batch for temporal attention
+        B, N, L, C = x.shape
+        x_reshape = x.view(B * N, L, C)
+        attn_out, _ = self.attn(x_reshape, x_reshape, x_reshape)
+        attn_out = self.dropout(attn_out)
+        attn_out = self.norm(attn_out + x_reshape)
+        return attn_out.view(B, N, L, C)
+
+
+class FeatureExtractor(nn.Module):
+    """Hybrid 1D CNN + GRU encoder to enrich temporal-local patterns before GNN."""
+
+    def __init__(self, in_channels: int, hidden_channels: int, gru_hidden: int, num_layers: int = 1, dropout: float = 0.1):
+        super().__init__()
+        self.conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=(1, 3), padding=(0, 1))
+        self.act = nn.ReLU()
+        self.gru = nn.GRU(hidden_channels, gru_hidden, num_layers=num_layers, batch_first=True, dropout=dropout if num_layers > 1 else 0.0)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: [B, C, N, L]
+        x = self.act(self.conv(x))  # [B, hidden, N, L]
+        B, C, N, L = x.shape
+        x = x.permute(0, 2, 3, 1).contiguous()  # [B, N, L, C]
+        x = x.view(B * N, L, C)
+        out, _ = self.gru(x)  # [B*N, L, gru_hidden]
+        out = out.view(B, N, L, -1)
+        out = out.permute(0, 3, 1, 2).contiguous()  # [B, gru_hidden, N, L]
+        return out
+
+
 class nconv(nn.Module):
     def __init__(self):
         super(nconv,self).__init__()

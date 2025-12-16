@@ -1,3 +1,5 @@
+from typing import Optional, Tuple
+
 from .layer import *
 import torch
 import sys
@@ -9,13 +11,15 @@ fixed_seed=123
 
 # Modified for Exchange Rate Forecasting
 class gtnet(nn.Module):
-    def __init__(self, gcn_true, buildA_true, gcn_depth, num_nodes, device, predefined_A=None, static_feat=None, dropout=0.3, subgraph_size=15, node_dim=40, dilation_exponential=1, conv_channels=32, residual_channels=32, skip_channels=64, end_channels=128, seq_length=12, in_dim=1, out_dim=8, layers=3, propalpha=0.05, tanhalpha=3, layer_norm_affline=True):
+    def __init__(self, gcn_true, buildA_true, gcn_depth, num_nodes, device, predefined_A=None, static_feat=None, dropout=0.3, subgraph_size=15, node_dim=40, dilation_exponential=1, conv_channels=32, residual_channels=32, skip_channels=64, end_channels=128, seq_length=12, in_dim=1, out_dim=8, layers=3, propalpha=0.05, tanhalpha=3, layer_norm_affline=True, attn_heads: int = 4, feature_gru_hidden: int = 32, predict_delta_output: bool = True, delta_scale: float = 0.05, clamp_range: Optional[Tuple[float, float]] = None, usd_anchor_idx: Optional[int] = 0):
         super(gtnet, self).__init__()
         self.gcn_true = gcn_true
         self.buildA_true = buildA_true
         self.num_nodes = num_nodes
         self.dropout = dropout
         self.predefined_A = predefined_A
+        self.feature_extractor = FeatureExtractor(in_channels=in_dim, hidden_channels=residual_channels, gru_hidden=feature_gru_hidden, num_layers=1, dropout=dropout)
+        feature_channels = feature_gru_hidden
         self.filter_convs = nn.ModuleList()
         self.gate_convs = nn.ModuleList()
         self.residual_convs = nn.ModuleList()
@@ -23,12 +27,18 @@ class gtnet(nn.Module):
         self.gconv1 = nn.ModuleList()
         self.gconv2 = nn.ModuleList()
         self.norm = nn.ModuleList()
-        self.start_conv = nn.Conv2d(in_channels=in_dim,
+        self.start_conv = nn.Conv2d(in_channels=feature_channels,
                                     out_channels=residual_channels,
                                     kernel_size=(1, 1))
         self.gc = graph_constructor(num_nodes, subgraph_size, node_dim, device, alpha=tanhalpha, static_feat=static_feat)
+        self.temporal_attn = TemporalAttentionBlock(embed_dim=residual_channels, num_heads=attn_heads, dropout=dropout)
+        self.predict_delta_output = predict_delta_output
+        self.delta_scale = delta_scale
+        self.clamp_range = clamp_range
+        self.usd_anchor_idx = usd_anchor_idx
 
         self.seq_length = seq_length
+        self.horizon = out_dim
         kernel_size = 7
         if dilation_exponential>1:
             self.receptive_field = int(1+(kernel_size-1)*(dilation_exponential**layers-1)/(dilation_exponential-1))
@@ -82,11 +92,11 @@ class gtnet(nn.Module):
                                              kernel_size=(1,1),
                                              bias=True)
         if self.seq_length > self.receptive_field:
-            self.skip0 = nn.Conv2d(in_channels=in_dim, out_channels=skip_channels, kernel_size=(1, self.seq_length), bias=True)
+            self.skip0 = nn.Conv2d(in_channels=feature_channels, out_channels=skip_channels, kernel_size=(1, self.seq_length), bias=True)
             self.skipE = nn.Conv2d(in_channels=residual_channels, out_channels=skip_channels, kernel_size=(1, self.seq_length-self.receptive_field+1), bias=True)
 
         else:
-            self.skip0 = nn.Conv2d(in_channels=in_dim, out_channels=skip_channels, kernel_size=(1, self.receptive_field), bias=True)
+            self.skip0 = nn.Conv2d(in_channels=feature_channels, out_channels=skip_channels, kernel_size=(1, self.receptive_field), bias=True)
             self.skipE = nn.Conv2d(in_channels=residual_channels, out_channels=skip_channels, kernel_size=(1, 1), bias=True)
 
 
@@ -132,8 +142,12 @@ class gtnet(nn.Module):
         #             print('] total=',counter)
         # sys.exit()
 
-        x = self.start_conv(input)
-        skip = self.skip0(F.dropout(input, self.dropout, training=self.training))
+        enriched = self.feature_extractor(input)
+        x = self.start_conv(enriched)
+        attn_in = x.permute(0, 2, 3, 1).contiguous()
+        attn_out = self.temporal_attn(attn_in)
+        x = (attn_out + attn_in).permute(0, 3, 1, 2).contiguous()
+        skip = self.skip0(F.dropout(enriched, self.dropout, training=self.training))
 
         for i in range(self.layers):
             residual = x
@@ -163,6 +177,28 @@ class gtnet(nn.Module):
         x = F.relu(self.end_conv_1(x))
         x = self.end_conv_2(x)
 
+        # Canonicalize to [B, H, N]
+        if x.dim() == 4 and x.shape[-1] == 1:
+            x = x[..., 0]
+        if x.dim() == 4 and x.shape[-1] != 1:
+            x = x.mean(dim=-1)
+        if x.dim() != 3:
+            raise RuntimeError(f"Unexpected output shape {tuple(x.shape)}")
+
+        if self.predict_delta_output:
+            # Treat model output as per-step deltas and anchor to the last observed level
+            last = input[:, 0, :, -1]  # [B, N]
+            delta = torch.tanh(x) * self.delta_scale  # [B, H, N]
+            x = last.unsqueeze(1) + torch.cumsum(delta, dim=1)
+
+            if self.clamp_range is not None:
+                lo, hi = self.clamp_range
+                x = torch.clamp(x, lo, hi)
+
+            if self.usd_anchor_idx is not None and 0 <= self.usd_anchor_idx < self.num_nodes:
+                anchor = last[:, self.usd_anchor_idx].unsqueeze(1)
+                x[:, :, self.usd_anchor_idx] = anchor
+
         return x
     
 
@@ -183,11 +219,15 @@ class gtnet(nn.Module):
             outs = []
             for _ in range(int(mc_samples)):
                 outs.append(self.forward(input, idx))
-            outs = torch.stack(outs, dim=0)  # [S, B, H, N, 1]
+            outs = torch.stack(outs, dim=0)  # [S, B, H, N] or [S, B, H, N, 1]
             mean = outs.mean(dim=0)
             q_lo, q_hi = quantiles
             lower = torch.quantile(outs, q_lo, dim=0)
             upper = torch.quantile(outs, q_hi, dim=0)
+            if mean.dim() == 3:
+                mean = mean.unsqueeze(-1)
+                lower = lower.unsqueeze(-1)
+                upper = upper.unsqueeze(-1)
             return mean, lower, upper
         finally:
             self.train(was_training)
