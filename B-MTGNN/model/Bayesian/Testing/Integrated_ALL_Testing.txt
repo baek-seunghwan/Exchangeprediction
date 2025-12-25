@@ -1,0 +1,2 @@
+ALL_Testing: rse=0.344020, rae=0.242470
+nodes=kr_fx,jp_fx,uk_fx,cn_fx,us_Trade Weighted Dollar Index,us_Balanced_of_Trade,us_Currency,us_Inflation_Rate,us_Inflation_Rate_MoM,us_Stock_Market,kr_Balanced_of_Trade,kr_Currency,kr_Inflation_Rate,kr_Inflation_Rate_MoM,jp_Balanced_of_Trade,jp_Currency,jp_Inflation_Rate,jp_Inflation_Rate_MoM,jp_Stock_Market,uk_Balanced_of_Trade,uk_Currency,uk_Inflation_Rate,uk_Inflation_Rate_MoM,uk_Stock_Market,ch_Balanced_of_Trade,ch_Currency,ch_Inflation_Rate,ch_Inflation_Rate_MoM,ch_Stock_Market
