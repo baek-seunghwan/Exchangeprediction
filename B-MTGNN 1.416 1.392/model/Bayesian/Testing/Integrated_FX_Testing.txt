@@ -1,2 +1,0 @@
-FX_Testing: rse=1.341541, rae=1.336460
-nodes=kr_fx,jp_fx,uk_fx,cn_fx
