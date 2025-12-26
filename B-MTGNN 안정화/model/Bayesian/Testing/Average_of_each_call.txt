@@ -1,0 +1,7 @@
+rse:1.894
+rae:2.211
+
+Cn_fx: rse:2.169, rae:2.675
+Jp_fx: rse:1.106, rae:1.169
+Kr_fx: rse:1.345, rae:1.354
+Uk_fx: rse:2.957, rae:3.647
