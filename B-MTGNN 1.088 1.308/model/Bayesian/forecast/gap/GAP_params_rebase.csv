@@ -1,0 +1,33 @@
+﻿node,base_mode,base_value,mul_factor,add_offset,base_index
+Unnamed: 0,first,0.0,100000000.0,1.0,1.0
+us_fx,first,1.0,1.0,0.0,1.0
+kr_fx,first,1120.07,0.0008928014,-1119.07,1.0
+jp_fx,first,82.61111,0.01210491,-81.61111,1.0
+uk_fx,first,0.64382446,1.5532184,0.35617554,1.0
+cn_fx,first,6.6033845,0.15143749,-5.6033845,1.0
+us_Trade Weighted Dollar Index,first,90.111206,0.011097399,-89.111206,1.0
+us_Balanced_of_Trade,first,-48.123,0.020780085,49.123,1.0
+us_Currency,first,77.735,0.012864218,-76.735,1.0
+us_Inflation_Rate,first,1.6000001,0.62499994,-0.60000014,1.0
+us_Inflation_Rate_MoM,first,0.29999998,3.3333335,0.70000005,1.0
+us_Stock_Market,first,1286.12,0.0007775324,-1285.12,1.0
+kr_Balanced_of_Trade,first,2484.0432,0.00040256948,-2483.0432,1.0
+kr_Currency,first,1119.25,0.00089345546,-1118.25,1.0
+kr_Inflation_Rate,first,3.4000003,0.29411763,-2.4000003,1.0
+kr_Inflation_Rate_MoM,first,1.2,0.8333333,-0.20000005,1.0
+kr_Stock_Market,first,1.0,1.0,0.0,1.0
+jp_Balanced_of_Trade,first,-497.15802,0.002011433,498.15802,1.0
+jp_Currency,first,82.07001,0.01218472,-81.07001,1.0
+jp_Inflation_Rate,first,-0.6000001,1.6666664,1.6000001,1.0
+jp_Inflation_Rate_MoM,first,-0.1,9.999999,1.1,1.0
+jp_Stock_Market,first,10237.92,9.767609e-05,-10236.92,1.0
+uk_Balanced_of_Trade,first,-399.0,0.0025062656,400.0,1.0
+uk_Currency,first,1.6014,0.6244536,-0.6014,1.0
+uk_Inflation_Rate,first,4.0,0.25,-3.0,1.0
+uk_Inflation_Rate_MoM,first,0.099999994,10.0,0.9,1.0
+uk_Stock_Market,first,2.6,0.3846154,-1.5999999,1.0
+ch_Balanced_of_Trade,first,5.7799997,0.1730104,-4.7799997,1.0
+ch_Currency,first,6.584,0.15188335,-5.584,1.0
+ch_Inflation_Rate,first,4.9,0.20408162,-3.9,1.0
+ch_Inflation_Rate_MoM,first,1.0,1.0,0.0,1.0
+ch_Stock_Market,first,2790.6943,0.00035833375,-2789.6943,1.0

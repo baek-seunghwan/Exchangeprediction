@@ -1,0 +1,6 @@
+Kr_fx: rse:1.043, rae:1.112
+Jp_fx: rse:1.006, rae:1.020
+Uk_fx: rse:1.302, rae:2.236
+Cn_fx: rse:0.999, rae:0.863
+
+Average RSE/RAE: rse:1.088, rae:1.308
