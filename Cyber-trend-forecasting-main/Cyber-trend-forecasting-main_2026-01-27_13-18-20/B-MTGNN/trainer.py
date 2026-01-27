@@ -68,3 +68,4 @@ class Optim:
             self.scheduler.step()
 
         return grad_norm
+    
