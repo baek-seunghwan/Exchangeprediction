@@ -183,8 +183,7 @@ def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, ou
         ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f - c, color=color, linewidth=0.8, alpha=0.6)
         ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f + c, color=color, linewidth=0.8, alpha=0.6)
 
-    x_ticks_pos = [i for i, date in enumerate(all_dates) if date.month == 1]
-    x_ticks_labels = [all_dates[i].strftime('%Y') for i in x_ticks_pos]
+    x_ticks_pos, x_ticks_labels = build_year_ticks(all_dates)
     ax.set_xticks(x_ticks_pos)
     ax.set_xticklabels(x_ticks_labels)
     ax.set_ylabel("Trend", fontsize=15)
@@ -201,6 +200,20 @@ def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, ou
     pyplot.savefig(os.path.join(output_dir, safe_name + '.png'), bbox_inches="tight")
     pyplot.close(fig)
     print(f"Individual Plot saved: {safe_name}.png (Color: {color})")
+
+
+def build_year_ticks(all_dates):
+    # all_dates may contain daily timestamps; pick first January occurrence per year
+    pos = []
+    lab = []
+    seen = set()
+    for i, d in enumerate(all_dates):
+        y = int(d.year)
+        if (y not in seen) and (int(d.month) == 1):
+            pos.append(i)
+            lab.append(str(y))
+            seen.add(y)
+    return pos, lab
 
 
 # --- Main Execution Block ---
@@ -232,9 +245,24 @@ print(f"Using device: {device}")
 
 try:
     print(f"Reading data from: {data_file}")
-    df = pd.read_csv(data_file, parse_dates=["Date"])
-    dates_all = df["Date"].tolist()      # ✅ 실제 시점
-    df = df.drop(columns=["Date"])       # 값만 남김
+    # === 날짜 인덱스 생성 (학습/예측 기준 기간을 고정하고 싶을 때 사용) ===
+    # - USE_CSV_DATE=True  : CSV의 Date 컬럼을 그대로 사용 (월별이어야 함)
+    # - USE_CSV_DATE=False : 마지막 관측월(HIST_END)을 기준으로 월별 인덱스를 재구성
+    USE_CSV_DATE = False
+    HIST_END = pd.Timestamp("2025-10-01")  # 25/Oct (월초로 둠)
+
+    df = pd.read_csv(data_file, parse_dates=["Date"]) 
+    if USE_CSV_DATE and ("Date" in df.columns):
+        dates_all = pd.to_datetime(df["Date"]) 
+        # 일 단위가 섞여도 월 단위로 강제(중복 안 줄이고 인덱스만 월초로)
+        dates_all = dates_all.dt.to_period("M").dt.to_timestamp()
+        df = df.drop(columns=["Date"])       # 값만 남김
+    else:
+        # row 개수(len(df))는 그대로 두고, 월별 인덱스를 HIST_END 기준으로 재구성
+        hist_start = HIST_END - pd.DateOffset(months=(len(df) - 1))
+        dates_all = pd.date_range(start=hist_start, periods=len(df), freq="MS")
+        if "Date" in df.columns:
+            df = df.drop(columns=["Date"])
     col = df.columns.tolist()
     index = {name: i for i, name in enumerate(col)}
     rawdat = df.values
@@ -279,33 +307,59 @@ if seq_len is None:
 print(f"Using input sequence length (seq_len) = {seq_len}")
 X_init = torch.from_numpy(dat[-seq_len:, :]).float().to(device)
 
-
-# 8. Bayesian Estimation
+# 8. Bayesian Estimation (정확히 horizon개월만 생성)
 num_runs, horizon = 20, 36
 outputs = []
+
 print(f"Running Bayesian Forecast for {horizon} months...")
-steps_needed = horizon // 12
+
+# Ensure rolling window size P equals model input length
+P = seq_len
+
+# Warm up: estimate model output block length (pred_len)
+model.train()
+with torch.no_grad():
+    tmp_in = X_init.unsqueeze(0).unsqueeze(0).permute(0, 1, 3, 2).contiguous()
+    tmp_out = model(tmp_in)
+    pred_len = int(tmp_out.size(1))
 
 for r in range(num_runs):
     curr_X = X_init.clone()
-    sample_preds = []
-    model.train() 
+    preds = []
+    len_preds = 0
+
+    model.train()
     with torch.no_grad():
-        for step in range(steps_needed):
+        while len_preds < horizon:
             curr_input = curr_X.unsqueeze(0).unsqueeze(0).permute(0, 1, 3, 2).contiguous()
-            output = model(curr_input)
-            pred_block = output.squeeze(3).squeeze(0)
+            out = model(curr_input)
+
+            pred_block = out.squeeze(3).squeeze(0)  # [pred_len, N]
+
             last = curr_input[:, 0, :, -1]
             last_rep = last.unsqueeze(1).repeat(1, pred_block.size(0), 1)
             pred_level = pred_block.unsqueeze(0) + last_rep
-            if us_idx != -1: pred_level[:, :, us_idx] = 1.0
-            sample_preds.append(pred_level.squeeze(0).cpu().numpy())
-            new_X = np.concatenate([curr_X.cpu().numpy(), pred_level.squeeze(0).cpu().numpy()], axis=0)
-            curr_X = torch.from_numpy(new_X[-seq_len:, :]).float().to(device).contiguous()
-    outputs.append(torch.tensor(np.concatenate(sample_preds, axis=0)))
+            pred_level = pred_level.squeeze(0)  # [pred_len, N]
 
-outputs = torch.stack(outputs) 
-Y, std_dev = torch.mean(outputs, dim=0), torch.std(outputs, dim=0)
+            if us_idx != -1:
+                pred_level[:, us_idx] = 1.0
+
+            need = horizon - len_preds
+            take = min(pred_level.size(0), need)
+            take_block = pred_level[:take, :].cpu().numpy()
+
+            preds.append(take_block)
+            len_preds += take
+
+            # roll forward by 'take' steps
+            new_X = np.concatenate([curr_X.cpu().numpy(), take_block], axis=0)
+            curr_X = torch.from_numpy(new_X[-P:, :]).float().to(device).contiguous()
+
+    outputs.append(torch.tensor(np.concatenate(preds, axis=0)))  # [horizon, N]
+
+outputs = torch.stack(outputs)  # [num_runs, horizon, N]
+Y = torch.mean(outputs, dim=0)              # [horizon, N]
+std_dev = torch.std(outputs, dim=0)         # [horizon, N]
 confidence = 1.96 * std_dev / torch.sqrt(torch.tensor(num_runs))
 variance = torch.var(outputs, dim=0)
 
@@ -337,7 +391,8 @@ smoothed_hist, smoothed_fut = smoothed_dat[:-horizon, :], smoothed_dat[-horizon:
 smoothed_conf_fut = smoothed_confidence[-horizon:, :]
 
 # === 날짜 처리: 실제 데이터 기준 ===
-dates_hist = dates_all
+# dates_all may be a pandas Series/Index; convert to plain list for safe concatenation
+dates_hist = list(dates_all)
 last_date = dates_hist[-1]
 dates_future = pd.date_range(start=last_date + pd.DateOffset(months=1), periods=horizon, freq="MS").tolist()
 
@@ -363,9 +418,9 @@ for idx, i in enumerate(target_indices):
     if i != us_idx: ax.fill_between(range(len(d) - 1, (len(d) + len(f)) - 1), f - c, f + c, color=color, alpha=0.25)
 
 all_dates = dates_hist + dates_future
-x_ticks_pos = [i for i, date in enumerate(all_dates) if date.month == 1]
+x_ticks_pos, x_ticks_labels = build_year_ticks(all_dates)
 ax.set_xticks(x_ticks_pos)
-ax.set_xticklabels([all_dates[i].strftime('%Y') for i in x_ticks_pos], rotation=90, fontsize=13)
+ax.set_xticklabels(x_ticks_labels, rotation=90, fontsize=13)
 ax.legend(loc="upper left", bbox_to_anchor=(1, 1.03))
 ax.grid(True, linestyle=':', alpha=0.6)
 pyplot.title("Multi-Node Forecast (Normalized Trend)", fontsize=18)
