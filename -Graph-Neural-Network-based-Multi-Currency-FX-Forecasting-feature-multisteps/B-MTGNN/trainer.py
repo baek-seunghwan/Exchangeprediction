@@ -15,7 +15,7 @@ class Optim:
         grad_norm = optim.step()
     """
 
-    def __init__(self, params, optim: str, lr: float, clip: float, lr_decay: float = None):
+    def __init__(self, params, optim: str, lr: float, clip: float, lr_decay: float = None, weight_decay: float = 0.0):
         """
         params    : model.parameters()
         optim     : 'adam', 'sgd', 'rmsprop' 등
@@ -26,14 +26,15 @@ class Optim:
         self.lr = lr
         self.clip = clip
         self.lr_decay = lr_decay
+        self.weight_decay = weight_decay
 
         optim = optim.lower()
         if optim == "sgd":
-            self.optimizer = torch.optim.SGD(params, lr=lr, momentum=0.9)
+            self.optimizer = torch.optim.SGD(params, lr=lr, momentum=0.9, weight_decay=self.weight_decay)
         elif optim == "adam":
-            self.optimizer = torch.optim.Adam(params, lr=lr)
+            self.optimizer = torch.optim.Adam(params, lr=lr, weight_decay=self.weight_decay)
         elif optim == "rmsprop":
-            self.optimizer = torch.optim.RMSprop(params, lr=lr)
+            self.optimizer = torch.optim.RMSprop(params, lr=lr, weight_decay=self.weight_decay)
         else:
             raise ValueError(f"Unsupported optimizer type: {optim}")
 

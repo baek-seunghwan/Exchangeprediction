@@ -101,6 +101,7 @@ parser.add_argument('--layers',type=int,default=5,help='number of layers')
 parser.add_argument('--batch_size',type=int,default=8,help='batch size')
 parser.add_argument('--lr',type=float,default=0.001,help='learning rate')
 parser.add_argument('--weight_decay',type=float,default=0.00001,help='weight decay rate')
+parser.add_argument('--lr_decay', type=float, default=1.0, help='learning rate decay (gamma for ExponentialLR)')
 parser.add_argument('--clip',type=int,default=10,help='clip')
 parser.add_argument('--propalpha',type=float,default=0.05,help='prop alpha')
 parser.add_argument('--tanhalpha',type=float,default=3,help='tanh alpha')
@@ -170,15 +171,15 @@ nParams = sum([p.nelement() for p in model.parameters()])
 print('Number of model parameters is', nParams, flush=True)
 
 if args.L1Loss:
-    criterion = nn.L1Loss(reduction='sum').to(device)
+    criterion = nn.L1Loss(reduction='mean').to(device)
 else:
-    criterion = nn.MSELoss(reduction='sum').to(device)
-evaluateL2 = nn.MSELoss(reduction='sum').to(device) #MSE
-evaluateL1 = nn.L1Loss(reduction='sum').to(device) #MAE
+    criterion = nn.MSELoss(reduction='mean').to(device)
+evaluateL2 = nn.MSELoss(reduction='mean').to(device) #MSE
+evaluateL1 = nn.L1Loss(reduction='mean').to(device) #MAE
 
 
 optim = Optim(
-    model.parameters(), args.optim, lr, args.clip, lr_decay=args.weight_decay
+    model.parameters(), args.optim, lr, args.clip, lr_decay=args.lr_decay, weight_decay=args.weight_decay
 )
 
 # At any point you can hit Ctrl + C to break out of training early.

@@ -376,6 +376,9 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
 
 
 def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
+    # Ensure model is in eval mode during validation (dropout/BN fixed)
+    model.eval()
+
     total_loss = 0
     total_loss_l1 = 0
     n_samples = 0
@@ -388,9 +391,10 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
     r = 0
     print('validation r=', str(r))
 
-    for X, Y in data.get_batches(X, Y, batch_size, False):
-        X = torch.unsqueeze(X, dim=1)
-        X = X.transpose(2, 3)
+    with torch.no_grad():
+        for X, Y in data.get_batches(X, Y, batch_size, False):
+            X = torch.unsqueeze(X, dim=1)
+            X = X.transpose(2, 3)
 
         num_runs = 10
         outputs = []
@@ -504,6 +508,8 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
             save_metrics_1d(torch.from_numpy(predict[-1, :, col]), torch.from_numpy(Ytest[-1, :, col]), node_name, 'Validation')
             plot_predicted_actual(predict[-1, :, col], Ytest[-1, :, col], node_name, 'Validation', variance[-1, :, col], confidence_95[-1, :, col])
             counter += 1
+    # restore train mode
+    model.train()
     return rrse, rae, correlation, smape
 
 
@@ -592,6 +598,7 @@ parser.add_argument('--batch_size', type=int, default=8, help='batch size')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
 parser.add_argument('--weight_decay', type=float, default=0.00001, help='weight decay rate')
 parser.add_argument('--clip', type=int, default=10, help='clip')
+parser.add_argument('--lr_decay', type=float, default=1.0, help='learning rate decay (gamma for ExponentialLR)')
 parser.add_argument('--propalpha', type=float, default=0.05, help='prop alpha')
 parser.add_argument('--tanhalpha', type=float, default=3, help='tanh alpha')
 parser.add_argument('--epochs', type=int, default=100, help='')
@@ -713,14 +720,14 @@ def main(experiment):
         print('Number of model parameters is', nParams, flush=True)
 
         if args.L1Loss:
-            criterion = nn.L1Loss(reduction='sum').to(device)
+            criterion = nn.L1Loss(reduction='mean').to(device)
         else:
-            criterion = nn.MSELoss(reduction='sum').to(device)
-        evaluateL2 = nn.MSELoss(reduction='sum').to(device)
-        evaluateL1 = nn.L1Loss(reduction='sum').to(device)
+            criterion = nn.MSELoss(reduction='mean').to(device)
+        evaluateL2 = nn.MSELoss(reduction='mean').to(device)
+        evaluateL1 = nn.L1Loss(reduction='mean').to(device)
 
         optim = Optim(
-            model.parameters(), args.optim, lr, args.clip, lr_decay=args.weight_decay
+            model.parameters(), args.optim, lr, args.clip, lr_decay=args.lr_decay, weight_decay=args.weight_decay
         )
 
         es_counter = 0
