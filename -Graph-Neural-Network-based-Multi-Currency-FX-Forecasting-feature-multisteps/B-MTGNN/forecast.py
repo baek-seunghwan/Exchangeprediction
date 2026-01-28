@@ -205,17 +205,22 @@ def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, ou
 
 # --- Main Execution Block ---
 
-# 1. 모든 경로를 구글 드라이브 절대 경로로 직접 지정 (project_root 미사용)
-data_file = '/content/drive/MyDrive/Cyber-trend-forecasting-main/Cyber-trend-forecasting-main/B-MTGNN/data/ExchangeRate_dataset.csv'
-model_file = '/content/drive/MyDrive/Cyber-trend-forecasting-main/Cyber-trend-forecasting-main/model/model.pt'
+# 프로젝트 디렉토리 기준으로 경로 설정
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir)
 
-plot_dir = '/content/drive/MyDrive/Cyber-trend-forecasting-main/Cyber-trend-forecasting-main/model/Bayesian/forecast/plots'
-pt_plots_dir = '/content/drive/MyDrive/Cyber-trend-forecasting-main/Cyber-trend-forecasting-main/model/Bayesian/forecast/pt_plots'
-data_out_dir = '/content/drive/MyDrive/Cyber-trend-forecasting-main/Cyber-trend-forecasting-main/model/Bayesian/forecast/data'
-rebased_out_dir = '/content/drive/MyDrive/Cyber-trend-forecasting-main/Cyber-trend-forecasting-main/model/Bayesian/forecast/data_rebased'
-gap_out_dir = '/content/drive/MyDrive/Cyber-trend-forecasting-main/Cyber-trend-forecasting-main/model/Bayesian/forecast/gap'
+# 데이터 및 모델 파일
+data_file = os.path.join(script_dir, 'data', 'ExchangeRate_dataset.csv')
+model_file = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'model.pt')
 
-# 2. 모든 저장 디렉토리 자동 생성
+# 출력 디렉토리
+plot_dir = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'forecast', 'plots')
+pt_plots_dir = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'forecast', 'pt_plots')
+data_out_dir = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'forecast', 'data')
+rebased_out_dir = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'forecast', 'data_rebased')
+gap_out_dir = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'forecast', 'gap')
+
+# 모든 저장 디렉토리 자동 생성 (workspace 내)
 for d in [plot_dir, pt_plots_dir, data_out_dir, rebased_out_dir, gap_out_dir]:
     if not os.path.exists(d): os.makedirs(d, exist_ok=True)
 
@@ -224,12 +229,12 @@ device = torch.device('cpu')
 print(f"Using device: {device}")
 
 # 4. 데이터 로드
+
 try:
     print(f"Reading data from: {data_file}")
-    df = pd.read_csv(data_file)
-    df = df.apply(pd.to_numeric, errors='coerce')
-    df = df.ffill().fillna(0)
-    dates_hist = pd.date_range(start='2011-01-01', periods=len(df), freq='MS').tolist()
+    df = pd.read_csv(data_file, parse_dates=["Date"])
+    dates_all = df["Date"].tolist()      # ✅ 실제 시점
+    df = df.drop(columns=["Date"])       # 값만 남김
     col = df.columns.tolist()
     index = {name: i for i, name in enumerate(col)}
     rawdat = df.values
@@ -253,11 +258,7 @@ for i in range(m):
     if scale[i] == 0: scale[i] = 1.0
     dat[:, i] = rawdat[:, i] / scale[i]
 
-# 6. Input Preparation
-P = 36
-X_init = torch.from_numpy(dat[-P:, :]).float().to(device)
-
-# 7. Load Model (map_location='cpu' 명시)
+# 6. Load Model (map_location='cpu' 명시)
 print(f"Loading Model from {model_file}...")
 try:
     with open(model_file, 'rb') as f:
@@ -266,6 +267,18 @@ try:
 except Exception as e:
     print(f"❌ 모델 로드 실패: {e}")
     sys.exit()
+
+# 7. Input Preparation: use model's expected sequence length
+try:
+    seq_len = int(getattr(model, 'seq_length', None) or getattr(model, 'module', None) and getattr(model.module, 'seq_length', None))
+except Exception:
+    seq_len = None
+if seq_len is None:
+    # fallback to 10 if not found
+    seq_len = 10
+print(f"Using input sequence length (seq_len) = {seq_len}")
+X_init = torch.from_numpy(dat[-seq_len:, :]).float().to(device)
+
 
 # 8. Bayesian Estimation
 num_runs, horizon = 20, 36
@@ -288,7 +301,7 @@ for r in range(num_runs):
             if us_idx != -1: pred_level[:, :, us_idx] = 1.0
             sample_preds.append(pred_level.squeeze(0).cpu().numpy())
             new_X = np.concatenate([curr_X.cpu().numpy(), pred_level.squeeze(0).cpu().numpy()], axis=0)
-            curr_X = torch.from_numpy(new_X[-36:, :]).float().to(device).contiguous()
+            curr_X = torch.from_numpy(new_X[-seq_len:, :]).float().to(device).contiguous()
     outputs.append(torch.tensor(np.concatenate(sample_preds, axis=0)))
 
 outputs = torch.stack(outputs) 
@@ -309,6 +322,7 @@ confidence_rebased = apply_rebase_mul(confidence_denorm, mul_factor)
 variance_rebased = apply_rebase_mul(variance_denorm, mul_factor)
 save_data(dat_rebased, Y_rebased, confidence_rebased, variance_rebased, col, rebased_out_dir)
 
+
 # 10. Smoothing
 all_data = torch.cat((dat_rebased, Y_rebased), dim=0)
 all_conf = torch.cat((torch.zeros_like(dat_rebased), confidence_rebased), dim=0)
@@ -321,7 +335,11 @@ smoothed_dat = torch.tensor(np.array(smoothed_data_list)).T
 smoothed_confidence = torch.tensor(np.array(smoothed_conf_list)).T
 smoothed_hist, smoothed_fut = smoothed_dat[:-horizon, :], smoothed_dat[-horizon:, :]
 smoothed_conf_fut = smoothed_confidence[-horizon:, :]
-dates_future = [dates_hist[-1] + pd.DateOffset(months=i + 1) for i in range(horizon)]
+
+# === 날짜 처리: 실제 데이터 기준 ===
+dates_hist = dates_all
+last_date = dates_hist[-1]
+dates_future = pd.date_range(start=last_date + pd.DateOffset(months=1), periods=horizon, freq="MS").tolist()
 
 # 11. Individual Plotting Loop
 target_keywords = ['us_fx', 'kr_fx', 'uk_fx', 'jp_fx', 'cn_fx']

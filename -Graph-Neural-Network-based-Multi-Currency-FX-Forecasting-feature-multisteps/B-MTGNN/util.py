@@ -93,15 +93,12 @@ class DataLoaderS(object):
         self.out_len = out
         self.device = device
 
+
         try:
             print(f"Loading data from {file_name}...")
-            df = pd.read_csv(file_name)
-            
-            if 'Date' in df.columns:
-                df = df.drop(columns=['Date'])
-            elif df.columns[0].lower() == 'date':
-                df = df.iloc[:, 1:]
-
+            df = pd.read_csv(file_name, parse_dates=["Date"])
+            self.dates_all = df["Date"].tolist()  # 실제 시점
+            df = df.drop(columns=["Date"])
             df = df.apply(pd.to_numeric, errors='coerce')
             df = df.fillna(0)
             self.rawdat_np = df.values.astype(float)
@@ -110,7 +107,12 @@ class DataLoaderS(object):
         except Exception as e:
             print(f"Pandas load failed: {e}. Trying np.loadtxt fallback...")
             try:
-                self.rawdat_np = np.loadtxt(file_name, delimiter=',', skiprows=1)
+                # 헤더에서 컬럼 개수 파악 (Date 포함)
+                with open(file_name, 'r') as f:
+                    header = f.readline()
+                ncol = len(header.strip().split(','))
+                # 첫 번째 컬럼(Date) 제외하고 데이터만 읽기
+                self.rawdat_np = np.loadtxt(file_name, delimiter=',', skiprows=1, usecols=range(1, ncol))
             except Exception as e2:
                 raise ValueError(f"Failed to load data: {e2}")
 

@@ -1,4 +1,5 @@
 import argparse
+import os
 import math
 import time
 import torch
@@ -560,8 +561,8 @@ DEFAULT_MODEL_SAVE = MODEL_BASE_DIR / 'model.pt'
 
 parser = argparse.ArgumentParser(description='PyTorch Time series forecasting')
 parser.add_argument('--data', type=str, 
-                    default='B-MTGNN/data/ExchangeRate_dataset.csv',
-                    help='location of the data file')
+    default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'ExchangeRate_dataset.csv'),
+    help='location of the data file')
 parser.add_argument('--log_interval', type=int, default=2000, metavar='N',
                     help='report interval')
 parser.add_argument('--save', type=str, default=str(DEFAULT_MODEL_SAVE),
@@ -649,7 +650,7 @@ def main(experiment):
 
     best_hp = []
 
-    for q in range(60):
+    for q in range(10):
         gcn_depth = gcn_depths[randrange(len(gcn_depths))]
         lr = lrs[randrange(len(lrs))]
         conv = convs[randrange(len(convs))]
