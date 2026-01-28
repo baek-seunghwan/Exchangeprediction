@@ -246,13 +246,14 @@ print(f"Using device: {device}")
 try:
     print(f"Reading data from: {data_file}")
     # === 날짜 인덱스 생성 (학습/예측 기준 기간을 고정하고 싶을 때 사용) ===
-    # - USE_CSV_DATE=True  : CSV의 Date 컬럼을 그대로 사용 (월별이어야 함)
-    # - USE_CSV_DATE=False : 마지막 관측월(HIST_END)을 기준으로 월별 인덱스를 재구성
-    USE_CSV_DATE = False
+    # - If the CSV contains a `Date` column, prefer it (monthly expected).
+    # - Otherwise reconstruct monthly index from HIST_END.
     HIST_END = pd.Timestamp("2025-10-01")  # 25/Oct (월초로 둠)
 
     df = pd.read_csv(data_file, parse_dates=["Date"]) 
-    if USE_CSV_DATE and ("Date" in df.columns):
+    # 자동 감지: CSV에 Date 컬럼이 있으면 그 컬럼을 우선 사용
+    USE_CSV_DATE = ("Date" in df.columns)
+    if USE_CSV_DATE:
         dates_all = pd.to_datetime(df["Date"]) 
         # 일 단위가 섞여도 월 단위로 강제(중복 안 줄이고 인덱스만 월초로)
         dates_all = dates_all.dt.to_period("M").dt.to_timestamp()
