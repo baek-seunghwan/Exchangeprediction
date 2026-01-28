@@ -118,24 +118,29 @@ def save_metrics_1d(predict, test, title, type):
 
 
 def plot_predicted_actual(predicted, actual, title, type, variance, confidence_95):
-    # === X축 날짜 매핑: Testing/Validation = Aug/22 ~ Jul/25 (값/학습은 그대로, 라벨만) ===
-    import pandas as pd
-    END = pd.Timestamp("2025-07-01")  # 최종 관측: 25/Jul
-    dates = pd.date_range(end=END, periods=len(predicted), freq="MS")
-    labels_all = [d.strftime('%b-%y') for d in dates]
-
-    # === 완전 균등 간격 + 시작(Aug) / 끝(Jul) 반드시 포함 ===
-    # Aug-22(0) ~ Jul-25(35) => (len-1)=35를 나누는 step만 균등 가능
-    step = 5   # 추천: 라벨 과밀 방지 + 완전 균등
-    total = len(labels_all) - 1
-    if total % step != 0:
-        step = 1  # 안전장치(데이터 길이가 바뀌면 월별로라도 균등)
-    idxs = list(range(0, len(labels_all), step))  # total%step==0이면 자동으로 마지막 포함
-    if idxs[-1] != total:
-        idxs.append(total)
-
-    M2 = [labels_all[i] for i in idxs]
-    p = [i + 1 for i in idxs]  # x가 1부터 시작
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    M = []
+    for year in range(11, 23):
+        for month in months:
+            if year == 11 and month not in ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']:
+                continue
+            M.append(month + '-' + str(year))
+    M2 = []
+    p = []
+    
+    if type == 'Testing':
+        M = M[-len(predicted):]
+        for index, value in enumerate(M):
+            if 'Dec' in M[index] or 'Mar' in M[index] or 'Jun' in M[index] or 'Sep' in M[index]:
+                M2.append(M[index])
+                p.append(index + 1)
+    
+    else:
+        M = M[63:99]
+        for index, value in enumerate(M):
+            if 'Dec' in M[index] or 'Mar' in M[index] or 'Jun' in M[index] or 'Sep' in M[index]:
+                M2.append(M[index])
+                p.append(index + 1)
 
     x = range(1, len(predicted) + 1)
     plt.plot(x, actual, 'b-', label='Actual')
@@ -150,13 +155,13 @@ def plot_predicted_actual(predicted, actual, title, type, variance, confidence_9
     locs, labs = plt.xticks()
     plt.xticks(ticks=p, labels=M2, rotation='vertical', fontsize=13)
     plt.yticks(fontsize=13)
-
+    
     fig = plt.gcf()
     title = title.replace('/', '_')
-
+    
     save_dir = MODEL_BASE_DIR / type
     save_dir.mkdir(parents=True, exist_ok=True)
-
+    
     plt.savefig(save_dir / f"{title}_{type}.png", bbox_inches="tight")
     # plt.savefig(save_dir / f"{title}_{type}.pdf", bbox_inches="tight", format='pdf')
 
@@ -602,19 +607,6 @@ parser.add_argument('--step_size', type=int, default=100, help='step_size')
 args = parser.parse_args()
 device = torch.device('cpu')
 torch.set_num_threads(3)
-
-# ---- 데이터 경로 자동 보정 (어느 디렉토리에서 실행해도 동작) ----
-from pathlib import Path
-_here = Path(__file__).resolve().parent
-_p = Path(args.data)
-if (not _p.is_absolute()) and (not _p.exists()):
-    cand = _here / args.data
-    if cand.exists():
-        args.data = str(cand)
-    else:
-        cand2 = _here / 'data' / _p.name
-        if cand2.exists():
-            args.data = str(cand2)
 
 
 def set_random_seed(seed):
