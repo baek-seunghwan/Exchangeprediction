@@ -9,6 +9,7 @@ import sys
 import csv
 from collections import defaultdict
 from matplotlib import pyplot
+import matplotlib.dates as mdates
 import random
 import pandas as pd
 
@@ -245,30 +246,38 @@ print(f"Using device: {device}")
 
 try:
     print(f"Reading data from: {data_file}")
-    # === 날짜 인덱스 생성 (학습/예측 기준 기간을 고정하고 싶을 때 사용) ===
-    # - If the CSV contains a `Date` column, prefer it (monthly expected).
-    # - Otherwise reconstruct monthly index from HIST_END.
-    HIST_END = pd.Timestamp("2025-10-01")  # 25/Oct (월초로 둠)
+    df_raw = pd.read_csv(data_file)
 
-    df = pd.read_csv(data_file, parse_dates=["Date"]) 
-    # 자동 감지: CSV에 Date 컬럼이 있으면 그 컬럼을 우선 사용
-    USE_CSV_DATE = ("Date" in df.columns)
-    if USE_CSV_DATE:
-        dates_all = pd.to_datetime(df["Date"]) 
-        # 일 단위가 섞여도 월 단위로 강제(중복 안 줄이고 인덱스만 월초로)
-        dates_all = dates_all.dt.to_period("M").dt.to_timestamp()
-        df = df.drop(columns=["Date"])       # 값만 남김
+    def _parse_monthly_date(s: pd.Series) -> pd.Series:
+        s = s.astype(str).str.strip()
+        m = s.str.extract(r'(?P<y>\d{4})\D*M(?P<m>\d{1,2})')
+        if m.notna().all(axis=1).all():
+            return pd.to_datetime(m['y'] + '-' + m['m'].str.zfill(2) + '-01')
+        dt = pd.to_datetime(s, errors='coerce')
+        if dt.isna().all():
+            return pd.to_datetime(s.str.replace('-', '/'), errors='coerce').dt.to_period('M').dt.to_timestamp()
+        return dt.dt.to_period('M').dt.to_timestamp()
+
+    if 'Date' in df_raw.columns:
+        date_ser = _parse_monthly_date(df_raw['Date'])
+        df = df_raw.drop(columns=['Date'])
     else:
-        # row 개수(len(df))는 그대로 두고, 월별 인덱스를 HIST_END 기준으로 재구성
-        hist_start = HIST_END - pd.DateOffset(months=(len(df) - 1))
-        dates_all = pd.date_range(start=hist_start, periods=len(df), freq="MS")
-        if "Date" in df.columns:
-            df = df.drop(columns=["Date"])
+        first_col = df_raw.columns[0]
+        date_ser = _parse_monthly_date(df_raw[first_col])
+        df = df_raw.drop(columns=[first_col])
+
+    df['__date'] = date_ser
+    df = df.sort_values('__date').reset_index(drop=True)
+    dates_hist = list(pd.to_datetime(df['__date']))
+    dates_all = pd.Series(dates_hist)
+    df = df.drop(columns=['__date'])
+    df = df.apply(pd.to_numeric, errors='coerce').ffill().fillna(0)
+
     col = df.columns.tolist()
     index = {name: i for i, name in enumerate(col)}
     rawdat = df.values
     n, m = rawdat.shape
-    print(f"Data loaded: {n} months, {m} nodes")
+    print(f"Data loaded: {n} months, {m} nodes | last={dates_hist[-1].strftime('%Y-%m')}")
 except FileNotFoundError:
     print(f"❌ Error: 파일을 찾을 수 없습니다: {data_file}")
     sys.exit()
@@ -391,11 +400,16 @@ smoothed_confidence = torch.tensor(np.array(smoothed_conf_list)).T
 smoothed_hist, smoothed_fut = smoothed_dat[:-horizon, :], smoothed_dat[-horizon:, :]
 smoothed_conf_fut = smoothed_confidence[-horizon:, :]
 
-# === 날짜 처리: 실제 데이터 기준 ===
-# dates_all may be a pandas Series/Index; convert to plain list for safe concatenation
-dates_hist = list(dates_all)
-last_date = dates_hist[-1]
-dates_future = pd.date_range(start=last_date + pd.DateOffset(months=1), periods=horizon, freq="MS").tolist()
+# === X축(월) 기준 고정: "마지막 관측월 = 2025/Jul" ===
+# 고정된 마지막 관측월을 기준으로 과거 월렬과 미래 월렬을 생성합니다.
+HIST_END = pd.Timestamp("2025-07-01")  # 최종 학습 데이터 마지막 월
+dates_hist = pd.date_range(end=HIST_END, periods=len(df), freq="MS").tolist()
+
+# 미래예측: 2025/Aug ~ 2028/Jul (36개월)
+FORECAST_START = HIST_END + pd.DateOffset(months=1)  # 2025-08-01
+dates_future = pd.date_range(start=FORECAST_START, periods=horizon, freq="MS").tolist()
+
+print("Forecast range:", dates_future[0].strftime('%Y-%m'), "~", dates_future[-1].strftime('%Y-%m'))
 
 # 11. Individual Plotting Loop
 target_keywords = ['us_fx', 'kr_fx', 'uk_fx', 'jp_fx', 'cn_fx']
@@ -408,25 +422,99 @@ for idx, i in enumerate(target_indices):
     plot_forecast(smoothed_hist[:, i], smoothed_fut[:, i], smoothed_conf_fut[:, i], col[i], dates_hist, dates_future, pt_plots_dir, 
                   color=plot_colours[idx % len(plot_colours)], linestyle='-' if i == us_idx else '--', is_us=(i == us_idx))
 
-# 12. Multi-Node Plot
-fig, ax = pyplot.subplots(figsize=(15, 10))
-for idx, i in enumerate(target_indices):
-    d = torch.cat((smoothed_hist[:, i], smoothed_fut[0:1, i]), dim=0).numpy()
-    f, c = smoothed_fut[:, i].numpy(), smoothed_conf_fut[:, i].numpy()
-    color = plot_colours[idx % len(plot_colours)]
-    ax.plot(range(len(d)), d, '-', label=consistent_name(col[i]), color=color, linewidth=1.5)
-    ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f, linestyle='-' if i == us_idx else '--', color=color, linewidth=2)
-    if i != us_idx: ax.fill_between(range(len(d) - 1, (len(d) + len(f)) - 1), f - c, f + c, color=color, alpha=0.25)
+# 12. Multi-Node Plot (DATE AXIS + FULL & ZOOM images)
+import matplotlib.dates as mdates
 
-all_dates = dates_hist + dates_future
-x_ticks_pos, x_ticks_labels = build_year_ticks(all_dates)
-ax.set_xticks(x_ticks_pos)
-ax.set_xticklabels(x_ticks_labels, rotation=90, fontsize=13)
-ax.legend(loc="upper left", bbox_to_anchor=(1, 1.03))
-ax.grid(True, linestyle=':', alpha=0.6)
-pyplot.title("Multi-Node Forecast (Normalized Trend)", fontsize=18)
-pyplot.savefig(os.path.join(plot_dir, 'Multi_Node_Normalized.png'), bbox_inches="tight")
-pyplot.close()
+def plot_multi_node(dates_hist, dates_future,
+                    smoothed_hist, smoothed_fut, smoothed_conf_fut,
+                    target_indices, col, us_idx, plot_colours,
+                    out_path,
+                    x_start=None, x_end=None,
+                    add_last_month_tick=True):
+    fig, ax = pyplot.subplots(figsize=(15, 10))
+
+    # 연결점(예측 첫 달)을 과거 라인 끝에 붙여서 기존 모양 유지
+    connect_date = dates_future[0]
+    x_past = dates_hist + [connect_date]   # len = len(hist)+1
+
+    for idx, i in enumerate(target_indices):
+        y_past = torch.cat((smoothed_hist[:, i], smoothed_fut[0:1, i]), dim=0).numpy()
+        y_fut  = smoothed_fut[:, i].numpy()
+        c_fut  = smoothed_conf_fut[:, i].numpy()
+
+        color = plot_colours[idx % len(plot_colours)]
+        is_us = (i == us_idx)
+
+        ax.plot(x_past, y_past, '-', label=consistent_name(col[i]), color=color, linewidth=1.5)
+        ax.plot(dates_future, y_fut, linestyle='-' if is_us else '--', color=color, linewidth=2)
+
+        if not is_us:
+            ax.fill_between(dates_future, y_fut - c_fut, y_fut + c_fut, color=color, alpha=0.25)
+
+    # 축 범위
+    if x_start is None:
+        x_start = dates_hist[0]
+    if x_end is None:
+        x_end = dates_future[-1] + pd.Timedelta(days=30)  # 마지막 달이 잘리면 안 보여서 여유
+    ax.set_xlim(pd.Timestamp(x_start), pd.Timestamp(x_end))
+
+    # 연도 tick + 마지막(2028/Jul)만 강제 표기(요청사항)
+    ax.xaxis.set_major_locator(mdates.YearLocator(1))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+
+    if add_last_month_tick:
+        end_tick = pd.Timestamp(dates_future[-1])  # 2028-07-01
+        year_ticks = pd.date_range(pd.Timestamp(x_start).normalize(), end_tick.normalize(), freq="YS")
+        ticks = list(year_ticks)
+
+        if end_tick not in ticks:
+            ticks.append(end_tick)
+
+        labels = [t.strftime('%Y') for t in year_ticks]
+        if ticks[-1] == end_tick and (len(labels) == len(ticks) - 1):
+            labels.append(end_tick.strftime('%Y/%b'))  # "2028/Jul"
+
+        ax.set_xticks(ticks)
+        ax.set_xticklabels(labels)
+
+    ax.legend(loc="upper left", bbox_to_anchor=(1, 1.03))
+    ax.grid(True, linestyle=':', alpha=0.6)
+    pyplot.title("Multi-Node Forecast (Normalized Trend)", fontsize=18)
+    pyplot.savefig(out_path, bbox_inches="tight")
+    pyplot.close()
+
+
+# === (A) 전체: 2011 ~ 2028/Jul ===
+plot_multi_node(
+    dates_hist=dates_hist,
+    dates_future=dates_future,
+    smoothed_hist=smoothed_hist,
+    smoothed_fut=smoothed_fut,
+    smoothed_conf_fut=smoothed_conf_fut,
+    target_indices=target_indices,
+    col=col,
+    us_idx=us_idx,
+    plot_colours=plot_colours,
+    out_path=os.path.join(plot_dir, "Multi_Node_Normalized_FULL.png"),
+    x_start=dates_hist[0],
+    x_end=pd.Timestamp("2028-07-31"),
+)
+
+# === (B) 확대: 2022/Aug ~ 2028/Jul ===
+plot_multi_node(
+    dates_hist=dates_hist,
+    dates_future=dates_future,
+    smoothed_hist=smoothed_hist,
+    smoothed_fut=smoothed_fut,
+    smoothed_conf_fut=smoothed_conf_fut,
+    target_indices=target_indices,
+    col=col,
+    us_idx=us_idx,
+    plot_colours=plot_colours,
+    out_path=os.path.join(plot_dir, "Multi_Node_Normalized_ZOOM.png"),
+    x_start=pd.Timestamp("2022-08-01"),
+    x_end=pd.Timestamp("2028-07-31"),
+)
 
 # 13. Gap Analysis
 found_comps = [n for cand in ['kr_fx', 'uk_fx', 'jp_fx', 'cn_fx'] for n in col if cand in n.lower()]
