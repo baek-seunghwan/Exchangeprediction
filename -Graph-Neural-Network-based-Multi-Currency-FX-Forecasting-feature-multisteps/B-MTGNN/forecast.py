@@ -184,9 +184,17 @@ def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, ou
         ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f - c, color=color, linewidth=0.8, alpha=0.6)
         ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f + c, color=color, linewidth=0.8, alpha=0.6)
 
-    x_ticks_pos, x_ticks_labels = build_year_ticks(all_dates)
+    x_ticks_pos = [i for i, date in enumerate(all_dates) if date.month == 1]
+    # 끝(예: Jul-28) 라벨도 포함
+    last_pos = len(all_dates) - 1
+    if last_pos not in x_ticks_pos:
+        x_ticks_pos.append(last_pos)
+
     ax.set_xticks(x_ticks_pos)
-    ax.set_xticklabels(x_ticks_labels)
+    ax.set_xticklabels(
+        [all_dates[i].strftime('%Y') if all_dates[i].month == 1 else all_dates[i].strftime('%b-%y') for i in x_ticks_pos],
+        rotation=90, fontsize=13
+    )
     ax.set_ylabel("Trend", fontsize=15)
     pyplot.yticks(fontsize=13)
     ax.legend(loc="upper left", prop={'size': 10}, bbox_to_anchor=(1, 1.03))
@@ -248,36 +256,35 @@ try:
     print(f"Reading data from: {data_file}")
     df_raw = pd.read_csv(data_file)
 
-    def _parse_monthly_date(s: pd.Series) -> pd.Series:
-        s = s.astype(str).str.strip()
-        m = s.str.extract(r'(?P<y>\d{4})\D*M(?P<m>\d{1,2})')
-        if m.notna().all(axis=1).all():
-            return pd.to_datetime(m['y'] + '-' + m['m'].str.zfill(2) + '-01')
-        dt = pd.to_datetime(s, errors='coerce')
-        if dt.isna().all():
-            return pd.to_datetime(s.str.replace('-', '/'), errors='coerce').dt.to_period('M').dt.to_timestamp()
-        return dt.dt.to_period('M').dt.to_timestamp()
+    # Date 컬럼이 있으면 사용하고(라벨용), 모델 입력에서는 제거
+    date_col = next((c for c in ["Date", "date", "DATA", "data"] if c in df_raw.columns), None)
 
-    if 'Date' in df_raw.columns:
-        date_ser = _parse_monthly_date(df_raw['Date'])
-        df = df_raw.drop(columns=['Date'])
+    if date_col is not None:
+        dates_all = pd.to_datetime(df_raw[date_col], errors="coerce")
+        df = df_raw.drop(columns=[date_col])
+        if dates_all.isna().all():
+            dates_all = None
     else:
-        first_col = df_raw.columns[0]
-        date_ser = _parse_monthly_date(df_raw[first_col])
-        df = df_raw.drop(columns=[first_col])
+        dates_all = None
+        df = df_raw
 
-    df['__date'] = date_ser
-    df = df.sort_values('__date').reset_index(drop=True)
-    dates_hist = list(pd.to_datetime(df['__date']))
-    dates_all = pd.Series(dates_hist)
-    df = df.drop(columns=['__date'])
-    df = df.apply(pd.to_numeric, errors='coerce').ffill().fillna(0)
+    # 숫자화(값은 그대로 유지, Date 컬럼이 섞여있어도 안전)
+    df = df.apply(pd.to_numeric, errors="coerce").ffill().fillna(0)
+
+    # Date 컬럼이 없으면: 월별 데이터가 2025/Jul에 끝난다고 가정해 라벨 생성
+    if dates_all is None:
+        LAST_OBS = pd.Timestamp("2025-07-01")  # 최종 관측: 25/Jul
+        dates_all = pd.date_range(end=LAST_OBS, periods=len(df), freq="MS").tolist()
+    else:
+        # 월 시작으로 정규화
+        dates_all = pd.Series(dates_all).ffill()
+        dates_all = [pd.Timestamp(d).to_period("M").to_timestamp() for d in dates_all.tolist()]
 
     col = df.columns.tolist()
     index = {name: i for i, name in enumerate(col)}
     rawdat = df.values
     n, m = rawdat.shape
-    print(f"Data loaded: {n} months, {m} nodes | last={dates_hist[-1].strftime('%Y-%m')}")
+    print(f"Data loaded: {n} months, {m} nodes | last={pd.Timestamp(dates_all[-1]).strftime('%Y-%m')}")
 except FileNotFoundError:
     print(f"❌ Error: 파일을 찾을 수 없습니다: {data_file}")
     sys.exit()
@@ -515,6 +522,41 @@ plot_multi_node(
     x_start=pd.Timestamp("2022-08-01"),
     x_end=pd.Timestamp("2028-07-31"),
 )
+
+# --- 추가: 기존 스타일로 Zoom 이미지 생성 (Aug/22 ~ Jul/28) ---
+zoom_start = pd.Timestamp("2022-08-01")
+zoom_end = pd.Timestamp("2028-07-01")
+
+all_dates = dates_hist + dates_future
+left = next((i for i, d in enumerate(all_dates) if d >= zoom_start), 0)
+right = next((i for i, d in reversed(list(enumerate(all_dates))) if d <= zoom_end), len(all_dates) - 1)
+
+fig, ax = pyplot.subplots(figsize=(15, 10))
+for idx, i in enumerate(target_indices):
+    d = torch.cat((smoothed_hist[:, i], smoothed_fut[0:1, i]), dim=0).numpy()
+    f, c = smoothed_fut[:, i].numpy(), smoothed_conf_fut[:, i].numpy()
+    color = plot_colours[idx % len(plot_colours)]
+    ax.plot(range(len(d)), d, '-', label=consistent_name(col[i]), color=color, linewidth=1.5)
+    ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f, linestyle='-' if i == us_idx else '--', color=color, linewidth=2)
+    if i != us_idx:
+        ax.fill_between(range(len(d) - 1, (len(d) + len(f)) - 1), f - c, f + c, color=color, alpha=0.25)
+
+ax.set_xlim(left, right)
+
+# 6개월 간격 + 시작/끝 포함
+step = 6
+tick_positions = list(range(left, right + 1, step))
+if right not in tick_positions:
+    tick_positions.append(right)
+tick_positions = sorted(set(tick_positions))
+ax.set_xticks(tick_positions)
+ax.set_xticklabels([all_dates[p].strftime('%b-%y') for p in tick_positions], rotation=90, fontsize=13)
+
+ax.legend(loc="upper left", bbox_to_anchor=(1, 1.03))
+ax.grid(True, linestyle=':', alpha=0.6)
+pyplot.title("Multi-Node Forecast (Normalized Trend) - Zoom", fontsize=18)
+pyplot.savefig(os.path.join(plot_dir, 'Multi_Node_Normalized_Zoom.png'), bbox_inches="tight")
+pyplot.close()
 
 # 13. Gap Analysis
 found_comps = [n for cand in ['kr_fx', 'uk_fx', 'jp_fx', 'cn_fx'] for n in col if cand in n.lower()]
