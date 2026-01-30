@@ -6,11 +6,17 @@ import torch
 import torch.nn as nn
 import sys
 import os
+from pathlib import Path
 
 # Ensure scripts directory is in path for module imports
 script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
+
+# 경로 설정
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+AXIS_DIR = PROJECT_DIR / 'AXIS'
+MODEL_BASE_DIR = AXIS_DIR / 'model' / 'Bayesian'
 
 from net import gtnet
 from o_util import *
@@ -71,11 +77,9 @@ def train(data, X, Y, model, criterion, optim, batch_size):
 
 
 parser = argparse.ArgumentParser(description='PyTorch Time series forecasting')
-parser.add_argument('--data', type=str, default='./data/sm_data.txt',
+parser.add_argument('--data', type=str, default=str(PROJECT_DIR / 'ExchangeRate_dataset.csv'),
                     help='location of the data file')
-parser.add_argument('--log_interval', type=int, default=2000, metavar='N',
-                    help='report interval')
-parser.add_argument('--save', type=str, default='model/Bayesian/o_model.pt',
+parser.add_argument('--save', type=str, default=str(MODEL_BASE_DIR / 'o_model.pt'),
                     help='path to save the final model')
 parser.add_argument('--optim', type=str, default='adam')
 parser.add_argument('--L1Loss', type=bool, default=True)
@@ -121,12 +125,8 @@ def set_random_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-fixed_seed = 123
-set_random_seed(fixed_seed)
-
-
 #read hyper-parameters
-filename = "model/Bayesian/hp.txt"
+filename = MODEL_BASE_DIR / "hp.txt"
 with open(filename, 'r') as file:
     content = file.read()
     hp = ast.literal_eval(content)
@@ -150,9 +150,15 @@ tanh_alpha=hp[11]
 epochs=hp[-1]
 
 
-Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len, col_file='data/data.csv', adj=build_predefined_adj(create_columns('data/data.csv'), graph_files='data/graph2-fx_Sheet.csv'))
+Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len, col_file=args.data, graph_file='data/graph.csv')
 
+# Auto-detect num_nodes based on actual data
+if len(Data.train[0].shape) == 4: # (Samples, C, N, T)
+    args.num_nodes = Data.train[0].shape[2]
+elif len(Data.train[0].shape) == 3: # (Samples, T, N)
+    args.num_nodes = Data.train[0].shape[2]
 
+print(f"Auto-detected num_nodes: {args.num_nodes}")
 
 model = gtnet(args.gcn_true, args.buildA_true, gcn_depth, args.num_nodes,
             device, Data.adj, dropout=dropout, subgraph_size=k,

@@ -6,11 +6,17 @@ import torch
 from scipy.sparse import linalg
 from torch.autograd import Variable
 import sys
+from pathlib import Path
 
 # Ensure scripts directory is in path for module imports
 script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
+
+# 경로 설정
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+AXIS_DIR = PROJECT_DIR / 'AXIS'
+MODEL_BASE_DIR = AXIS_DIR / 'model' / 'Bayesian'
 
 import csv
 from collections import defaultdict
@@ -107,7 +113,7 @@ def plot_forecast(data,forecast,confidence,s,index,col, start_date='2011-01-01',
     try:
         dates = pd.date_range(start=pd.to_datetime(start_date), periods=total_len, freq=freq)
     except Exception:
-        dates = pd.date_range(start=pd.to_datetime(start_date), periods=total_len, freq='M')
+        dates = pd.date_range(start=pd.to_datetime(start_date), periods=total_len, freq='ME')
 
     # split past and forecast dates
     past_dates = dates[:len(d)]
@@ -234,17 +240,27 @@ def build_graph(file_name):
 
 
 #This script forecasts the future of the graph, up to 3 years in advance
+import os
+from pathlib import Path
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = Path(script_dir).resolve().parent
+AXIS_DIR = PROJECT_DIR / 'AXIS'
+MODEL_BASE_DIR = AXIS_DIR / 'model' / 'Bayesian'
 
-data_file='./data/sm_data.txt'
-model_file='model/Bayesian/o_model.pt'
-nodes_file='data/data.csv'
-graph_file='data/graph2-fx_Sheet.csv'
-
+data_file=str(PROJECT_DIR / 'ExchangeRate_dataset.csv')
+model_file=str(MODEL_BASE_DIR / 'o_model.pt')
+nodes_file=data_file
+graph_file='data/graph.csv'
 
 #read the data
-fin = open(data_file)
-rawdat = np.loadtxt(fin, delimiter='\t')
+import pandas as pd
+df = pd.read_csv(data_file)
+if "Date" in df.columns:
+    df = df.drop(columns=["Date"])
+df = df.apply(pd.to_numeric, errors='coerce')
+df = df.fillna(0)
+rawdat = df.values.astype(float)
 n, m = rawdat.shape
 
 #load column names and dictionary of (column name, index)
@@ -279,7 +295,7 @@ X = X.to(torch.float)
 #load the model
 model=None
 with open(model_file, 'rb') as f:
-    model = torch.load(f)
+    model = torch.load(f, weights_only=False)
 
 
 # Bayesian estimation

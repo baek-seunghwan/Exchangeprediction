@@ -5,6 +5,7 @@ import scipy.sparse as sp
 import torch
 from scipy.sparse import linalg
 import csv
+import pandas as pd
 from collections import defaultdict
 
 #by Zaid et al.
@@ -78,10 +79,10 @@ def build_predefined_adj(columns, graph_files='data/graph2-fx_Sheet.csv'):
     
     adj_sp = sp.coo_matrix((data, (row_indices, col_indices)), shape=(n_nodes, n_nodes)).astype(np.float32)
     
-    adj_dense = adj_sp.todense()
-    adj_dense[adj_sp > 1] = 1
+    adj_array = adj_sp.toarray()
+    adj_array[adj_array > 1] = 1
     
-    adj = torch.from_numpy(adj_dense).float()
+    adj = torch.from_numpy(adj_array).float()
         
     print('Adjacency created...')
 
@@ -94,13 +95,29 @@ def normal_std(x):
 
 class DataLoaderS(object):
     # train and valid is the ratio of training set and validation set. test = 1 - train - valid
-    def __init__(self, file_name, train, valid, device, horizon, window, adj, normalize=2, out=1, col_file='data/data.csv'):
+    def __init__(self, file_name, train, valid, device, horizon, window, normalize=2, out=1, col_file='data/data.csv', graph_file='data/graph2-fx_Sheet.csv'):
         self.P = window
         self.h = horizon
         self.out_len = out
+        self.device = device
 
-        with open(file_name, 'r', encoding='utf-8') as fin:
-            self.rawdat_np = np.loadtxt(fin, delimiter='\t')
+        # Load data - support both CSV and tab-separated formats
+        try:
+            if file_name.endswith('.csv'):
+                print(f"Loading CSV data from {file_name}...")
+                df = pd.read_csv(file_name, parse_dates=["Date"] if "Date" in pd.read_csv(file_name, nrows=1).columns else False)
+                if "Date" in df.columns:
+                    df = df.drop(columns=["Date"])
+                df = df.apply(pd.to_numeric, errors='coerce')
+                df = df.fillna(0)
+                self.rawdat_np = df.values.astype(float)
+            else:
+                print(f"Loading tab-separated data from {file_name}...")
+                with open(file_name, 'r', encoding='utf-8') as fin:
+                    self.rawdat_np = np.loadtxt(fin, delimiter='\t')
+        except Exception as e:
+            print(f"Error loading data: {e}")
+            raise
 
         self.rawdat = torch.from_numpy(self.rawdat_np).float()
 
@@ -128,18 +145,20 @@ class DataLoaderS(object):
         self.rse = normal_std(tmp)
         self.rae = torch.mean(torch.abs(tmp - torch.mean(tmp)))
 
-        self.device = device
-
-        self.adj = adj 
+        # Build adjacency matrix from graph file
+        if col_file and os.path.exists(col_file):
+            cols = create_columns(col_file)
+        else:
+            cols = [str(i) for i in range(self.m)]
+            
+        self.adj = build_predefined_adj(cols, graph_files=graph_file)
 
         try:
-            cols = create_columns(col_file)
-
             if len(cols) != self.m:
-                print(f"Warning: Column count mismatch! Data has {self.m}, but {col_file} has {len(cols)} columns.")
+                print(f"Warning: Column count mismatch! Data has {self.m}, but columns has {len(cols)} columns.")
             DataLoaderS.col = cols
         except Exception as e:
-            print(f"Error loading columns from {col_file}: {e}")
+            print(f"Error with columns: {e}")
             DataLoaderS.col = [str(i) for i in range(self.m)]
 
     def _normalized(self, normalize):
