@@ -150,7 +150,7 @@ tanh_alpha=hp[11]
 epochs=hp[-1]
 
 
-Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize,args.seq_out_len)
+Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len, col_file='data/data.csv', adj=build_predefined_adj(create_columns('data/data.csv'), graph_files='data/graph2-fx_Sheet.csv'))
 
 
 

@@ -25,13 +25,13 @@ def create_columns(file_path):
         return col
     
 #by Zaid et al.
-def build_predefined_adj(columns, graph_files='data/graph.csv'):
+def build_predefined_adj(columns, graph_files='data/graph2-fx_Sheet.csv'):
     # Initialize an empty dictionary with default value as an empty list
-    graph = defaultdict(list)
 
+    graph = defaultdict(list)
     # Read the graph CSV file
     try:
-        with open('data/graph.csv', 'r', encoding='utf-8') as f:
+        with open(graph_files, 'r', encoding='utf-8') as f:
             reader = csv.reader(f)
             # Iterate over each row in the CSV file
             for row in reader:

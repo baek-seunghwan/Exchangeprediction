@@ -239,7 +239,7 @@ def build_graph(file_name):
 data_file='./data/sm_data.txt'
 model_file='model/Bayesian/o_model.pt'
 nodes_file='data/data.csv'
-graph_file='data/graph.csv'
+graph_file='data/graph2-fx_Sheet.csv'
 
 
 #read the data
