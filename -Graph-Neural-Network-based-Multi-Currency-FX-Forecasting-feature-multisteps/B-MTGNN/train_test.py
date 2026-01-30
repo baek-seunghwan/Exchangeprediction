@@ -665,7 +665,7 @@ def main(experiment):
         prop_alpha = prop_alphas[randrange(len(prop_alphas))]
         tanh_alpha = tanh_alphas[randrange(len(tanh_alphas))]
 
-        Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len, col_file='data/data.csv', graph_file='data/graph2-fx_Sheet.csv')
+        Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
 
         print('train X:', Data.train[0].shape)
         print('train Y:', Data.train[1].shape)

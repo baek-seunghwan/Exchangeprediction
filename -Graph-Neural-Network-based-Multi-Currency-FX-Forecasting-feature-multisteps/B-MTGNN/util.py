@@ -24,7 +24,7 @@ def create_columns(file_path):
         except StopIteration:
             return []
 
-def build_predefined_adj(columns, graph_file='data/graph2-fx_Sheet.csv'):
+def build_predefined_adj(columns, graph_file='data/graph.csv'):
     # Initialize an empty dictionary
     graph = defaultdict(list)
 
@@ -87,7 +87,7 @@ def normal_std(x):
 
 class DataLoaderS(object):
     # train and valid is the ratio of training set and validation set. test = 1 - train - valid
-    def __init__(self, file_name, train, valid, device, horizon, window, normalize=2, out=1, col_file=None, graph_file='data/graph2-fx_Sheet.csv'):
+    def __init__(self, file_name, train, valid, device, horizon, window, normalize=2, out=1, col_file=None):
         self.P = window
         self.h = horizon
         self.out_len = out
@@ -132,7 +132,6 @@ class DataLoaderS(object):
         self.scale = torch.ones(self.m)
         self.scale = self.scale.to(device)
 
-
         self._normalized(normalize)
         self._split(int(train * self.n), int((train + valid) * self.n), self.n)
 
@@ -140,11 +139,12 @@ class DataLoaderS(object):
         try:
             self.col = create_columns(target_col_file)
             if len(self.col) != self.m:
-                self.col = [str(i) for i in range(self.m)]
+                 self.col = [str(i) for i in range(self.m)]
         except:
-            self.col = [str(i) for i in range(self.m)]
+             self.col = [str(i) for i in range(self.m)]
 
-        self.adj = build_predefined_adj(self.col, graph_file=graph_file)
+        self.adj = build_predefined_adj(self.col) 
+        # 만약 그래프 파일 경로가 다르다면 build_predefined_adj(self.col, '경로') 로 수정 필요
 
         # Calculate metrics using Test set
         scale_expanded = self.scale.view(1, 1, self.m).expand(self.test[1].size(0), self.test[1].size(1), self.m)

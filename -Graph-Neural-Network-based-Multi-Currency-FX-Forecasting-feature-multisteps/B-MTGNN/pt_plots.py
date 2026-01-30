@@ -248,10 +248,18 @@ PROJECT_DIR = Path(script_dir).resolve().parent
 AXIS_DIR = PROJECT_DIR / 'AXIS'
 MODEL_BASE_DIR = AXIS_DIR / 'model' / 'Bayesian'
 
+<<<<<<< HEAD
 data_file=str(PROJECT_DIR / 'ExchangeRate_dataset.csv')
 model_file=str(MODEL_BASE_DIR / 'o_model.pt')
 nodes_file=data_file
 graph_file='data/graph.csv'
+=======
+data_file='./data/sm_data.txt'
+model_file='model/Bayesian/o_model.pt'
+nodes_file='data/data.csv'
+graph_file='data/graph.csv'
+
+>>>>>>> parent of 89f69e6 (csv 파일 적용)
 
 #read the data
 import pandas as pd

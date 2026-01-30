@@ -150,7 +150,11 @@ tanh_alpha=hp[11]
 epochs=hp[-1]
 
 
+<<<<<<< HEAD
 Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len, col_file=args.data, graph_file='data/graph.csv')
+=======
+Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize,args.seq_out_len)
+>>>>>>> parent of 89f69e6 (csv 파일 적용)
 
 # Auto-detect num_nodes based on actual data
 if len(Data.train[0].shape) == 4: # (Samples, C, N, T)
