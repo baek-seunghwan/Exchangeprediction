@@ -16,8 +16,33 @@ from matplotlib import pyplot as plt
 import time
 import os
 from pathlib import Path
+from datetime import datetime
+from typing import Optional, Dict, Any
 
 plt.rcParams['savefig.dpi'] = 1200
+
+# ============================================================================
+# 터미널 출력 유틸리티
+# ============================================================================
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+def print_iteration_loss(iter_num: int, loss: float, batch_size: Optional[int] = None):
+    """반복 손실 출력 (한 줄에)"""
+    if batch_size:
+        print(f"{Colors.CYAN}iter:{iter_num:4d} | loss: {loss:>8.3f} | batch_size: {batch_size}{Colors.END}", end='\r')
+    else:
+        print(f"{Colors.CYAN}iter:{iter_num:4d} | loss: {loss:>8.3f}{Colors.END}", end='\r')
+
+# ============================================================================
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 AXIS_DIR = PROJECT_DIR / 'AXIS'
@@ -215,8 +240,7 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     test = None
     variance = None
     confidence_95 = None
-    r = 0 
-    print('testing r=', str(r))
+    r = 0
 
     #test_window : 전체 시계열 데이터
     x_input = test_window[0:n_input, :].clone()
@@ -276,14 +300,6 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         else:
             # 입력 길이가 더 길면 기존 입력의 뒷부분 + 예측값 겷합
             x_input = torch.cat([x_input[-(data.P - data.out_len):, :].clone(), y_pred.clone()], dim=0)
-
-        print('----------------------------Predicted months', str(i - n_input + 1), 'to', str(i - n_input + data.out_len), '--------------------------------------------------')
-        print(y_pred.shape, y_true.shape)
-        y_pred_o = y_pred
-        y_true_o = y_true
-        for z in range(y_true.shape[0]):
-            print(y_pred_o[z, r], y_true_o[z, r])
-        print('------------------------------------------------------------------------------------------------------------')
 
         if predict is None:
             predict = y_pred
@@ -386,7 +402,6 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
     sum_squared_diff = 0
     sum_absolute_diff = 0
     r = 0
-    print('validation r=', str(r))
 
     for X, Y in data.get_batches(X, Y, batch_size, False):
         X = torch.unsqueeze(X, dim=1)
@@ -430,12 +445,7 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
             variance = torch.cat((variance, var))
             confidence_95 = torch.cat((confidence_95, confidence))
 
-        print('EVALUATE RESULTS:')
         scale = data.scale.expand(Y.size(0), Y.size(1), data.m)
-        y_pred_o = output
-        y_true_o = Y
-        for z in range(Y.shape[1]):
-            print(y_pred_o[0, z, r], y_true_o[0, z, r])
         
         total_loss += evaluateL2(output, Y).item()
         total_loss_l1 += evaluateL1(output, Y).item()
@@ -545,8 +555,6 @@ def train(data, X, Y, model, criterion, optim, batch_size):
             
             grad_norm = optim.step()
 
-        if iter % 1 == 0:
-            print('iter:{:3d} | loss: {:.3f}'.format(iter, loss.item() / (output.size(0) * output.size(1) * data.m)))
         iter += 1
     return total_loss / n_samples
 
@@ -675,19 +683,6 @@ def main(experiment):
 
         Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
 
-        print('train X:', Data.train[0].shape)
-        print('train Y:', Data.train[1].shape)
-        print('valid X:', Data.valid[0].shape)
-        print('valid Y:', Data.valid[1].shape)
-        print('test X:', Data.test[0].shape)
-        print('test Y:', Data.test[1].shape)
-        print('test window:', Data.test_window.shape)
-
-        print('length of training set=', Data.train[0].shape[0])
-        print('length of validation set=', Data.valid[0].shape[0])
-        print('length of testing set=', Data.test[0].shape[0])
-        print('valid=', int((0.43 + 0.3) * Data.n))
-
         # [중요 수정] 실제 데이터에 맞춰 노드 개수 재설정 (하드코딩된 142 -> 32로 자동 변경)
         # Data.train[0] 형태가 (Samples, Time, Nodes)인 경우 2번 인덱스가 Node 수입니다.
         if len(Data.train[0].shape) == 4: # (Samples, C, N, T)인 경우
@@ -724,40 +719,44 @@ def main(experiment):
         )
 
         es_counter = 0
+        epoch_times = []
         try:
-            print('begin training')
             for epoch in range(1, args.epochs + 1):
-                print('Experiment:', (experiment + 1))
-                print('Iter:', q)
-                print('epoch:', epoch)
-                print('hp=', [gcn_depth, lr, conv, res, skip, end, k, dropout, dilation_ex, node_dim, prop_alpha, tanh_alpha, layer, epoch])
-                print('best sum=', best_val)
-                print('best rrse=', best_rse)
-                print('best rrae=', best_rae)
-                print('best corr=', best_corr)
-                print('best smape=', best_smape)
-                print('best hps=', best_hp)
-                print('best test rse=', best_test_rse)
-                print('best test corr=', best_test_corr)
-
                 es_counter += 1
 
                 epoch_start_time = time.time()
                 train_loss = train(Data, Data.train[0], Data.train[1], model, criterion, optim, args.batch_size)
                 val_loss, val_rae, val_corr, val_smape = evaluate(Data, Data.valid[0], Data.valid[1], model, evaluateL2, evaluateL1,
                                                                   args.batch_size, False)
-                print(
-                    '| end of epoch {:3d} | time: {:5.2f}s | train_loss {:5.4f} | valid rse {:5.4f} | valid rae {:5.4f} | valid corr  {:5.4f} | valid smape  {:5.4f}'.format(
-                        epoch, (time.time() - epoch_start_time), train_loss, val_loss, val_rae, val_corr, val_smape), flush=True)
+                elapsed_time = time.time() - epoch_start_time
+                epoch_times.append(elapsed_time)
+                
+                # 평균 시간 계산 및 남은 시간 예측
+                avg_time = sum(epoch_times) / len(epoch_times)
+                remaining_epochs = args.epochs - epoch
+                estimated_remaining_time = avg_time * remaining_epochs
+                
+                # 전체 진행 바 (총 100번 중 몇 번 완료)
+                overall_bar_length = 20
+                overall_filled = int(overall_bar_length * epoch / args.epochs)
+                overall_bar = '█' * overall_filled + '░' * (overall_bar_length - overall_filled)
+                overall_percentage = (epoch / args.epochs) * 100
+                
+                # 현재 에포크 진행 바 (현재 에포크는 완료되었으므로 100%)
+                epoch_bar_length = 20
+                epoch_bar = '█' * epoch_bar_length  # 완료됨
+                
+                print(f"\r전체[{overall_bar}] {epoch}/100 | 남은 {estimated_remaining_time:.0f}s | Loss: {train_loss:.2f} | RSE: {val_loss:.2f} | RAE: {val_rae:.2f}", end='', flush=True)
                 
                 sum_loss = val_loss + val_rae - val_corr
                 if (not math.isnan(val_corr)) and val_loss < best_rse:
-                    # [수정] 모델 저장 경로 디렉토리 확인 및 생성
+                    # 모델 저장
                     save_path = Path(args.save)
                     save_path.parent.mkdir(parents=True, exist_ok=True)
                     
                     with open(save_path, 'wb') as f:
                         torch.save(model, f)
+                    
                     best_val = sum_loss
                     best_rse = val_loss
                     best_rae = val_rae
@@ -770,21 +769,13 @@ def main(experiment):
 
                     test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(Data, Data.test_window, model, evaluateL2, evaluateL1,
                                                                                         args.seq_in_len, False, horizon=args.horizon)
-                    print('********************************************************************************************************')
-                    print("test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f}| test smape {:5.4f}".format(test_acc, test_rae, test_corr, test_smape), flush=True)
-                    print('********************************************************************************************************')
                     best_test_rse = test_acc
                     best_test_corr = test_corr
 
         except KeyboardInterrupt:
-            print('-' * 89)
-            print('Exiting from training early')
-
-    print('best val loss=', best_val)
-    print('best hps=', best_hp)
+            print(f"\n\nTraining interrupted")
     
-    # [수정] hp.txt 저장 경로 수정
-    hp_save_path = MODEL_BASE_DIR / 'hp.txt'
+    # hp.txt 저장
     hp_save_path.parent.mkdir(parents=True, exist_ok=True)
     with open(hp_save_path, "w") as f:
         f.write(str(best_hp))
@@ -797,9 +788,7 @@ def main(experiment):
 
     test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(Data, Data.test_window, model, evaluateL2, evaluateL1,
                                                                         args.seq_in_len, True, horizon=args.horizon)
-    print('********************************************************************************************************')
-    print("final test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f} | test smape {:5.4f}".format(test_acc, test_rae, test_corr, test_smape))
-    print('********************************************************************************************************')
+    print(f"\n\n✓ Final Results: RSE={test_acc:.4f} | RAE={test_rae:.4f} | Corr={test_corr:.4f} | SMAPE={test_smape:.4f}")
     return vtest_acc, vtest_rae, vtest_corr, vtest_smape, test_acc, test_rae, test_corr, test_smape
 
 

@@ -17,6 +17,7 @@ from o_util import *
 from trainer import Optim
 from random import randrange
 from matplotlib import pyplot as plt
+from progress_utils import print_iteration_loss, print_section, Colors
 
 # This script trains the final model on the full data, utilising the optimal set of hyper-parameters found in the file train_test
 import numpy as np
@@ -64,8 +65,9 @@ def train(data, X, Y, model, criterion, optim, batch_size):
             
             grad_norm = optim.step()
 
-        if iter%1==0:
-            print('iter:{:3d} | loss: {:.3f}'.format(iter,loss.item()/(output.size(0) * output.size(1)* data.m)))
+        if iter % 10 == 0:  # 10 반복마다 한 번
+            current_loss = loss.item() / (output.size(0) * output.size(1) * data.m)
+            print_iteration_loss(iter, current_loss, batch_size)
         iter += 1
     return total_loss / n_samples
 
@@ -183,13 +185,22 @@ optim = Optim(
 
 # At any point you can hit Ctrl + C to break out of training early.
 try:
-    print('begin training')
     for epoch in range(1, epochs + 1):
-        print('epoch:',epoch)
         epoch_start_time = time.time()
         train_loss = train(Data, Data.train[0], Data.train[1], model, criterion, optim, args.batch_size)
+        
+        # 진행 바
+        bar_length = 40
+        filled = int(bar_length * epoch / epochs)
+        bar = '█' * filled + '░' * (bar_length - filled)
+        percentage = (epoch / epochs) * 100
+        elapsed = time.time() - epoch_start_time
+        print(f"\r[{bar}] {epoch}/{epochs} ({percentage:.0f}%) | Time: {elapsed:.2f}s | Loss: {train_loss:.4f}", end='', flush=True)
+    
+    print(f"\n\nTraining completed!")
     with open(args.save, 'wb') as f:
-        torch.save(model, f)        
+        torch.save(model, f)
+    print(f"Model saved to {args.save}\n")
 except KeyboardInterrupt:
     print('-' * 89)
     print('Exiting from training early')
