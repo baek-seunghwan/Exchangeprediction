@@ -195,7 +195,7 @@ def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, ou
         [all_dates[i].strftime('%Y') if all_dates[i].month == 1 else all_dates[i].strftime('%b-%y') for i in x_ticks_pos],
         rotation=90, fontsize=13
     )
-    ax.set_ylabel("Trend", fontsize=15)
+    ax.set_ylabel(f"{consistent_name(name)}", fontsize=15)
     pyplot.yticks(fontsize=13)
     ax.legend(loc="upper left", prop={'size': 10}, bbox_to_anchor=(1, 1.03))
     ax.axis('tight')
@@ -345,6 +345,7 @@ for r in range(num_runs):
     preds = []
     len_preds = 0
 
+
     model.train()
     with torch.no_grad():
         while len_preds < horizon:
@@ -352,11 +353,7 @@ for r in range(num_runs):
             out = model(curr_input)
 
             pred_block = out.squeeze(3).squeeze(0)  # [pred_len, N]
-
-            last = curr_input[:, 0, :, -1]
-            last_rep = last.unsqueeze(1).repeat(1, pred_block.size(0), 1)
-            pred_level = pred_block.unsqueeze(0) + last_rep
-            pred_level = pred_level.squeeze(0)  # [pred_len, N]
+            pred_level = pred_block  # 누적합 없이 바로 사용
 
             if us_idx != -1:
                 pred_level[:, us_idx] = 1.0
@@ -385,21 +382,17 @@ scale_torch = torch.from_numpy(scale).float()
 dat_denorm = torch.from_numpy(dat).float() * scale_torch
 Y_denorm, confidence_denorm, variance_denorm = Y * scale_torch, confidence * scale_torch, variance * scale_torch
 
-print("Applying Rebase (Start Points to 1.0)...")
-gap_df, _, mul_factor, _ = make_gap_params(hist=dat_denorm, col_names=col, base_mode="first", base_index=1.0)
-dat_rebased = apply_rebase_mul(dat_denorm, mul_factor)
-Y_rebased = apply_rebase_mul(Y_denorm, mul_factor)
-confidence_rebased = apply_rebase_mul(confidence_denorm, mul_factor)
-variance_rebased = apply_rebase_mul(variance_denorm, mul_factor)
-save_data(dat_rebased, Y_rebased, confidence_rebased, variance_rebased, col, rebased_out_dir)
+# Rebase 없이 실제 스케일로 저장
+save_data(dat_denorm, Y_denorm, confidence_denorm, variance_denorm, col, data_out_dir)
 
 
 # 10. Smoothing
-all_data = torch.cat((dat_rebased, Y_rebased), dim=0)
-all_conf = torch.cat((torch.zeros_like(dat_rebased), confidence_rebased), dim=0)
+# 실제 스케일로 smoothing
+all_data = torch.cat((dat_denorm, Y_denorm), dim=0)
+all_conf = torch.cat((torch.zeros_like(dat_denorm), confidence_denorm), dim=0)
 smoothed_data_list, smoothed_conf_list = [], []
 for i in range(m):
-    smoothed_data_list.append(exponential_smoothing(all_data[:, i].cpu().numpy(), 0.1))
+    smoothed_data_list.append(exponential_smoothing(all_data[:, i].cpu().numpy(), 0.3))
     smoothed_conf_list.append(exponential_smoothing(all_conf[:, i].cpu().numpy(), 0.1))
 
 smoothed_dat = torch.tensor(np.array(smoothed_data_list)).T
@@ -445,9 +438,12 @@ def plot_multi_node(dates_hist, dates_future,
     x_past = dates_hist + [connect_date]   # len = len(hist)+1
 
     for idx, i in enumerate(target_indices):
-        y_past = torch.cat((smoothed_hist[:, i], smoothed_fut[0:1, i]), dim=0).numpy()
-        y_fut  = smoothed_fut[:, i].numpy()
-        c_fut  = smoothed_conf_fut[:, i].numpy()
+        # 각 노드의 시작값(첫 달)을 1.0으로 정규화 (Rebase)
+        base_value = smoothed_hist[0, i]
+        
+        y_past = torch.cat((smoothed_hist[:, i], smoothed_fut[0:1, i]), dim=0).numpy() / base_value
+        y_fut  = smoothed_fut[:, i].numpy() / base_value
+        c_fut  = smoothed_conf_fut[:, i].numpy() / base_value
 
         color = plot_colours[idx % len(plot_colours)]
         is_us = (i == us_idx)
@@ -457,6 +453,9 @@ def plot_multi_node(dates_hist, dates_future,
 
         if not is_us:
             ax.fill_between(dates_future, y_fut - c_fut, y_fut + c_fut, color=color, alpha=0.25)
+
+    # 예측 시작점에 세로선 추가
+    ax.axvline(x=dates_future[0], color='black', linestyle='--', linewidth=1.5, alpha=0.7)
 
     # 축 범위
     if x_start is None:
@@ -486,7 +485,7 @@ def plot_multi_node(dates_hist, dates_future,
 
     ax.legend(loc="upper left", bbox_to_anchor=(1, 1.03))
     ax.grid(True, linestyle=':', alpha=0.6)
-    pyplot.title("Multi-Node Forecast (Normalized Trend)", fontsize=18)
+    pyplot.title("Multi-Node Forecast (Actual Scale)", fontsize=18)
     pyplot.savefig(out_path, bbox_inches="tight")
     pyplot.close()
 
@@ -533,13 +532,24 @@ right = next((i for i, d in reversed(list(enumerate(all_dates))) if d <= zoom_en
 
 fig, ax = pyplot.subplots(figsize=(15, 10))
 for idx, i in enumerate(target_indices):
-    d = torch.cat((smoothed_hist[:, i], smoothed_fut[0:1, i]), dim=0).numpy()
-    f, c = smoothed_fut[:, i].numpy(), smoothed_conf_fut[:, i].numpy()
+    # 각 노드의 시작값 기준으로 정규화 (Rebase)
+    base_value = smoothed_hist[0, i]
+    d = torch.cat((smoothed_hist[:, i], smoothed_fut[0:1, i]), dim=0).numpy() / base_value
+    f, c = smoothed_fut[:, i].numpy() / base_value, smoothed_conf_fut[:, i].numpy() / base_value
     color = plot_colours[idx % len(plot_colours)]
+    
+    # 보라색 점선 처리
+    is_purple = color == '#9467bd'
+    linestyle = '-' if i == us_idx else ('--' if is_purple else '--')
+    
     ax.plot(range(len(d)), d, '-', label=consistent_name(col[i]), color=color, linewidth=1.5)
-    ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f, linestyle='-' if i == us_idx else '--', color=color, linewidth=2)
+    ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f, linestyle=linestyle, color=color, linewidth=2)
     if i != us_idx:
         ax.fill_between(range(len(d) - 1, (len(d) + len(f)) - 1), f - c, f + c, color=color, alpha=0.25)
+
+# 예측 시작점에 세로선 추가
+forecast_boundary = len(d) - 1  # 과거 데이터의 마지막 인덱스
+ax.axvline(x=forecast_boundary, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
 
 ax.set_xlim(left, right)
 
