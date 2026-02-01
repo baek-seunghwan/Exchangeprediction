@@ -180,7 +180,12 @@ evaluateL1 = nn.L1Loss(reduction='sum').to(device) #MAE
 
 
 optim = Optim(
-    model.parameters(), args.optim, lr, args.clip, lr_decay=args.weight_decay
+    model.parameters(),
+    args.optim,
+    lr,
+    args.clip,
+    weight_decay=args.weight_decay,  # 진짜 weight decay
+    lr_decay=None                   # 일단 끄고 시작 (필요하면 0.99 등으로)
 )
 
 # At any point you can hit Ctrl + C to break out of training early.

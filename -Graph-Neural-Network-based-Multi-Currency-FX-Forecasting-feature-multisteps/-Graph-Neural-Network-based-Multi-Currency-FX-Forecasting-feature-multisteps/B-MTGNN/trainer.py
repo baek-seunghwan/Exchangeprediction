@@ -15,7 +15,7 @@ class Optim:
         grad_norm = optim.step()
     """
 
-    def __init__(self, params, optim: str, lr: float, clip: float, lr_decay: float = None):
+    def __init__(self, params, optim: str, lr: float, clip: float, weight_decay: float = 0.0, lr_decay: float = None):
         """
         params    : model.parameters()
         optim     : 'adam', 'sgd', 'rmsprop' 등
@@ -29,11 +29,11 @@ class Optim:
 
         optim = optim.lower()
         if optim == "sgd":
-            self.optimizer = torch.optim.SGD(params, lr=lr, momentum=0.9)
+            self.optimizer = torch.optim.SGD(params, lr=lr, momentum=0.9, weight_decay=weight_decay)
         elif optim == "adam":
-            self.optimizer = torch.optim.Adam(params, lr=lr)
+            self.optimizer = torch.optim.Adam(params, lr=lr, weight_decay=weight_decay)
         elif optim == "rmsprop":
-            self.optimizer = torch.optim.RMSprop(params, lr=lr)
+            self.optimizer = torch.optim.RMSprop(params, lr=lr, weight_decay=weight_decay)
         else:
             raise ValueError(f"Unsupported optimizer type: {optim}")
 
@@ -49,23 +49,13 @@ class Optim:
             self.scheduler = None
 
     def step(self):
-        """
-        gradient clipping + optimizer.step() + (optional) lr scheduler.step()
-
-        return: grad_norm (없으면 0.0)
-        """
         grad_norm = 0.0
-
-        # gradient clipping
         if self.clip is not None and self.clip > 0:
             grad_norm = float(clip_grad_norm_(self.params, self.clip))
-
-        # 파라미터 업데이트
         self.optimizer.step()
+        return grad_norm
 
-        # lr decay 스케줄러가 있으면 한 스텝 진행
+    def step_scheduler(self):
         if self.scheduler is not None:
             self.scheduler.step()
-
-        return grad_norm
     
