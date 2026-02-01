@@ -523,8 +523,8 @@ def train(data, X, Y, model, criterion, optim, batch_size):
     n_samples = 0
     iter = 0
 
+    metric_idx = None
     for X, Y in data.get_batches(X, Y, batch_size, True):
-        model.zero_grad()
         X = torch.unsqueeze(X, dim=1)
         X = X.transpose(2, 3)
         if iter % args.step_size == 0:
@@ -540,18 +540,20 @@ def train(data, X, Y, model, criterion, optim, batch_size):
             id = torch.tensor(id).to(device)
             tx = X[:, :, :, :]
             ty = Y[:, :, :]
+            model.zero_grad()
             output = model(tx)
             output = torch.squeeze(output, 3)
-            # scale = data.scale.expand(output.size(0), output.size(1), data.m)
-            # scale = scale[:, :, :]
-
-            # 학습 loss는 정규화 상태에서 계산
+            # === metric(FX) 노드만 loss (목표함수 일치) ===
+            if metric_idx is None:
+                idx = _select_metric_nodes(data, getattr(data, "m", 0) or 0)
+                metric_idx = torch.tensor(idx, dtype=torch.long, device=output.device)
+            output = output[:, :, metric_idx]
+            ty = ty[:, :, metric_idx]
             loss = criterion(output, ty)
             loss.backward()
             total_loss += loss.item()
-            n_samples += (output.size(0) * output.size(1) * data.m)
+            n_samples += output.numel()
             grad_norm = optim.step()
-
         iter += 1
     return total_loss / n_samples
 

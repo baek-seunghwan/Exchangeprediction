@@ -170,6 +170,11 @@ class gtnet(nn.Module):
         x = F.relu(self.end_conv_1(x))
         x = self.end_conv_2(x)
 
+        # === persistence(마지막 입력값) residual 추가 ===
+        # input: [B, 1, N, L], x: [B, H, N, 1]
+        base = input[:, :, :, -1:].repeat(1, x.size(1), 1, 1)
+        x = x + base
+
         return x
     
 
