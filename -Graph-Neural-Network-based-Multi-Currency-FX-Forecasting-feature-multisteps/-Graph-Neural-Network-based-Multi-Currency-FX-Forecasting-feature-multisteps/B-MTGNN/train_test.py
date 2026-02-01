@@ -542,17 +542,14 @@ def train(data, X, Y, model, criterion, optim, batch_size):
             ty = Y[:, :, :]
             output = model(tx)
             output = torch.squeeze(output, 3)
-            scale = data.scale.expand(output.size(0), output.size(1), data.m)
-            scale = scale[:, :, :]
+            # scale = data.scale.expand(output.size(0), output.size(1), data.m)
+            # scale = scale[:, :, :]
 
-            output *= scale
-            ty *= scale
-
+            # 학습 loss는 정규화 상태에서 계산
             loss = criterion(output, ty)
             loss.backward()
             total_loss += loss.item()
             n_samples += (output.size(0) * output.size(1) * data.m)
-            
             grad_norm = optim.step()
 
         iter += 1
