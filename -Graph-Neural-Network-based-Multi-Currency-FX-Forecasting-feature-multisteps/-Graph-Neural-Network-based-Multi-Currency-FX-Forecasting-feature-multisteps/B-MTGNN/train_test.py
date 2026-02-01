@@ -665,7 +665,7 @@ def main(experiment):
 
     best_hp = []
 
-    for q in range(60):
+    for q in range(10):
         gcn_depth = gcn_depths[randrange(len(gcn_depths))]
         lr = lrs[randrange(len(lrs))]
         conv = convs[randrange(len(convs))]
