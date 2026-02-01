@@ -715,7 +715,12 @@ def main(experiment):
         evaluateL1 = nn.L1Loss(reduction='sum').to(device)
 
         optim = Optim(
-            model.parameters(), args.optim, lr, args.clip, lr_decay=args.weight_decay
+            model.parameters(),
+            args.optim,
+            lr,
+            args.clip,
+            weight_decay=args.weight_decay,
+            lr_decay=None
         )
 
         es_counter = 0
