@@ -777,13 +777,24 @@ def main(experiment):
         except KeyboardInterrupt:
             print(f"\n\nTraining interrupted")
     
-    # hp.txt 저장
-    hp_save_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(hp_save_path, "w") as f:
-        f.write(str(best_hp))
 
-    with open(args.save, 'rb') as f:
-        model = torch.load(f, weights_only=False)
+
+    # hp_save_path 정의 (실험별로 저장)
+    hp_save_path = Path(args.save).parent / f"hp_run_{experiment}.txt"
+    if best_hp:
+        hp_save_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(hp_save_path, "w") as f:
+            f.write(str(best_hp))
+    else:
+        print("\n[경고] best_hp가 비어있어서 hp 저장을 건너뜁니다.")
+
+    save_path = Path(args.save)
+    if save_path.exists():
+        with open(save_path, 'rb') as f:
+            model = torch.load(f, weights_only=False)
+    else:
+        print("\n[경고] 저장된 모델 파일이 없어서 현재 모델로 평가합니다.")
+        # model은 그대로 사용
 
     vtest_acc, vtest_rae, vtest_corr, vtest_smape = evaluate(Data, Data.valid[0], Data.valid[1], model, evaluateL2, evaluateL1,
                                                              args.batch_size, True)
