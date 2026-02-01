@@ -1,4 +1,5 @@
 import ast
+from pathlib import Path
 import argparse
 import math
 import time
@@ -17,7 +18,6 @@ from o_util import *
 from trainer import Optim
 from random import randrange
 from matplotlib import pyplot as plt
-from progress_utils import print_iteration_loss, print_section, Colors
 
 # This script trains the final model on the full data, utilising the optimal set of hyper-parameters found in the file train_test
 import numpy as np
@@ -67,7 +67,7 @@ def train(data, X, Y, model, criterion, optim, batch_size):
 
         if iter % 10 == 0:  # 10 반복마다 한 번
             current_loss = loss.item() / (output.size(0) * output.size(1) * data.m)
-            print_iteration_loss(iter, current_loss, batch_size)
+            print(f"[Iter {iter}] Loss: {current_loss:.6f} (batch_size={batch_size})")
         iter += 1
     return total_loss / n_samples
 
@@ -111,7 +111,21 @@ parser.add_argument('--num_split',type=int,default=1,help='number of splits for 
 parser.add_argument('--step_size',type=int,default=100,help='step_size')
 
 
+
 args = parser.parse_args()
+
+# best_seq_in_len.txt가 있으면 seq_in_len을 강제 세팅
+best_seq_path = Path(__file__).resolve().parent.parent / 'AXIS' / 'model' / 'Bayesian' / 'best_seq_in_len.txt'
+if best_seq_path.exists():
+    with open(best_seq_path) as f:
+        best_seq = f.read().strip()
+        try:
+            best_seq = int(best_seq)
+            args.seq_in_len = best_seq
+            print(f"[INFO] best_seq_in_len.txt 적용: seq_in_len = {best_seq}")
+        except Exception:
+            print(f"[경고] best_seq_in_len.txt 파싱 실패: {best_seq}")
+
 device = torch.device('cpu')
 torch.set_num_threads(3)
 
@@ -152,7 +166,7 @@ tanh_alpha=hp[11]
 epochs=hp[-1]
 
 
-Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize,args.seq_out_len)
+Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
 
 
 
