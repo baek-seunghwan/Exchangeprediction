@@ -6,10 +6,26 @@ import torch
 from scipy.sparse import linalg
 import csv
 from collections import defaultdict
+from pathlib import Path
+
+# Path resolver for module data files
+_THIS_DIR = Path(__file__).resolve().parent
+_DATA_DIR = _THIS_DIR / "data"
+
+def _resolve_data_path(path_str: str) -> str:
+    p = Path(path_str)
+    if p.is_absolute():
+        return str(p)
+    # If path explicitly starts with data, resolve relative to module
+    if p.parts and p.parts[0] == 'data':
+        return str(_THIS_DIR / p)
+    return str(_DATA_DIR / p)
 
 #by Zaid et al.
 # returns column names within dataset    
 def create_columns(file_path):
+    # Resolve relative paths to module data dir
+    file_path = _resolve_data_path(file_path)
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Column file not found at: {file_path}")
 
@@ -18,73 +34,68 @@ def create_columns(file_path):
         reader = csv.reader(f)
         # Read the first row
         col = [c for c in next(reader)]
-            
         if 'Date' in col[0]:
             return col[1:]
-            
         return col
     
 #by Zaid et al.
-def build_predefined_adj(columns, graph_files='data/graph.csv'):
-    # Initialize an empty dictionary with default value as an empty list
+def build_predefined_adj(columns, graph_files='data/graph.csv', exclude_nodes=None):
+    # Default: exclude CN/UK-related nodes (case-insensitive)
+    default_exclude = {"cn", "uk", "cn_fx", "uk_fx"}
+    if exclude_nodes is None:
+        exclude_nodes = default_exclude.copy()
+    # Normalize exclude set to lowercase for robust comparisons
+    exclude_nodes = {str(x).lower() for x in exclude_nodes}
+
     graph = defaultdict(list)
 
-    # Read the graph CSV file
     try:
-        with open('data/graph.csv', 'r', encoding='utf-8') as f:
+        with open(graph_files, 'r', encoding='utf-8') as f:
             reader = csv.reader(f)
-            # Iterate over each row in the CSV file
             for row in reader:
-                # Extract the key node from the first column
-                if not row: continue
+                if not row:
+                    continue
                 key_node = row[0]
-                # Extract the adjacent nodes from the remaining columns
-                adjacent_nodes =  [node for node in row[1:] if node] #does not include empty columns
-                # Add the adjacent nodes to the graph dictionary
+                if key_node and key_node.lower() in exclude_nodes:
+                    continue
+                adjacent_nodes = [node for node in row[1:] if node and (node.lower() not in exclude_nodes)]
                 graph[key_node].extend(adjacent_nodes)
-        print('Graph loaded with',len(graph),'attacks...')
+        print('Graph loaded with', len(graph), 'attacks...')
     except FileNotFoundError:
         print("Warning: file not found. Retruning zero matrix")
-        return torch.zeros((len(columns), len(columns)))
+        clean_columns = [c for c in columns if c not in exclude_nodes]
+        return torch.zeros((len(clean_columns), len(clean_columns)))
 
-    
-    print(len(columns), 'columns loaded')
+    clean_columns = [c for c in columns if str(c).lower() not in exclude_nodes]
+    print(len(clean_columns), 'columns loaded')
 
-    n_nodes = len(columns)
-
-    col_to_idx = {col: i for i, col in enumerate(columns)}
+    n_nodes = len(clean_columns)
+    col_to_idx = {col: i for i, col in enumerate(clean_columns)}
 
     row_indices = []
     col_indices = []
 
-    for node_name, neighbors in graph.items() :
+    for node_name, neighbors in graph.items():
         if node_name in col_to_idx:
             i = col_to_idx[node_name]
             for neighbor_name in neighbors:
                 if neighbor_name in col_to_idx:
                     j = col_to_idx[neighbor_name]
-
-                    row_indices.append(i)
-                    col_indices.append(j)
-
-                    row_indices.append(j)
-                    col_indices.append(i)
+                    row_indices.append(i); col_indices.append(j)
+                    row_indices.append(j); col_indices.append(i)
 
     if not row_indices:
         print("No edges found in the graph.")
         return torch.zeros(n_nodes, n_nodes)
-    
+
     data = np.ones(len(row_indices), dtype=np.float32)
-    
     adj_sp = sp.coo_matrix((data, (row_indices, col_indices)), shape=(n_nodes, n_nodes)).astype(np.float32)
-    
+
     adj_dense = adj_sp.todense()
     adj_dense[adj_sp > 1] = 1
-    
-    adj = torch.from_numpy(adj_dense).float()
-        
-    print('Adjacency created...')
 
+    adj = torch.from_numpy(adj_dense).float()
+    print('Adjacency created...')
     return adj
 
 def normal_std(x):
@@ -98,6 +109,10 @@ class DataLoaderS(object):
         self.P = window
         self.h = horizon
         self.out_len = out
+
+        # resolve paths for data files
+        file_name = _resolve_data_path(file_name)
+        col_file = _resolve_data_path(col_file)
 
         with open(file_name, 'r', encoding='utf-8') as fin:
             self.rawdat_np = np.loadtxt(fin, delimiter='\t')

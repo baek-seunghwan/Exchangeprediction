@@ -11,6 +11,7 @@ import sys
 script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
+project_root = os.path.dirname(script_dir)
 
 import csv
 from collections import defaultdict
@@ -119,12 +120,8 @@ def plot_forecast(data,forecast,confidence,s,index,col, start_date='2011-01-01',
         display_name = 'US(1호선)'
     elif key_low.startswith('kr'):
         display_name = 'KR(2호선)'
-    elif key_low.startswith('uk'):
-        display_name = 'UK(3호선)'
     elif key_low.startswith('jp'):
         display_name = 'JP(4호선)'
-    elif key_low.startswith('cn'):
-        display_name = 'CN(5호선)'
     else:
         display_name = consistent_name(s_key)
 
@@ -178,11 +175,12 @@ def plot_forecast(data,forecast,confidence,s,index,col, start_date='2011-01-01',
     fig = pyplot.gcf()
     fig.set_size_inches(10, 7)
 
-    # save and show the forecast
-    images_dir = 'model/Bayesian/forecast/pt_plots/'
+    # save and show the forecast (ensure directory exists)
+    images_dir = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'forecast', 'pt_plots')
+    os.makedirs(images_dir, exist_ok=True)
     safe_name = display_name.replace('/','_')
-    pyplot.savefig(images_dir+safe_name+'.png', bbox_inches="tight")
-    pyplot.savefig(images_dir+safe_name+".pdf", bbox_inches = "tight", format='pdf')
+    pyplot.savefig(os.path.join(images_dir, safe_name + '.png'), bbox_inches="tight")
+    pyplot.savefig(os.path.join(images_dir, safe_name + ".pdf"), bbox_inches = "tight", format='pdf')
     pyplot.show(block=False)
     pyplot.pause(5)
     pyplot.close()
@@ -235,11 +233,16 @@ def build_graph(file_name):
 
 #This script forecasts the future of the graph, up to 3 years in advance
 
+project_root = os.path.dirname(script_dir)
 
-data_file='./data/sm_data.txt'
-model_file='model/Bayesian/o_model.pt'
-nodes_file='data/data.csv'
-graph_file='data/graph.csv'
+data_file = os.path.join(script_dir, 'data', 'sm_data.txt')
+# prefer o_model if present, else fallback to main model.pt
+model_file = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'o_model.pt')
+if not os.path.exists(model_file):
+    model_file = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'model.pt')
+
+nodes_file = os.path.join(script_dir, 'data', 'data.csv')
+graph_file = os.path.join(script_dir, 'data', 'graph.csv')
 
 
 #read the data
@@ -276,11 +279,63 @@ X = X.to(torch.float)
 
 
 
-#load the model
-model=None
-with open(model_file, 'rb') as f:
-    model = torch.load(f)
+#load the model (allowlisted for net.gtnet if needed)
+model = None
+try:
+    import net as _netmod
+    from torch.serialization import safe_globals
+    with open(model_file, 'rb') as f:
+        try:
+            with safe_globals([_netmod.gtnet]):
+                model = torch.load(f, map_location='cpu', weights_only=False)
+        except Exception:
+            # fallback to default load
+            f.seek(0)
+            model = torch.load(f, map_location='cpu')
+except Exception:
+    # best-effort load
+    with open(model_file, 'rb') as f:
+        model = torch.load(f, map_location='cpu')
 
+
+# Bayesian estimation
+# Align model <-> data node dimensions and input sequence length
+model_nodes = getattr(model, 'num_nodes', None) or (getattr(model, 'module', None) and getattr(model.module, 'num_nodes', None))
+if model_nodes is not None and m != int(model_nodes):
+    print(f"Warning: model expects {int(model_nodes)} nodes but data has {m} columns. Aligning data to model nodes.")
+    if m > int(model_nodes):
+        # trim extra columns (keep left-most)
+        dat = dat[:, :int(model_nodes)]
+        col = col[:int(model_nodes)]
+        index = {name: i for i, name in enumerate(col)}
+    else:
+        # pad with zeros for missing nodes
+        pad_cols = int(model_nodes) - m
+        pad = np.zeros((dat.shape[0], pad_cols))
+        dat = np.concatenate([dat, pad], axis=1)
+        for i in range(pad_cols):
+            col.append(f"_PAD_{i}")
+        index = {name: i for i, name in enumerate(col)}
+
+    # update m and recompute scale (use rawdat where possible)
+    m = dat.shape[1]
+    new_scale = np.ones(m)
+    for i in range(m):
+        new_scale[i] = np.max(np.abs(rawdat[:, i])) if i < rawdat.shape[1] else 1.0
+        if new_scale[i] == 0: new_scale[i] = 1.0
+    scale = new_scale
+    # re-normalise dat
+    dat = dat / scale
+
+# Use model's seq_length if present
+P = int(getattr(model, 'seq_length', None) or (getattr(model, 'module', None) and getattr(model.module, 'seq_length', None)) or 10)
+
+# Recreate input tensor X with the possibly-updated `dat` and `P`
+X = torch.from_numpy(dat[-P:, :])
+X = torch.unsqueeze(X, dim=0)
+X = torch.unsqueeze(X, dim=1)
+X = X.transpose(2, 3)
+X = X.to(torch.float)
 
 # Bayesian estimation
 num_runs = 10

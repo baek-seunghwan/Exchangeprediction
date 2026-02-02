@@ -544,12 +544,12 @@ def train(data, X, Y, model, criterion, optim, batch_size):
     return total_loss / n_samples
 
 
-DEFAULT_DATA_PATH = AXIS_DIR / 'ExchangeRate_dataset.csv'
+DEFAULT_DATA_PATH = Path(__file__).resolve().parent / 'data' / 'data.csv'
 DEFAULT_MODEL_SAVE = MODEL_BASE_DIR / 'model.pt'
 
 parser = argparse.ArgumentParser(description='PyTorch Time series forecasting')
 parser.add_argument('--data', type=str, 
-    default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'ExchangeRate_dataset.csv'),
+    default=str(Path(__file__).resolve().parent / 'data' / 'data.csv'),
     help='location of the data file')
 parser.add_argument('--log_interval', type=int, default=2000, metavar='N',
                     help='report interval')

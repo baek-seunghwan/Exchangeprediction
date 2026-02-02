@@ -6,7 +6,21 @@ import torch
 from scipy.sparse import linalg
 import csv
 from collections import defaultdict
-import pandas as pd 
+import pandas as pd
+from pathlib import Path
+
+# Helper to resolve data paths relative to this module's data directory
+_THIS_DIR = Path(__file__).resolve().parent
+_DATA_DIR = _THIS_DIR / "data"
+
+def _resolve_data_path(path_str: str) -> str:
+    p = Path(path_str)
+    if p.is_absolute():
+        return str(p)
+    # If path starts with 'data' treat it as relative to this module
+    if p.parts and p.parts[0] == 'data':
+        return str(_THIS_DIR / p)
+    return str(_DATA_DIR / p)
 
 def create_columns(file_path):
     if not os.path.exists(file_path):
@@ -24,32 +38,40 @@ def create_columns(file_path):
         except StopIteration:
             return []
 
-def build_predefined_adj(columns, graph_file='data/graph.csv'):
-    # Initialize an empty dictionary
+def build_predefined_adj(columns, graph_file='data/graph.csv', exclude_nodes=None):
+    # Default: exclude CN/UK-related nodes (case-insensitive)
+    default_exclude = {"cn", "uk", "cn_fx", "uk_fx"}
+    if exclude_nodes is None:
+        exclude_nodes = default_exclude.copy()
+    exclude_nodes = {str(x).lower() for x in exclude_nodes}
+
     graph = defaultdict(list)
 
-    # Read the graph CSV file
     try:
         with open(graph_file, 'r', encoding='utf-8') as f:
             reader = csv.reader(f)
             for row in reader:
-                if not row: continue
+                if not row:
+                    continue
                 key_node = row[0]
-                # Extract adjacent nodes (skipping empty strings)
-                adjacent_nodes = [node for node in row[1:] if node]
+                if key_node and key_node.lower() in exclude_nodes:
+                    continue
+                adjacent_nodes = [node for node in row[1:] if node and (node.lower() not in exclude_nodes)]
                 graph[key_node].extend(adjacent_nodes)
         print('Graph loaded with', len(graph), 'attacks...')
     except FileNotFoundError:
         print(f"Warning: Graph file not found at {graph_file}. Returning zero matrix.")
-        return torch.zeros((len(columns), len(columns)))
+        clean_columns = [c for c in columns if c not in (exclude_nodes or set())]
+        return torch.zeros((len(clean_columns), len(clean_columns)))
 
-    print(len(columns), 'columns loaded')
-    n_nodes = len(columns)
-    
+    clean_columns = [c for c in columns if str(c).lower() not in (exclude_nodes or set())]
+    print(len(clean_columns), 'columns loaded')
+
+    n_nodes = len(clean_columns)
     if n_nodes == 0:
         return torch.zeros(0, 0)
 
-    col_to_idx = {col: i for i, col in enumerate(columns)}
+    col_to_idx = {col: i for i, col in enumerate(clean_columns)}
 
     row_indices = []
     col_indices = []
@@ -60,23 +82,21 @@ def build_predefined_adj(columns, graph_file='data/graph.csv'):
             for neighbor_name in neighbors:
                 if neighbor_name in col_to_idx:
                     j = col_to_idx[neighbor_name]
-                    # Undirected graph (Symmetric)
                     row_indices.append(i); col_indices.append(j)
                     row_indices.append(j); col_indices.append(i)
 
     if not row_indices:
         print("No edges found in the graph.")
         return torch.zeros(n_nodes, n_nodes)
-    
+
     data = np.ones(len(row_indices), dtype=np.float32)
     adj_sp = sp.coo_matrix((data, (row_indices, col_indices)), shape=(n_nodes, n_nodes)).astype(np.float32)
-    
+
     adj_dense = adj_sp.todense()
-    adj_dense[adj_sp > 1] = 1 # Clip values to 1
-    
+    adj_dense[adj_sp > 1] = 1
+
     adj = torch.from_numpy(adj_dense).float()
     print('Adjacency created...')
-
     return adj
 
 def normal_std(x):
@@ -93,6 +113,10 @@ class DataLoaderS(object):
         self.out_len = out
         self.device = device
 
+        # Resolve paths relative to B-MTGNN/data when a relative path is provided
+        file_name = _resolve_data_path(file_name)
+        if col_file:
+            col_file = _resolve_data_path(col_file)
 
         try:
             print(f"Loading data from {file_name}...")
@@ -132,12 +156,14 @@ class DataLoaderS(object):
         try:
             self.col = create_columns(target_col_file)
             if len(self.col) != self.m:
-                 self.col = [str(i) for i in range(self.m)]
+                self.col = [str(i) for i in range(self.m)]
         except:
-             self.col = [str(i) for i in range(self.m)]
+            self.col = [str(i) for i in range(self.m)]
 
-        self.adj = build_predefined_adj(self.col) 
-        # 만약 그래프 파일 경로가 다르다면 build_predefined_adj(self.col, '경로') 로 수정 필요
+        # Build adjacency using graph file inside module data dir by default
+        graph_path = _resolve_data_path('data/graph.csv')
+        # Use build_predefined_adj default (which excludes CN/UK case-insensitively)
+        self.adj = build_predefined_adj(self.col, graph_file=graph_path)
 
         # Calculate metrics using Test set
         scale_expanded = self.scale.view(1, 1, self.m).expand(self.test[1].size(0), self.test[1].size(1), self.m)

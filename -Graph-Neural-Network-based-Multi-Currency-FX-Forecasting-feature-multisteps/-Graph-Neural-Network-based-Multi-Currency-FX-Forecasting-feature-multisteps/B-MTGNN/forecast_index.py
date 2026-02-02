@@ -208,7 +208,7 @@ def plot_multi_node(dates_hist, dates_future, smoothed_hist, smoothed_fut, smoot
 # 경로 설정
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(script_dir)
-data_file = os.path.join(script_dir, 'data', 'ExchangeRate_dataset.csv')
+data_file = os.path.join(script_dir, 'data', 'data.csv')
 model_file = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'model.pt')
 
 # 출력 디렉토리
@@ -302,7 +302,22 @@ if seq_len is None:
 
 print(f"Using input sequence length (seq_len) = {seq_len}")
 
-# 초기 입력 준비
+# Align data node count to model expectation if needed
+model_nodes = getattr(model, 'num_nodes', None) or (getattr(model, 'module', None) and getattr(model.module, 'num_nodes', None))
+if model_nodes is not None and dat.shape[1] != int(model_nodes):
+    print(f"Warning: model expects {int(model_nodes)} nodes but data has {dat.shape[1]} columns. Aligning data to model nodes.")
+    if dat.shape[1] > int(model_nodes):
+        dat = dat[:, :int(model_nodes)]
+        col = col[:int(model_nodes)]
+    else:
+        pad_cols = int(model_nodes) - dat.shape[1]
+        pad = np.zeros((dat.shape[0], pad_cols))
+        dat = np.concatenate([dat, pad], axis=1)
+        for i in range(pad_cols):
+            col.append(f"_PAD_{i}")
+    # update m to match aligned data
+    m = dat.shape[1]
+
 X_init = torch.from_numpy(dat[-seq_len:, :]).float().to(device)
 
 # Bayesian Estimation (Dropout MC)
@@ -359,6 +374,15 @@ confidence = 1.96 * std_dev / torch.sqrt(torch.tensor(num_runs))
 variance = torch.var(outputs, dim=0)
 
 # Denormalization
+# Ensure scale matches current data width after any alignment
+if len(scale) != dat.shape[1]:
+    if len(scale) > dat.shape[1]:
+        scale = scale[:dat.shape[1]]
+    else:
+        # pad with ones for missing scale entries
+        pad = np.ones(dat.shape[1] - len(scale))
+        scale = np.concatenate([scale, pad])
+
 scale_torch = torch.from_numpy(scale).float()
 dat_denorm = torch.from_numpy(dat).float() * scale_torch
 Y_denorm = Y * scale_torch

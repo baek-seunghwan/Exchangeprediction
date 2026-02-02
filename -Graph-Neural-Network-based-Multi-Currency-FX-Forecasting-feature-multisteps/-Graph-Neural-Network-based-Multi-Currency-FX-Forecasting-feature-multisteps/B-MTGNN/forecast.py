@@ -232,7 +232,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(script_dir)
 
 # 데이터 및 모델 파일
-data_file = os.path.join(script_dir, 'data', 'ExchangeRate_dataset.csv')
+data_file = os.path.join(script_dir, 'data', 'data.csv')
 model_file = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'model.pt')
 
 # 출력 디렉토리
@@ -322,6 +322,32 @@ if seq_len is None:
     # fallback to 10 if not found
     seq_len = 10
 print(f"Using input sequence length (seq_len) = {seq_len}")
+# Align data node dimension to model expectation if necessary
+model_nodes = getattr(model, 'num_nodes', None) or (getattr(model, 'module', None) and getattr(model.module, 'num_nodes', None))
+if model_nodes is not None and dat.shape[1] != int(model_nodes):
+    print(f"Warning: model expects {int(model_nodes)} nodes but data has {dat.shape[1]} columns. Aligning data to model nodes.")
+    if dat.shape[1] > int(model_nodes):
+        # trim extra columns (keep left-most)
+        dat = dat[:, :int(model_nodes)]
+        col = col[:int(model_nodes)]
+        index = {name: i for i, name in enumerate(col)}
+    else:
+        # pad with zeros for missing nodes
+        pad_cols = int(model_nodes) - dat.shape[1]
+        pad = np.zeros((dat.shape[0], pad_cols))
+        dat = np.concatenate([dat, pad], axis=1)
+        # extend column names
+        for i in range(pad_cols):
+            col.append(f"_PAD_{i}")
+        index = {name: i for i, name in enumerate(col)}
+
+    m = dat.shape[1]
+    scale = np.ones(m)
+    for i in range(m):
+        scale[i] = np.max(np.abs(rawdat[:, i])) if i < rawdat.shape[1] else 1.0
+        if scale[i] == 0: scale[i] = 1.0
+    dat = dat / scale
+
 X_init = torch.from_numpy(dat[-seq_len:, :]).float().to(device)
 
 # 8. Bayesian Estimation (정확히 horizon개월만 생성)

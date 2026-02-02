@@ -1,6 +1,10 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import csv
+import os
+from pathlib import Path
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
 def exponential_smoothing(series, alpha):
 
@@ -51,7 +55,7 @@ def plot_double_exponential_smoothing(series, alphas, betas, attack):
 #The below script performs double exponential smoothing for the data
 alpha=float(0.1)
 beta=float(0.3)
-file_name='data/data.txt'
+file_name = os.path.join(script_dir, 'data', 'data.txt')
 fin = open(file_name)
 rawdat = np.loadtxt(fin, delimiter='\t')
 print(rawdat)
@@ -65,6 +69,7 @@ for r in rawdat.transpose():
 smoothed = list(map(list, zip(*smoothed)))
 
 
-with open("data/sm_data.csv", "w",newline="") as f:
+out_path = os.path.join(script_dir, 'data', 'sm_data.csv')
+with open(out_path, "w", newline="") as f:
     writer = csv.writer(f)
-    writer.writerows(smoothed [:-1]) #do not include the last extra row
+    writer.writerows(smoothed[:-1])  # do not include the last extra row
