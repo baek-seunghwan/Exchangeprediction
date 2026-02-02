@@ -49,20 +49,6 @@ AXIS_DIR = PROJECT_DIR / 'AXIS'
 MODEL_BASE_DIR = AXIS_DIR / 'model' / 'Bayesian'
 
 
-def inverse_diff_2d(output, I, shift):
-    output[0, :] = torch.exp(output[0, :] + torch.log(I + shift)) - shift
-    for i in range(1, output.shape[0]):
-        output[i, :] = torch.exp(output[i, :] + torch.log(output[i - 1, :] + shift)) - shift
-    return output
-
-
-def inverse_diff_3d(output, I, shift):
-    output[:, 0, :] = torch.exp(output[:, 0, :] + torch.log(I + shift)) - shift
-    for i in range(1, output.shape[1]):
-        output[:, i, :] = torch.exp(output[:, i, :] + torch.log(output[:, i - 1, :] + shift)) - shift
-    return output
-
-
 def plot_data(data, title):
     x = range(1, len(data) + 1)
     plt.plot(x, data, 'b-', label='Actual')

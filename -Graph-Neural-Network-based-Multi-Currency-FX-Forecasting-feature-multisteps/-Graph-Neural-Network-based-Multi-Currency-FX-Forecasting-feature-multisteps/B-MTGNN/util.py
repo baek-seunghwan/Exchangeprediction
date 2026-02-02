@@ -118,13 +118,6 @@ class DataLoaderS(object):
 
         self.rawdat = torch.from_numpy(self.rawdat_np).float()
 
-        self.shift = 0
-        self.min_data = torch.min(self.rawdat)
-        if(self.min_data < 0):
-            self.shift = (self.min_data * -1) + 1
-        elif (self.min_data == 0):
-            self.shift = 1
-
         self.dat = torch.zeros_like(self.rawdat)
         self.n, self.m = self.dat.shape
         self.normalize = 2
