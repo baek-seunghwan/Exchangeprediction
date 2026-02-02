@@ -412,7 +412,8 @@ dates_future = pd.date_range(start=FORECAST_START, periods=horizon, freq="MS").t
 print("Forecast range:", dates_future[0].strftime('%Y-%m'), "~", dates_future[-1].strftime('%Y-%m'))
 
 # 11. Individual Plotting Loop
-target_keywords = ['us_fx', 'kr_fx', 'uk_fx', 'jp_fx', 'cn_fx']
+# Removed UK and CN targets per request
+target_keywords = ['us_fx', 'kr_fx', 'jp_fx']
 target_indices = [i for k in target_keywords for i, n in enumerate(col) if k.lower() in n.lower()]
 if not target_indices: target_indices = range(m)
 plot_colours = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
@@ -569,7 +570,8 @@ pyplot.savefig(os.path.join(plot_dir, 'Multi_Node_Normalized_Zoom.png'), bbox_in
 pyplot.close()
 
 # 13. Gap Analysis
-found_comps = [n for cand in ['kr_fx', 'uk_fx', 'jp_fx', 'cn_fx'] for n in col if cand in n.lower()]
+# Exclude UK/CN - only compare KR and JP
+found_comps = [n for cand in ['kr_fx', 'jp_fx'] for n in col if cand in n.lower()]
 if us_idx != -1 and found_comps:
     save_gap_fx_yearly(smoothed_fut, col[us_idx], found_comps, index, gap_out_dir, dates_future)
 
