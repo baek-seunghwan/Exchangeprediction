@@ -416,7 +416,6 @@ dates_future = pd.date_range(start=FORECAST_START, periods=horizon, freq="MS").t
 print(f"Forecast range: {dates_future[0].strftime('%Y-%m')} ~ {dates_future[-1].strftime('%Y-%m')}")
 
 # 플롯 대상 선택 (US Trade Weighted Dollar Index + 3개 환율)
-# Excluding CN and UK nodes per request
 target_keywords = ['us_trade', 'weighted', 'kr_fx', 'jp_fx']
 target_indices = sorted(list(set([i for k in target_keywords for i, n in enumerate(col) if k.lower() in n.lower()])))
 if not target_indices: 
