@@ -92,11 +92,10 @@ def build_predefined_adj(columns, graph_file='data/graph.csv', exclude_nodes=Non
     data = np.ones(len(row_indices), dtype=np.float32)
     adj_sp = sp.coo_matrix((data, (row_indices, col_indices)), shape=(n_nodes, n_nodes)).astype(np.float32)
 
-    # Convert to a numpy array safely and cap any multi-edges at 1
-    adj_arr = np.array(adj_sp.todense())
-    adj_arr[adj_arr > 1] = 1
+    adj_dense = adj_sp.todense()
+    adj_dense[adj_sp > 1] = 1
 
-    adj = torch.from_numpy(adj_arr.astype(np.float32)).float()
+    adj = torch.from_numpy(adj_dense).float()
     print('Adjacency created...')
     return adj
 

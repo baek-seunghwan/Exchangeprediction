@@ -40,19 +40,12 @@ def create_columns(file_path):
     
 #by Zaid et al.
 def build_predefined_adj(columns, graph_files='data/graph.csv', exclude_nodes=None):
-    # If caller didn't provide exclude list, try reading external config file
+    # Default: exclude CN/UK-related nodes (case-insensitive)
+    default_exclude = {"cn", "uk", "cn_fx", "uk_fx"}
     if exclude_nodes is None:
-        exclude_nodes = set()
-        try:
-            cfg_path = _resolve_data_path('data/exclude_nodes.txt')
-            if os.path.exists(cfg_path):
-                with open(cfg_path, 'r', encoding='utf-8') as fh:
-                    for line in fh:
-                        v = line.strip()
-                        if v:
-                            exclude_nodes.add(v.lower())
-        except Exception:
-            exclude_nodes = set()
+        exclude_nodes = default_exclude.copy()
+    # Normalize exclude set to lowercase for robust comparisons
+    exclude_nodes = {str(x).lower() for x in exclude_nodes}
 
     graph = defaultdict(list)
 
