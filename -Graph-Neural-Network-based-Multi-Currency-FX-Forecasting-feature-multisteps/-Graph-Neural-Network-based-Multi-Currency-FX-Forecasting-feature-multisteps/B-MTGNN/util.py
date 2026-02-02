@@ -196,16 +196,42 @@ class DataLoaderS(object):
             self.dat[:, mask] = self.rawdat[:, mask] / max_abs_val[mask]  
             self.dat = (self.rawdat / max_abs_val.view(1, -1)).to(self.device)
     def _split(self, train, valid, test):
-        # util.py Logic: Strictly separates Train / Valid / Test ranges
-        train_set = range(self.P + self.h - 1, train) 
-        valid_set = range(train, valid) 
-        test_set = range(valid, self.n)
-        
+        # Prefer calendar-based split if date information is available:
+        # - validation: 2024-01-01 .. 2024-12-31
+        # - test:       2025-01-01 .. 2025-12-31
+        try:
+            if hasattr(self, 'dates_all') and len(self.dates_all) == self.n:
+                idxs_2024 = [i for i, d in enumerate(self.dates_all) if getattr(d, 'year', None) == 2024]
+                idxs_2025 = [i for i, d in enumerate(self.dates_all) if getattr(d, 'year', None) == 2025]
+                if idxs_2024 and idxs_2025:
+                    valid_start = min(idxs_2024)
+                    valid_end = max(idxs_2024) + 1
+                    test_start = min(idxs_2025)
+                    test_end = max(idxs_2025) + 1
+
+                    train_set = range(self.P + self.h - 1, valid_start)
+                    valid_set = range(valid_start, valid_end)
+                    test_set = range(test_start, test_end)
+                else:
+                    # fallback to ratio-based split
+                    train_set = range(self.P + self.h - 1, train)
+                    valid_set = range(train, valid)
+                    test_set = range(valid, self.n)
+            else:
+                train_set = range(self.P + self.h - 1, train)
+                valid_set = range(train, valid)
+                test_set = range(valid, self.n)
+        except Exception:
+            train_set = range(self.P + self.h - 1, train)
+            valid_set = range(train, valid)
+            test_set = range(valid, self.n)
+
         self.train = self._batchify(train_set, self.h)
         self.valid = self._batchify(valid_set, self.h)
-        self.test =  self._batchify(test_set, self.h)
-        
-        self.test_window = self.dat[-(36+self.P):, :].clone()
+        self.test = self._batchify(test_set, self.h)
+
+        # keep a test window (36 months + P) for sliding evaluation
+        self.test_window = self.dat[-(36 + self.P):, :].clone()
 
     def _batchify(self, idx_set, horizon):
         n = len(idx_set) 

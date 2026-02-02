@@ -321,7 +321,7 @@ if model_nodes is not None and dat.shape[1] != int(model_nodes):
 X_init = torch.from_numpy(dat[-seq_len:, :]).float().to(device)
 
 # Bayesian Estimation (Dropout MC)
-num_runs, horizon = 20, 36
+num_runs, horizon = 20, 12
 outputs = []
 
 print(f"Running Bayesian Forecast ({num_runs} MC runs, {horizon} month horizon)...")
@@ -407,10 +407,10 @@ smoothed_fut = smoothed_dat[-horizon:, :]
 smoothed_conf_fut = smoothed_confidence[-horizon:, :]
 
 # 날짜 설정
-HIST_END = pd.Timestamp("2025-07-01")
+HIST_END = pd.Timestamp("2025-12-01")
 dates_hist = pd.date_range(end=HIST_END, periods=len(df), freq="MS").tolist()
 
-FORECAST_START = HIST_END + pd.DateOffset(months=1)
+FORECAST_START = pd.Timestamp("2026-01-01")
 dates_future = pd.date_range(start=FORECAST_START, periods=horizon, freq="MS").tolist()
 
 print(f"Forecast range: {dates_future[0].strftime('%Y-%m')} ~ {dates_future[-1].strftime('%Y-%m')}")

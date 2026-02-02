@@ -351,7 +351,8 @@ if model_nodes is not None and dat.shape[1] != int(model_nodes):
 X_init = torch.from_numpy(dat[-seq_len:, :]).float().to(device)
 
 # 8. Bayesian Estimation (정확히 horizon개월만 생성)
-num_runs, horizon = 20, 36
+# Produce forecasts for the 2026 calendar year (12 months)
+num_runs, horizon = 20, 12
 outputs = []
 
 print(f"Running Bayesian Forecast for {horizon} months...")
@@ -426,13 +427,12 @@ smoothed_confidence = torch.tensor(np.array(smoothed_conf_list)).T
 smoothed_hist, smoothed_fut = smoothed_dat[:-horizon, :], smoothed_dat[-horizon:, :]
 smoothed_conf_fut = smoothed_confidence[-horizon:, :]
 
-# === X축(월) 기준 고정: "마지막 관측월 = 2025/Jul" ===
-# 고정된 마지막 관측월을 기준으로 과거 월렬과 미래 월렬을 생성합니다.
-HIST_END = pd.Timestamp("2025-07-01")  # 최종 학습 데이터 마지막 월
+# === X축(월) 기준 고정: 마지막 관측월을 2025/Dec로 설정하여 2026년 전체를 예측
+HIST_END = pd.Timestamp("2025-12-01")  # 최종 학습 데이터 기준 (마지막 관측월)
 dates_hist = pd.date_range(end=HIST_END, periods=len(df), freq="MS").tolist()
 
-# 미래예측: 2025/Aug ~ 2028/Jul (36개월)
-FORECAST_START = HIST_END + pd.DateOffset(months=1)  # 2025-08-01
+# 미래예측: 2026/Jan ~ 2026/Dec (12개월)
+FORECAST_START = pd.Timestamp("2026-01-01")
 dates_future = pd.date_range(start=FORECAST_START, periods=horizon, freq="MS").tolist()
 
 print("Forecast range:", dates_future[0].strftime('%Y-%m'), "~", dates_future[-1].strftime('%Y-%m'))
