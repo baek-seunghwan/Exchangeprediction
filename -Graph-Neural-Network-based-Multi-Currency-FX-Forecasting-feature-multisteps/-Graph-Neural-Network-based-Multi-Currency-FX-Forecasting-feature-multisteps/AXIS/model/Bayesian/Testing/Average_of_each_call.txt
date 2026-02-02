@@ -1,4 +1,4 @@
-rse: 2.721500
-rae: 3.096302
-correlation: -0.471507
-smape: 0.058757
+rse: 2.315969
+rae: 2.609706
+correlation: -0.117465
+smape: 0.049085
