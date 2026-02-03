@@ -517,7 +517,7 @@ def plot_multi_node(dates_hist, dates_future,
     pyplot.close()
 
 
-# === (A) 전체: 2011 ~ 2028/Jul ===
+# === (A) 전체: 2024/01 ~ 2026/12 ===
 plot_multi_node(
     dates_hist=dates_hist,
     dates_future=dates_future,
@@ -529,11 +529,11 @@ plot_multi_node(
     us_idx=us_idx,
     plot_colours=plot_colours,
     out_path=os.path.join(plot_dir, "Multi_Node_Normalized_FULL.png"),
-    x_start=dates_hist[0],
-    x_end=pd.Timestamp("2028-07-31"),
+    x_start=pd.Timestamp("2024-01-01"),
+    x_end=pd.Timestamp("2026-12-31"),
 )
 
-# === (B) 확대: 2022/Aug ~ 2028/Jul ===
+# === (B) 확대: 2024/01 ~ 2026/12 ===
 plot_multi_node(
     dates_hist=dates_hist,
     dates_future=dates_future,
@@ -545,13 +545,13 @@ plot_multi_node(
     us_idx=us_idx,
     plot_colours=plot_colours,
     out_path=os.path.join(plot_dir, "Multi_Node_Normalized_ZOOM.png"),
-    x_start=pd.Timestamp("2022-08-01"),
-    x_end=pd.Timestamp("2028-07-31"),
+    x_start=pd.Timestamp("2024-01-01"),
+    x_end=pd.Timestamp("2026-12-31"),
 )
 
-# --- 추가: 기존 스타일로 Zoom 이미지 생성 (Aug/22 ~ Jul/28) ---
-zoom_start = pd.Timestamp("2022-08-01")
-zoom_end = pd.Timestamp("2028-07-01")
+# --- 추가: 기존 스타일로 Zoom 이미지 생성 (2024/01 ~ 2026/12) ---
+zoom_start = pd.Timestamp("2024-01-01")
+zoom_end = pd.Timestamp("2026-12-01")
 
 all_dates = dates_hist + dates_future
 left = next((i for i, d in enumerate(all_dates) if d >= zoom_start), 0)

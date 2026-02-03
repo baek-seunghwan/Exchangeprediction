@@ -1,11 +1,4 @@
-<<<<<<< HEAD
-rse: 2.315969
-rae: 2.609706
-correlation: -0.117465
-smape: 0.049085
-=======
-rse: 1.744592
-rae: 1.930796
-correlation: 0.225101
-smape: 0.025725
->>>>>>> parent of 7f2ec37 (rse 1.7(1년치로 업데이트 해야됌))
+rse: 1.818107
+rae: 1.618064
+correlation: -0.626321
+smape: 0.019116

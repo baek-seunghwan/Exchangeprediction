@@ -14,7 +14,7 @@ if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
 from net import gtnet
-from o_util import *
+from util import *
 from trainer import Optim
 from random import randrange
 from matplotlib import pyplot as plt
@@ -97,7 +97,7 @@ parser.add_argument('--skip_channels',type=int,default=32,help='skip channels')
 parser.add_argument('--end_channels',type=int,default=64,help='end channels')
 parser.add_argument('--in_dim',type=int,default=1,help='inputs dimension')
 parser.add_argument('--seq_in_len',type=int,default=10,help='input sequence length')
-parser.add_argument('--seq_out_len',type=int,default=36,help='output sequence length')
+parser.add_argument('--seq_out_len',type=int,default=12,help='output sequence length')
 parser.add_argument('--horizon', type=int, default=1) 
 parser.add_argument('--layers',type=int,default=5,help='number of layers')
 parser.add_argument('--batch_size',type=int,default=8,help='batch size')

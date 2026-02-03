@@ -108,7 +108,7 @@ def plot_forecast(data,forecast,confidence,s,index,col, start_date='2011-01-01',
     try:
         dates = pd.date_range(start=pd.to_datetime(start_date), periods=total_len, freq=freq)
     except Exception:
-        dates = pd.date_range(start=pd.to_datetime(start_date), periods=total_len, freq='M')
+        dates = pd.date_range(start=pd.to_datetime(start_date), periods=total_len, freq='ME')
 
     # split past and forecast dates
     past_dates = dates[:len(d)]
@@ -407,9 +407,9 @@ for i in range(all.shape[0]):
             else:
                 all_n[i,j]=all[i,j]/incident_max
             
-            if i>=all.shape[0]-36:
+            if i>=all.shape[0]-12:
                 confidence_n[u,j]=confidence[u,j]*(all_n[i,j]/all[i,j])
-    if i>=all.shape[0]-36:
+    if i>=all.shape[0]-12:
         u+=1
 
 
@@ -426,4 +426,5 @@ for attack, solutions in graph.items():
     for s in solutions:
         if not s in done:
             done.append(s)
-            plot_forecast(smoothed_dat[:-36,],smoothed_dat[-36:,], smoothed_confidence,s,index,col)
+            # Show last 36 months: 2024-01~2024-12 (validation) + 2025-01~2025-12 (test) + 2026-01~2026-12 (forecast)
+            plot_forecast(smoothed_dat[-36:-12,],smoothed_dat[-12:,], smoothed_confidence,s,index,col, start_date='2024-01-01', freq='M')

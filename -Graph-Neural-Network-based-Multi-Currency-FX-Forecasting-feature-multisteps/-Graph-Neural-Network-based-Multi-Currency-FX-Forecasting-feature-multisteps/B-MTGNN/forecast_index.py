@@ -446,8 +446,8 @@ plot_multi_node(
     index_idx=index_idx,
     plot_colours=plot_colours,
     out_path=os.path.join(plot_dir, "Multi_Node_Index_FULL.png"),
-    x_start=dates_hist[0],
-    x_end=pd.Timestamp("2028-07-31"),
+    x_start=pd.Timestamp("2024-01-01"),
+    x_end=pd.Timestamp("2026-12-31"),
 )
 
 # Multi-Node Plot - ZOOM
@@ -462,8 +462,8 @@ plot_multi_node(
     index_idx=index_idx,
     plot_colours=plot_colours,
     out_path=os.path.join(plot_dir, "Multi_Node_Index_ZOOM.png"),
-    x_start=pd.Timestamp("2022-08-01"),
-    x_end=pd.Timestamp("2028-07-31"),
+    x_start=pd.Timestamp("2024-01-01"),
+    x_end=pd.Timestamp("2026-12-31"),
 )
 
 print("=== 최종 완료 ===")
