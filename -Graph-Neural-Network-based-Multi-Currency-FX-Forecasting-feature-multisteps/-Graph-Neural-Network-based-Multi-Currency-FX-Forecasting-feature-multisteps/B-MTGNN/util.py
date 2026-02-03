@@ -234,7 +234,8 @@ class DataLoaderS(object):
         self.valid = self._batchify(valid_set, self.h)
         self.test = self._batchify(test_set, self.h)
 
-        # test_window: 입력(P개) + 테스트(out_len개) 포함 (실제 test_set 범위 기준)
+        # test_window: 1-step 예측용 (입력 P개 + 출력 1개)
+        # 12개월 forecast는 evaluate_sliding_window에서 롤링으로 구성됨
         test_window_start = max(0, test_start - self.P)
         test_window_end = test_end
         self.test_window = self.dat[test_window_start:test_window_end, :].clone()
