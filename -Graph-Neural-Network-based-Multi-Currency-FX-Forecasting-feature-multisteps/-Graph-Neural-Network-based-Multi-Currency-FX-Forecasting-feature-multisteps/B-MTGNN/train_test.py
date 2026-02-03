@@ -132,9 +132,9 @@ def plot_predicted_actual(predicted, actual, title, type, variance, confidence_9
     # === X축 날짜 매핑: type에 따라 END 시점 동적 변경 ===
     import pandas as pd
     if type == 'Testing':
-        END = pd.Timestamp("2025-12-01")  # Testing: 2025-01 ~ 2025-12
+        END = pd.Timestamp("2025-12-31")  # Testing: 2025-01 ~ 2025-12
     else:  # Validation
-        END = pd.Timestamp("2024-12-01")  # Validation: 2024-01 ~ 2024-12
+        END = pd.Timestamp("2024-12-31")  # Validation: 2024-01 ~ 2024-12
     
     dates = pd.date_range(end=END, periods=len(predicted), freq="MS")
     labels_all = [d.strftime('%b-%y') for d in dates]
@@ -144,7 +144,7 @@ def plot_predicted_actual(predicted, actual, title, type, variance, confidence_9
     total = len(labels_all) - 1
     if total % step != 0:
         step = 1  # 안전장치
-    idxs = list(range(0, len(labels_all), step))  # total%step==0이면 자동으로 마지막 포함
+    idxs = list(range(0, len(labels_all), step))
     if idxs[-1] != total:
         idxs.append(total)
 
@@ -222,6 +222,9 @@ def _select_metric_nodes(data, fallback_m):
 # [수정] horizon 파라미터 추가, y_true 인덱싱 시 horizon 반영
 # ========================================================
 def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_input, is_plot, horizon=1):
+    # === 모델을 평가 모드로 ===
+    model.eval()
+    
     total_loss = 0
     total_loss_l1 = 0
     n_samples = 0
@@ -327,6 +330,18 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     rrse = float(np.mean(rrse_list))
     rae = float(np.mean(rae_list))
 
+    # === 노드별 성능 출력 (진단용) ===
+    print("\n[노드별 RSE/RAE Top5 (나쁜 순서)]")
+    node_perf = [(idx[i], rrse_list[i], rae_list[i]) for i in range(len(idx))]
+    node_perf.sort(key=lambda x: x[1], reverse=True)
+    for node_idx, rse, rae_val in node_perf[:5]:
+        try:
+            node_name = data.col[node_idx]
+        except:
+            node_name = f"Node_{node_idx}"
+        print(f"  {node_name}: RSE={rse:.4f}, RAE={rae_val:.4f}")
+    print()
+
     # correlation/smape도 동일한 노드 집합으로 계산
     predict = predict.data.cpu().numpy()
     Ytest = test.data.cpu().numpy()
@@ -361,9 +376,9 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         f.write(f"smape: {smape:.6f}\n")
 
     if is_plot:
-        loop_end = min(r + 142, data.m) 
-        for v in range(r, loop_end):
-            col = v % data.m
+        # === A안: FX 노드만 플롯/저장 (지표와 그래프 일치) ===
+        for i in idx:  # metric_idx로 선택된 fx 노드만
+            col = i
             # node_name 처리 로직 유지
             try:
                 node_name = data.col[col] # data.col 접근 방식 확인 필요
@@ -381,6 +396,9 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
 
 
 def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
+    # === 3순위: 검증은 deterministic하게 (model.eval + num_runs=1) ===
+    model.eval()
+    
     total_loss = 0
     total_loss_l1 = 0
     n_samples = 0
@@ -396,7 +414,7 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
         X = torch.unsqueeze(X, dim=1)
         X = X.transpose(2, 3)
 
-        num_runs = 10
+        num_runs = 1  # 검증: 1회만 (안정성)
         outputs = []
 
         with torch.no_grad():
@@ -494,10 +512,10 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
 
     counter = 0
     if is_plot:
-        # [수정] loop 범위 수정 (에러 방지)
-        loop_end = min(r + 142, data.m)
-        for v in range(r, loop_end):
-            col = v % data.m
+        # === A안: FX 노드만 플롯/저장 ===
+        idx = _select_metric_nodes(data, data.m)
+        for i in idx:  # metric_idx로 선택된 fx 노드만
+            col = i
             node_name = data.col[col].replace('-ALL', '').replace('Mentions-', 'Mentions of ').replace(' ALL', '').replace('Solution_', '').replace('_Mentions', '')
             node_name = consistent_name(node_name)
             save_metrics_1d(torch.from_numpy(predict[-1, :, col]), torch.from_numpy(Ytest[-1, :, col]), node_name, 'Validation')
@@ -578,12 +596,10 @@ parser.add_argument('--in_dim', type=int, default=1, help='inputs dimension')
 parser.add_argument('--seq_in_len', type=int, default=12, help='input sequence length')
 
 # ========================================================
-# [핵심 수정] horizon과 Output Length를 늘려 Multi-step 설정
-# 주의: seq_out_len은 각 split의 크기보다 작아야 함
-# 현재 데이터(180 rows): train ~129, valid ~26, test ~25 (split: 0.65, 0.22)
-# seq_out_len = 12로 설정 (각 split이 충분히 커야 함)
+# [수정] 1-step 예측으로 변경 (seq_out_len=1, horizon=1)
+# 12개월은 롤링으로 구성 → 배치가 충분히 생성됨
 # ========================================================
-parser.add_argument('--seq_out_len', type=int, default=12, help='output sequence length')
+parser.add_argument('--seq_out_len', type=int, default=1, help='output sequence length (1-step for rolling)')
 parser.add_argument('--horizon', type=int, default=1)
 
 parser.add_argument('--layers', type=int, default=5, help='number of layers')
@@ -685,6 +701,9 @@ def main(experiment):
 
         print(f"Auto-detected num_nodes: {args.num_nodes}")
 
+        # === 1순위: k를 num_nodes로 클램프 (topk 오류 방지) ===
+        k = min(k, args.num_nodes)
+
         model = gtnet(args.gcn_true, args.buildA_true, gcn_depth, args.num_nodes,
                       device, Data.adj, dropout=dropout, subgraph_size=k,
                       node_dim=node_dim, dilation_exponential=dilation_ex,
@@ -698,10 +717,8 @@ def main(experiment):
         nParams = sum([p.nelement() for p in model.parameters()])
         print('Number of model parameters is', nParams, flush=True)
 
-        if args.L1Loss:
-            criterion = nn.L1Loss(reduction='sum').to(device)
-        else:
-            criterion = nn.MSELoss(reduction='sum').to(device)
+        # === 2순위: criterion을 MSE로 고정 (RSE 내리기 위함) ===
+        criterion = nn.MSELoss(reduction='sum').to(device)
         evaluateL2 = nn.MSELoss(reduction='sum').to(device)
         evaluateL1 = nn.L1Loss(reduction='sum').to(device)
 
@@ -793,6 +810,8 @@ def main(experiment):
     vtest_acc, vtest_rae, vtest_corr, vtest_smape = evaluate(Data, Data.valid[0], Data.valid[1], model, evaluateL2, evaluateL1,
                                                              args.batch_size, True)
 
+    # === 테스트: MC-dropout (num_runs=10) ===
+    # evaluate_sliding_window에서 자동으로 10회 평가하므로 그대로
     test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(Data, Data.test_window, model, evaluateL2, evaluateL1,
                                                                         args.seq_in_len, True, horizon=args.horizon)
     print(f"\n\n✓ Final Results: RSE={test_acc:.4f} | RAE={test_rae:.4f} | Corr={test_corr:.4f} | SMAPE={test_smape:.4f}")
