@@ -276,8 +276,14 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
 
         outputs = torch.stack(outputs)
         y_pred = torch.mean(outputs, dim=0)
-        var = torch.var(outputs, dim=0)
-        std_dev = torch.std(outputs, dim=0)
+        
+        # ✅ FIX: num_runs > 1일 때만 var/std 계산
+        if outputs.size(0) > 1:
+            var = torch.var(outputs, dim=0, unbiased=False)
+            std_dev = torch.std(outputs, dim=0, unbiased=False)
+        else:
+            var = torch.zeros_like(y_pred)
+            std_dev = torch.zeros_like(y_pred)
 
         z = 1.96
         confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
@@ -304,11 +310,17 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
             variance = torch.cat((variance, var))
             confidence_95 = torch.cat((confidence_95, confidence))
 
-    scale = data.scale.expand(test.size(0), data.m)
-    predict *= scale
-    test *= scale
-    variance *= scale
-    confidence_95 *= scale
+    # ✅ FIX: scale shape 명시적 관리
+    scale = data.scale.to(predict.device)
+    if scale.dim() == 1:
+        # [num_nodes] → [1, num_nodes]
+        scale = scale.unsqueeze(0)
+    
+    # out-of-place 연산
+    predict = predict * scale
+    test = test * scale
+    variance = variance * scale
+    confidence_95 = confidence_95 * scale
 
     # === metrics: per-node(RRSE/RAE) 평균 (txt 파일과 동일한 기준) ===
     idx = _select_metric_nodes(data, data.m)
@@ -427,19 +439,56 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
 
         outputs = torch.stack(outputs)
         mean = torch.mean(outputs, dim=0)
-        var = torch.var(outputs, dim=0)
-        std_dev = torch.std(outputs, dim=0)
+        
+        # ✅ FIX: num_runs=1 또는 num_split=1이면 var/std 계산 스킵
+        if outputs.size(0) > 1:
+            var = torch.var(outputs, dim=0, unbiased=False)
+            std_dev = torch.std(outputs, dim=0, unbiased=False)
+        else:
+            var = torch.zeros_like(mean)
+            std_dev = torch.zeros_like(mean)
 
         z = 1.96
         confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
 
         output = mean
-        scale = data.scale.expand(Y.size(0), Y.size(1), data.m)
         
-        output *= scale
-        Y *= scale
-        var *= scale
-        confidence *= scale
+        # ✅ FIX: output shape을 Y와 일치시키기
+        # Y: [batch, seq_out_len, num_nodes]
+        # output: [seq_out_len, batch, num_nodes] → transpose → [batch, seq_out_len, num_nodes]
+        if output.dim() == 3 and Y.dim() == 3:
+            if output.shape[0] == Y.shape[1] and output.shape[1] == Y.shape[0]:
+                # output: [out_len, batch, nodes] → [batch, out_len, nodes]
+                output = output.transpose(0, 1)
+        
+        # var, confidence도 동일하게 맞추기
+        if var.dim() == 3 and output.dim() == 3:
+            if var.shape[0] == output.shape[1] and var.shape[1] == output.shape[0]:
+                var = var.transpose(0, 1)
+        if confidence.dim() == 3 and output.dim() == 3:
+            if confidence.shape[0] == output.shape[1] and confidence.shape[1] == output.shape[0]:
+                confidence = confidence.transpose(0, 1)
+        
+        # ✅ FIX: scale shape 명시적 관리 (broadcast 에러 방지)
+        scale = data.scale.to(output.device)
+        if scale.dim() == 1:
+            # [num_nodes] → [1, 1, num_nodes] (3D 대응)
+            scale = scale.view(1, 1, -1)
+            if output.dim() == 2:
+                # output: [batch, num_nodes] → scale: [1, batch, num_nodes] 맞추기
+                scale = scale.expand(1, output.size(0), -1)
+            elif output.dim() == 3:
+                # output: [batch, out_len, num_nodes] → scale: [1, 1, num_nodes]
+                scale = scale.view(1, 1, -1)
+        elif scale.dim() == 2:
+            # [batch, num_nodes] → [1, batch, num_nodes]
+            scale = scale.unsqueeze(0)
+        
+        # out-of-place 연산 (in-place 금지)
+        output = output * scale
+        Y = Y * scale
+        var = var * scale
+        confidence = confidence * scale
 
         if predict is None:
             predict = output
@@ -447,16 +496,14 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
             variance = var
             confidence_95 = confidence
         else:
-            predict = torch.cat((predict, output))
-            test = torch.cat((test, Y))
-            variance = torch.cat((variance, var))
-            confidence_95 = torch.cat((confidence_95, confidence))
+            predict = torch.cat((predict, output), dim=0 if output.dim() == 3 else 0)
+            test = torch.cat((test, Y), dim=0 if Y.dim() == 3 else 0)
+            variance = torch.cat((variance, var), dim=0 if var.dim() == 3 else 0)
+            confidence_95 = torch.cat((confidence_95, confidence), dim=0 if confidence.dim() == 3 else 0)
 
-        scale = data.scale.expand(Y.size(0), Y.size(1), data.m)
-        
         total_loss += evaluateL2(output, Y).item()
         total_loss_l1 += evaluateL1(output, Y).item()
-        n_samples += (output.size(0) * output.size(1) * data.m)
+        n_samples += (output.size(0) * output.size(1) * data.m) if output.dim() == 3 else (output.size(0) * data.m)
 
         sum_squared_diff += torch.sum(torch.pow(Y - output, 2))
         sum_absolute_diff += torch.sum(torch.abs(Y - output))

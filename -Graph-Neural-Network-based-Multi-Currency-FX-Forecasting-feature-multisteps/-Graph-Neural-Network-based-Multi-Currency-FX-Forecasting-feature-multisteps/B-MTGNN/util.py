@@ -226,9 +226,15 @@ class DataLoaderS(object):
         test_start, test_end   = min(idx_2025), max(idx_2025) + 1
 
         # train은 valid_start 이전까지 (슬라이딩 윈도우 고려: 최소 P+h-1부터 시작)
-        train_set = range(self.P + self.h - 1, valid_start)
-        valid_set = range(valid_start, valid_end)
-        test_set  = range(test_start, test_end)
+        # ✅ FIX: valid/test는 "직전 P개월(history) + 해당 구간 12개월"으로 구성
+        # 예: valid_set = [2023-01~12:2024-01~12] → 24개 샘플 → seq_in_len=12, seq_out_len=12 가능
+        # train_set: P+h-1 ~ valid_start-P 사이 (history 포함 전 data까지)
+        train_set = range(self.P + self.h - 1, valid_start - self.P)
+        valid_start_with_history = max(0, valid_start - self.P)
+        test_start_with_history = max(0, test_start - self.P)
+        
+        valid_set = range(valid_start_with_history, valid_end)
+        test_set  = range(test_start_with_history, test_end)
 
         self.train = self._batchify(train_set, self.h)
         self.valid = self._batchify(valid_set, self.h)
