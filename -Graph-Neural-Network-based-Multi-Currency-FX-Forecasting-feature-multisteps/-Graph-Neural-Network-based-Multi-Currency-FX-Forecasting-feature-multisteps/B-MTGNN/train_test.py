@@ -129,22 +129,32 @@ def save_metrics_1d(predict, test, title, type):
 
 
 def plot_predicted_actual(predicted, actual, title, type, variance, confidence_95):
-    # === X축 날짜 매핑: type에 따라 END 시점 동적 변경 ===
+    # === X축 날짜 매핑: Testing/Validation = Aug/22 ~ Jul/25 (값/학습은 그대로, 라벨만) ===
     import pandas as pd
+<<<<<<< HEAD
     if type == 'Testing':
         END = pd.Timestamp("2025-12-31")  # Testing: 2025-01 ~ 2025-12
     else:  # Validation
         END = pd.Timestamp("2024-12-31")  # Validation: 2024-01 ~ 2024-12
     
+=======
+    END = pd.Timestamp("2025-07-01")  # 최종 관측: 25/Jul
+>>>>>>> parent of 362b15c (x축)
     dates = pd.date_range(end=END, periods=len(predicted), freq="MS")
     labels_all = [d.strftime('%b-%y') for d in dates]
 
-    # === 균등 간격 + 시작/끝 반드시 포함 ===
-    step = 3   # 월별 라벨 표시
+    # === 완전 균등 간격 + 시작(Aug) / 끝(Jul) 반드시 포함 ===
+    # Aug-22(0) ~ Jul-25(35) => (len-1)=35를 나누는 step만 균등 가능
+    step = 5   # 추천: 라벨 과밀 방지 + 완전 균등
     total = len(labels_all) - 1
     if total % step != 0:
+<<<<<<< HEAD
         step = 1  # 안전장치
     idxs = list(range(0, len(labels_all), step))
+=======
+        step = 1  # 안전장치(데이터 길이가 바뀌면 월별로라도 균등)
+    idxs = list(range(0, len(labels_all), step))  # total%step==0이면 자동으로 마지막 포함
+>>>>>>> parent of 362b15c (x축)
     if idxs[-1] != total:
         idxs.append(total)
 
@@ -640,13 +650,19 @@ parser.add_argument('--residual_channels', type=int, default=16, help='residual 
 parser.add_argument('--skip_channels', type=int, default=32, help='skip channels')
 parser.add_argument('--end_channels', type=int, default=64, help='end channels')
 parser.add_argument('--in_dim', type=int, default=1, help='inputs dimension')
-parser.add_argument('--seq_in_len', type=int, default=12, help='input sequence length')
+parser.add_argument('--seq_in_len', type=int, default=10, help='input sequence length')
 
 # ========================================================
+<<<<<<< HEAD
 # [수정] 1-step 예측으로 변경 (seq_out_len=1, horizon=1)
 # 12개월은 롤링으로 구성 → 배치가 충분히 생성됨
 # ========================================================
 parser.add_argument('--seq_out_len', type=int, default=1, help='output sequence length (1-step for rolling)')
+=======
+# [핵심 수정] horizon과 Output Length를 늘려 Multi-step 설정
+# ========================================================
+parser.add_argument('--seq_out_len', type=int, default=36, help='output sequence length')
+>>>>>>> parent of 362b15c (x축)
 parser.add_argument('--horizon', type=int, default=1)
 
 parser.add_argument('--layers', type=int, default=5, help='number of layers')
@@ -735,7 +751,7 @@ def main(experiment):
         prop_alpha = prop_alphas[randrange(len(prop_alphas))]
         tanh_alpha = tanh_alphas[randrange(len(tanh_alphas))]
 
-        Data = DataLoaderS(args.data, 0.50, 0.35, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
+        Data = DataLoaderS(args.data, 0.43, 0.30, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
 
         # [중요 수정] 실제 데이터에 맞춰 노드 개수 재설정 (하드코딩된 142 -> 32로 자동 변경)
         # Data.train[0] 형태가 (Samples, Time, Nodes)인 경우 2번 인덱스가 Node 수입니다.

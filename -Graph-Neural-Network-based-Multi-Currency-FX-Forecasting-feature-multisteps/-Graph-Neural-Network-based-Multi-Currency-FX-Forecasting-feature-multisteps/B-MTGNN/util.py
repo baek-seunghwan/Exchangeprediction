@@ -8,7 +8,6 @@ import csv
 from collections import defaultdict
 import pandas as pd
 from pathlib import Path
-import re
 
 # Helper to resolve data paths relative to this module's data directory
 _THIS_DIR = Path(__file__).resolve().parent
@@ -22,19 +21,6 @@ def _resolve_data_path(path_str: str) -> str:
     if p.parts and p.parts[0] == 'data':
         return str(_THIS_DIR / p)
     return str(_DATA_DIR / p)
-
-def _is_excluded_node(name: str) -> bool:
-    """정규식 기반 CN/UK 노드 필터링 (더 강력한 정제)"""
-    s = str(name).strip().lower()
-    # uk / cn이 어디에 붙어있든 걸러버림
-    if re.search(r'(^|[^a-z])uk([^a-z]|$)', s): 
-        return True
-    if re.search(r'(^|[^a-z])cn([^a-z]|$)', s): 
-        return True
-    # 보수적으로 fx 표기도 같이
-    if "uk_fx" in s or "cn_fx" in s: 
-        return True
-    return False
 
 def create_columns(file_path):
     if not os.path.exists(file_path):
@@ -53,7 +39,12 @@ def create_columns(file_path):
             return []
 
 def build_predefined_adj(columns, graph_file='data/graph.csv', exclude_nodes=None):
-    # CN/UK 노드 제외 (정규식 기반 강력한 필터링)
+    # Default: exclude CN/UK-related nodes (case-insensitive)
+    default_exclude = {"cn", "uk", "cn_fx", "uk_fx"}
+    if exclude_nodes is None:
+        exclude_nodes = default_exclude.copy()
+    exclude_nodes = {str(x).lower() for x in exclude_nodes}
+
     graph = defaultdict(list)
 
     try:
@@ -63,21 +54,18 @@ def build_predefined_adj(columns, graph_file='data/graph.csv', exclude_nodes=Non
                 if not row:
                     continue
                 key_node = row[0]
-                # 정규식 기반 제외 + 기본 exclude_nodes도 확인
-                if key_node and (_is_excluded_node(key_node)):
+                if key_node and key_node.lower() in exclude_nodes:
                     continue
-                # neighbor에서도 CN/UK 제외
-                adjacent_nodes = [node for node in row[1:] if node and (not _is_excluded_node(node))]
+                adjacent_nodes = [node for node in row[1:] if node and (node.lower() not in exclude_nodes)]
                 graph[key_node].extend(adjacent_nodes)
-        print('Graph loaded with', len(graph), 'nodes...')
+        print('Graph loaded with', len(graph), 'attacks...')
     except FileNotFoundError:
         print(f"Warning: Graph file not found at {graph_file}. Returning zero matrix.")
-        clean_columns = [c for c in columns if not _is_excluded_node(c)]
+        clean_columns = [c for c in columns if c not in (exclude_nodes or set())]
         return torch.zeros((len(clean_columns), len(clean_columns)))
 
-    # 컬럼에서도 CN/UK 제외 (최종 보조 필터)
-    clean_columns = [c for c in columns if not _is_excluded_node(c)]
-    print(len(clean_columns), 'columns loaded after exclusion')
+    clean_columns = [c for c in columns if str(c).lower() not in (exclude_nodes or set())]
+    print(len(clean_columns), 'columns loaded')
 
     n_nodes = len(clean_columns)
     if n_nodes == 0:
@@ -104,8 +92,8 @@ def build_predefined_adj(columns, graph_file='data/graph.csv', exclude_nodes=Non
     data = np.ones(len(row_indices), dtype=np.float32)
     adj_sp = sp.coo_matrix((data, (row_indices, col_indices)), shape=(n_nodes, n_nodes)).astype(np.float32)
 
-    adj_dense = np.asarray(adj_sp.todense())
-    adj_dense[adj_sp.toarray() > 1] = 1
+    adj_dense = adj_sp.todense()
+    adj_dense[adj_sp > 1] = 1
 
     adj = torch.from_numpy(adj_dense).float()
     print('Adjacency created...')
@@ -207,10 +195,20 @@ class DataLoaderS(object):
             self.dat[:, mask] = self.rawdat[:, mask] / max_abs_val[mask]  
             self.dat = (self.rawdat / max_abs_val.view(1, -1)).to(self.device)
     def _split(self, train, valid, test):
-        # 날짜 기반 split을 "강제" (validation=2024, test=2025)
-        if not (hasattr(self, "dates_all") and len(self.dates_all) == self.n):
-            raise ValueError("Date 컬럼(dates_all)이 없어서 2024/2025 고정 split을 할 수 없습니다.")
+        # Prefer calendar-based split if date information is available:
+        # - validation: 2024-01-01 .. 2024-12-31
+        # - test:       2025-01-01 .. 2025-12-31
+        try:
+            if hasattr(self, 'dates_all') and len(self.dates_all) == self.n:
+                idxs_2024 = [i for i, d in enumerate(self.dates_all) if getattr(d, 'year', None) == 2024]
+                idxs_2025 = [i for i, d in enumerate(self.dates_all) if getattr(d, 'year', None) == 2025]
+                if idxs_2024 and idxs_2025:
+                    valid_start = min(idxs_2024)
+                    valid_end = max(idxs_2024) + 1
+                    test_start = min(idxs_2025)
+                    test_end = max(idxs_2025) + 1
 
+<<<<<<< HEAD
         # 월초로 정규화 (혹시 일자 섞여 있어도 월 기준으로 정확히 자름)
         dates_m = [pd.Timestamp(d).to_period("M").to_timestamp() for d in self.dates_all]
 
@@ -235,42 +233,53 @@ class DataLoaderS(object):
         
         valid_set = range(valid_start_with_history, valid_end)
         test_set  = range(test_start_with_history, test_end)
+=======
+                    train_set = range(self.P + self.h - 1, valid_start)
+                    valid_set = range(valid_start, valid_end)
+                    test_set = range(test_start, test_end)
+                else:
+                    # fallback to ratio-based split
+                    train_set = range(self.P + self.h - 1, train)
+                    valid_set = range(train, valid)
+                    test_set = range(valid, self.n)
+            else:
+                train_set = range(self.P + self.h - 1, train)
+                valid_set = range(train, valid)
+                test_set = range(valid, self.n)
+        except Exception:
+            train_set = range(self.P + self.h - 1, train)
+            valid_set = range(train, valid)
+            test_set = range(valid, self.n)
+>>>>>>> parent of 362b15c (x축)
 
         self.train = self._batchify(train_set, self.h)
         self.valid = self._batchify(valid_set, self.h)
         self.test = self._batchify(test_set, self.h)
 
+<<<<<<< HEAD
         # test_window: 1-step 예측용 (입력 P개 + 출력 1개)
         # 12개월 forecast는 evaluate_sliding_window에서 롤링으로 구성됨
         test_window_start = max(0, test_start - self.P)
         test_window_end = test_end
         self.test_window = self.dat[test_window_start:test_window_end, :].clone()
+=======
+        # keep a test window (36 months + P) for sliding evaluation
+        self.test_window = self.dat[-(36 + self.P):, :].clone()
+>>>>>>> parent of 362b15c (x축)
 
     def _batchify(self, idx_set, horizon):
-        n = len(idx_set)
-        # n - self.out_len >= 1이어야 최소 1개 배치 생성 가능
-        # 즉, n > self.out_len이어야 함
-        if n <= self.out_len:
-            # 너무 작으면 경고하되, validation/test는 작을 수 있으므로
-            # 최소 1개 샘플이라도 반환하도록 함
-            print(f"[경고] Split 구간이 작음: n={n}, out_len={self.out_len}. 배치 생성 불가능")
-            # 빈 배치 반환 (또는 에러 발생)
-            if n <= self.out_len:
-                # 1개 샘플이라도 만들기: n=1, out_len이 커도 일단 시도
-                pass
-        
-        num_samples = max(1, n - self.out_len)  # 최소 1개
-        X = torch.zeros((num_samples, self.P, self.m))
-        Y = torch.zeros((num_samples, self.out_len, self.m))
+        n = len(idx_set) 
+        X = torch.zeros((n - self.out_len, self.P, self.m)) 
+        Y = torch.zeros((n - self.out_len, self.out_len, self.m)) 
 
-        for i in range(num_samples):
-            end = idx_set[i] - self.h + 1
-            start = end - self.P
-
+        for i in range(n - self.out_len): 
+            end = idx_set[i] - self.h + 1 
+            start = end - self.P 
+            
             # Optimized: Direct tensor slicing
             X[i, :, :] = self.dat[start:end, :]
-            Y[i, :, :] = self.dat[idx_set[i]:idx_set[i]+self.out_len, :]
-
+            Y[i, :, :] = self.dat[idx_set[i]:idx_set[i]+self.out_len, :] 
+            
         return [X, Y]
 
     def get_batches(self, inputs, targets, batch_size, shuffle=True):
