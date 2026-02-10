@@ -626,8 +626,16 @@ parser.add_argument('--clip', type=int, default=10, help='clip')
 parser.add_argument('--propalpha', type=float, default=0.05, help='prop alpha')
 parser.add_argument('--tanhalpha', type=float, default=3, help='tanh alpha')
 parser.add_argument('--epochs', type=int, default=200, help='')
+parser.add_argument('--patience', type=int, default=15, help='early stopping patience on validation RSE')
+parser.add_argument('--trials', type=int, default=40, help='number of random hyperparameter trials')
+parser.add_argument('--lr_decay', type=float, default=0.98, help='exponential LR decay gamma (set 1.0 to disable)')
 parser.add_argument('--num_split', type=int, default=1, help='number of splits for graphs')
 parser.add_argument('--step_size', type=int, default=100, help='step_size')
+
+# [추가] 롤링 테스트 구간(타깃) 길이(개월).  
+# 기존 코드의 util.py가 36개월을 하드코딩해서 test가 2023~2025로 보였던 문제를 여기서 방지합니다.
+# seq_out_len(=모델이 한 번에 예측하는 길이)과 동일하게 12로 두는 걸 권장.
+parser.add_argument('--test_months', type=int, default=12, help='rolling test target length in months')
 
 
 args = parser.parse_args()
@@ -661,21 +669,25 @@ fixed_seed = 123
 def main(experiment):
 
     set_random_seed(fixed_seed)
-
-    gcn_depths = [1, 2, 3]
-    lrs = [0.0005, 0.0008, 0.0001, 0.0003]
-    convs = [4, 8, 16]
-    ress = [16, 32, 64]
-    skips = [64, 128, 256]
-    ends = [256, 512, 1024]
-    layers = [1, 2]
-    ks = [20, 30, 40, 50, 60, 70, 80, 90, 100]
-    dropouts = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
-    dilation_exs = [1, 2, 3]
-    node_dims = [20, 30, 40, 50, 60, 70, 80, 90, 100]
-    prop_alphas = [0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.6, 0.8]
-    tanh_alphas = [0.05, 0.1, 0.5, 1, 2, 3, 5, 7, 9]
-
+    # -----------------------------
+    # Hyper-parameter search space (RSE 튜닝용으로 현실적인 범위로 정리)
+    # - 너무 큰 dropout / 너무 큰 채널은 성능 저하 + 불안정 유발 가능성이 높아서 제거
+    # - FX 예측은 과적합보다 "학습 안정성"이 더 중요해서 LR/채널 폭을 적당히 제한
+    # -----------------------------
+    gcn_depths   = [1, 2, 3]
+    lrs          = [1e-3, 8e-4, 5e-4, 3e-4, 1e-4]
+    convs        = [16, 32]
+    ress         = [32, 64]
+    skips        = [64, 128]
+    ends         = [128, 256]
+    layers       = [2, 3, 4]
+    # k(subgraph_size)는 실행 중 num_nodes로 클램프됨
+    ks           = [10, 15, 20, 30]
+    dropouts     = [0.0, 0.1, 0.2, 0.3]
+    dilation_exs = [1, 2]
+    node_dims    = [16, 32, 40]
+    prop_alphas  = [0.05, 0.1, 0.2]
+    tanh_alphas  = [1, 2, 3, 5]
     best_val = 10000000
     best_rse = 10000000
     best_rae = 10000000
@@ -704,6 +716,21 @@ def main(experiment):
         device = torch.device(args.device if torch.cuda.is_available() else "cpu")
         
         Data = DataLoaderS(args.data, 0.86, 0.07, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
+
+        # ========================================================
+        # [핵심 수정] 롤링 테스트 구간을 "최근 1년(12개월)"로 강제
+        # - 원본 util.py의 test_window가 (36 + P)로 고정돼 있어서
+        #   데이터가 2025-12로 끝나면 테스트 플롯이 2023-01~2025-12로 보였음
+        # - 여기서는 (test_months + P)만 남겨서, 예측 타깃이 정확히 2025-01~2025-12가 되게 함
+        #   (P=10이면 히스토리: 2024-03~2024-12, 타깃: 2025-01~2025-12)
+        # ========================================================
+        if hasattr(Data, 'dat') and hasattr(Data, 'P'):
+            need = int(args.test_months) + int(Data.P)
+            if need > 0 and Data.dat.size(0) >= need:
+                Data.test_window = Data.dat[-need:, :].clone()
+            else:
+                # fallback: 기존 test_window 사용
+                pass
 
         # [중요 수정] 실제 데이터에 맞춰 노드 개수 재설정 (하드코딩된 142 -> 32로 자동 변경)
         # Data.train[0] 형태가 (Samples, Time, Nodes)인 경우 2번 인덱스가 Node 수입니다.
@@ -746,72 +773,73 @@ def main(experiment):
             lr,
             args.clip,
             weight_decay=args.weight_decay,
-            lr_decay=None
+            lr_decay=(args.lr_decay if (args.lr_decay is not None and 0.0 < args.lr_decay < 1.0) else None)
         )
 
-        es_counter = 0
-        patience = 50
+                # ---- Early stopping (각 trial 내부 기준) ----
+        trial_best_rse = float('inf')
+        no_improve = 0
         epoch_times = []
         try:
             for epoch in range(1, args.epochs + 1):
-                #es_counter += 1
-
                 epoch_start_time = time.time()
                 train_loss = train(Data, Data.train[0], Data.train[1], model, criterion, optim, args.batch_size)
-                val_loss, val_rae, val_corr, val_smape = evaluate(Data, Data.valid[0], Data.valid[1], model, evaluateL2, evaluateL1,
-                                                                  args.batch_size, False)
+                val_rse, val_rae, val_corr, val_smape = evaluate(
+                    Data, Data.valid[0], Data.valid[1], model, evaluateL2, evaluateL1, args.batch_size, False
+                )
                 elapsed_time = time.time() - epoch_start_time
                 epoch_times.append(elapsed_time)
-                
-                # 평균 시간 계산 및 남은 시간 예측
-                avg_time = sum(epoch_times) / len(epoch_times)
-                remaining_epochs = args.epochs - epoch
+        
+                # 진행 상황 표시 (남은 시간 추정)
+                avg_time = sum(epoch_times) / max(1, len(epoch_times))
+                remaining_epochs = (args.epochs - epoch)
                 estimated_remaining_time = avg_time * remaining_epochs
-                
-                # 전체 진행 바 (총 100번 중 몇 번 완료)
+        
                 overall_bar_length = 20
-                overall_filled = int(overall_bar_length * epoch / args.epochs)
+                overall_filled = int(overall_bar_length * epoch / max(1, args.epochs))
                 overall_bar = '█' * overall_filled + '░' * (overall_bar_length - overall_filled)
-                overall_percentage = (epoch / args.epochs) * 100
-                
-                # 현재 에포크 진행 바 (현재 에포크는 완료되었으므로 100%)
-                epoch_bar_length = 20
-                epoch_bar = '█' * epoch_bar_length  # 완료됨
-                
-                print(f"\r전체[{overall_bar}] {epoch}/100 | 남은 {estimated_remaining_time:.0f}s | Loss: {train_loss:.2f} | RSE: {val_loss:.2f} | RAE: {val_rae:.2f}", end='', flush=True)
-                
-                sum_loss = val_loss + val_rae - val_corr
-                if (not math.isnan(val_corr)) and val_loss < best_rse:
-                    # 모델 저장
+        
+                print(
+                    f"\r전체[{overall_bar}] {epoch}/{args.epochs} | 남은 {estimated_remaining_time:.0f}s | "
+                    f"Loss: {train_loss:.4f} | ValRSE: {val_rse:.4f} | ValRAE: {val_rae:.4f}",
+                    end='',
+                    flush=True
+                )
+        
+                # trial 내부 early-stop 기준 업데이트
+                if (not math.isnan(val_corr)) and (val_rse < trial_best_rse - 1e-6):
+                    trial_best_rse = val_rse
+                    no_improve = 0
+                else:
+                    no_improve += 1
+        
+                # ---- 전역(best) 업데이트: 여기서만 모델 저장 ----
+                sum_loss = val_rse + val_rae - (val_corr if not math.isnan(val_corr) else 0.0)
+                if (not math.isnan(val_corr)) and (val_rse < best_rse):
                     save_path = Path(args.save)
                     save_path.parent.mkdir(parents=True, exist_ok=True)
-                    
                     with open(save_path, 'wb') as f:
                         torch.save(model, f)
-                    
+        
                     best_val = sum_loss
-                    best_rse = val_loss
+                    best_rse = val_rse
                     best_rae = val_rae
                     best_corr = val_corr
                     best_smape = val_smape
-
+        
                     best_hp = [gcn_depth, lr, conv, res, skip, end, k, dropout, dilation_ex, node_dim, prop_alpha, tanh_alpha, layer, epoch]
-
-                    es_counter = 0
-
-                    test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(Data, Data.test_window, model, evaluateL2, evaluateL1,
-                                                                                        args.seq_in_len, False, horizon=args.horizon)
+        
+                    # 테스트(롤링) 성능도 바로 기록
+                    test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(
+                        Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, horizon=args.horizon
+                    )
                     best_test_rse = test_acc
                     best_test_corr = test_corr
-                else:
-                    es_counter += 1
-                    
-                if es_counter >= patience:
-                    print(f"\n\n[Early Stopping] {patience} 에포크 동안 개선이 없어 중단합니다.")
+        
+                # ---- trial early stop ----
+                if no_improve >= args.patience:
+                    print(f"\n[EarlyStop] trial={q}: {args.patience} epoch 동안 ValRSE 개선 없음 → 중단")
                     break
-
-        except KeyboardInterrupt:
-            print(f"\n\nTraining interrupted")
 
         except KeyboardInterrupt:
             print(f"\n\nTraining interrupted")
