@@ -500,13 +500,9 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
     rae = rae.item()
 
     predict = predict.data.cpu().numpy()
-<<<<<<< Updated upstream
-    Ytest = test.data.cpu().numpy()
-=======
     Ytest = Ytest.data.cpu().numpy()
     variance = variance.data.cpu().numpy()
     confidence_95 = confidence_95.data.cpu().numpy()
->>>>>>> Stashed changes
     sigma_p = (predict).std(axis=0)
     sigma_g = (Ytest).std(axis=0)
     mean_p = predict.mean(axis=0)
