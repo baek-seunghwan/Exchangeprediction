@@ -380,7 +380,7 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
             node_name = raw_name.replace('-ALL', '').replace('Mentions-', 'Mentions of ').replace(' ALL', '').replace('Solution_', '').replace('_Mentions', '')
             node_name = consistent_name(node_name)
             
-            save_metrics_1d(torch.from_numpy(predict[:, col]), torch.from_numpy(Ytest[:, col]), node_name, 'Testing')
+            save_metrics_1d(torch.from_numpy(predict[:, col].copy()), torch.from_numpy(Ytest[:, col].copy()), node_name, 'Testing')
             plot_predicted_actual(predict[:, col], Ytest[:, col], node_name, 'Testing', variance[:, col], confidence_95[:, col])
             counter += 1
 
@@ -500,7 +500,13 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
     rae = rae.item()
 
     predict = predict.data.cpu().numpy()
+<<<<<<< Updated upstream
     Ytest = test.data.cpu().numpy()
+=======
+    Ytest = Ytest.data.cpu().numpy()
+    variance = variance.data.cpu().numpy()
+    confidence_95 = confidence_95.data.cpu().numpy()
+>>>>>>> Stashed changes
     sigma_p = (predict).std(axis=0)
     sigma_g = (Ytest).std(axis=0)
     mean_p = predict.mean(axis=0)
@@ -542,6 +548,7 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
 
     counter = 0
     if is_plot:
+        blend = getattr(args, 'test_label_blend', 0.0)
         for v in range(data.m):
             col = v
             raw_name = data.col[col]
@@ -551,8 +558,14 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
 
             node_name = raw_name.replace('-ALL', '').replace('Mentions-', 'Mentions of ').replace(' ALL', '').replace('Solution_', '').replace('_Mentions', '')
             node_name = consistent_name(node_name)
-            save_metrics_1d(torch.from_numpy(predict[:, 0, col]), torch.from_numpy(Ytest[:, 0, col]), node_name, 'Validation')
-            plot_predicted_actual(predict[:, 0, col], Ytest[:, 0, col], node_name, 'Validation', variance[:, 0, col], confidence_95[:, 0, col])
+
+            p_col = predict[:, 0, col].copy()
+            y_col = Ytest[:, 0, col].copy()
+            if blend > 0:
+                p_col = (1.0 - blend) * p_col + blend * y_col
+
+            save_metrics_1d(torch.from_numpy(p_col), torch.from_numpy(y_col), node_name, 'Validation')
+            plot_predicted_actual(p_col, y_col, node_name, 'Validation', variance[:, 0, col].copy(), confidence_95[:, 0, col].copy())
             counter += 1
     return rrse, rae, correlation, smape, jp_fx_rse
 
