@@ -24,9 +24,12 @@ def create_columns(file_path):
         except StopIteration:
             return []
 
-def build_predefined_adj(columns, graph_file='data/graph.csv'):
+def build_predefined_adj(columns, graph_file=None):
     # Initialize an empty dictionary
     graph = defaultdict(list)
+
+    if graph_file is None:
+        graph_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'graph.csv')
 
     # Read the graph CSV file
     try:

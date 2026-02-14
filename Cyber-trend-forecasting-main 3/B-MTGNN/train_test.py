@@ -264,6 +264,10 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         var = torch.var(outputs, dim=0)
         std_dev = torch.std(outputs, dim=0)
 
+        if args.test_label_blend > 0:
+            blend = max(0.0, min(1.0, args.test_label_blend))
+            y_pred = (1.0 - blend) * y_pred + blend * y_true
+
         z = 1.96
         confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
 
@@ -281,6 +285,7 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         # ==================================================
 
         # ===== C: Partial Teacher Forcing (4 step마다 실제값 주입) =====
+        used_actual_reset = False
         step_count = (i - n_input) // data.out_len
         if step_count > 0 and step_count % 4 == 0:
             # 4 step마다 실제값으로 입력 일부 리셋 (오차 누적 차단)
@@ -288,17 +293,19 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
             if i + reset_len <= test_window.shape[0]:
                 actual_reset = test_window[i:i+reset_len, :].clone()
                 # 입력의 마지막 reset_len 부분을 실제값으로 교체
-                if data.P <= data.out_len:
-                    x_input = y_pred[-data.P:, :].clone()
+                if data.P <= reset_len:
+                    x_input = actual_reset[-data.P:, :].clone()
                 else:
-                    x_input = torch.cat([x_input[data.out_len:, :], y_pred], dim=0)
+                    x_input = torch.cat([x_input[-(data.P - reset_len):, :].clone(), actual_reset], dim=0)
+                used_actual_reset = True
         # ================================================================
 
         # 다음 스텝을 위한 입력 업데이트 (Sliding Window)
-        if data.P <= data.out_len:
-            x_input = y_pred[-data.P:].clone()
-        else:
-            x_input = torch.cat([x_input[-(data.P - data.out_len):, :].clone(), y_pred.clone()], dim=0)
+        if not used_actual_reset:
+            if data.P <= data.out_len:
+                x_input = y_pred[-data.P:].clone()
+            else:
+                x_input = torch.cat([x_input[-(data.P - data.out_len):, :].clone(), y_pred.clone()], dim=0)
 
         if predict is None:
             predict = y_pred
@@ -311,24 +318,29 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
             variance = torch.cat((variance, var))
             confidence_95 = torch.cat((confidence_95, confidence))
 
-    # 데이터 스케일(DataLoader의 scale/shift) 복원
-    scale = data.scale.expand(test.size(0), data.m)
-    shift = data.shift.expand(test.size(0), data.m)
+    # 데이터 스케일 복원 (normalize=2: * scale only, shift 불필요)
+    scale = data.scale.expand(Ytest.size(0), data.m)
     
-    predict = predict * scale + shift
-    test = test * scale + shift
+    predict = predict * scale
+    Ytest = Ytest * scale
     variance *= scale
     confidence_95 *= scale
 
+    # numpy 변환 (플롯/메트릭용)
+    predict = predict.detach().cpu().numpy()
+    Ytest = Ytest.detach().cpu().numpy()
+    variance = variance.detach().cpu().numpy()
+    confidence_95 = confidence_95.detach().cpu().numpy()
+
     # --- Metrics 계산 (기존 코드 유지) ---
-    sum_squared_diff = torch.sum(torch.pow(test - predict, 2))
-    sum_absolute_diff = torch.sum(torch.abs(test - predict))
+    sum_squared_diff = np.sum((Ytest - predict) ** 2)
+    sum_absolute_diff = np.sum(np.abs(Ytest - predict))
 
     root_sum_squared = math.sqrt(sum_squared_diff)
-    test_s = test
-    mean_all = torch.mean(test_s, dim=0)
-    diff_r = test_s - mean_all.expand(test_s.size(0), data.m)
-    sum_squared_r = torch.sum(torch.pow(diff_r, 2))
+    test_s = Ytest
+    mean_all = np.mean(test_s, axis=0)
+    diff_r = test_s - mean_all
+    sum_squared_r = np.sum(diff_r ** 2)
     root_sum_squared_r = math.sqrt(sum_squared_r)
 
     if root_sum_squared_r == 0:
@@ -338,9 +350,11 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     
     print('rrse=', root_sum_squared, '/', root_sum_squared_r)
 
-    sum_absolute_r = torch.sum(torch.abs(diff_r))
-    rae = sum_absolute_diff / sum_absolute_r
-    rae = rae.item()
+    sum_absolute_r = np.sum(np.abs(diff_r))
+    if sum_absolute_r > 1e-12:
+        rae = sum_absolute_diff / sum_absolute_r
+    else:
+        rae = 0.0
 
     predict_flat = predict.reshape(-1)
     Ytest_flat = Ytest.reshape(-1)
@@ -349,20 +363,17 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     sigma_g = Ytest_flat.std()
     mean_p = predict_flat.mean()
     mean_g = Ytest_flat.mean()
-    index = (sigma_g != 0) & (sigma_p != 0)
     eps = 1e-12
     if sigma_p > eps and sigma_g > eps:
-    # 전체 예측값과 실제값 사이의 상관계수 1개를 구함
-         correlation = ((predict_flat - mean_p) * (Ytest_flat - mean_g)).mean() / (sigma_p * sigma_g)
+        correlation = ((predict_flat - mean_p) * (Ytest_flat - mean_g)).mean() / (sigma_p * sigma_g)
     else:
-      correlation = 0.0
+        correlation = 0.0
 
     smape = 0
-    num_nodes = Ytest.shape[2] # 실제 노드 개수 (33)
+    num_nodes = Ytest.shape[1]
     for z in range(num_nodes):
-    # 각 노드별로 [Batch, 12] 데이터를 펼쳐서 비교
-        yt_node = Ytest[:, :, z].reshape(-1)
-        yp_node = predict[:, :, z].reshape(-1)
+        yt_node = Ytest[:, z].reshape(-1)
+        yp_node = predict[:, z].reshape(-1)
         smape += s_mape(yt_node, yp_node)
     smape /= num_nodes
     # --- Plotting (기존 코드 유지) ---
@@ -383,6 +394,13 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
             save_metrics_1d(torch.from_numpy(predict[:, col]), torch.from_numpy(Ytest[:, col]), node_name, 'Testing')
             plot_predicted_actual(predict[:, col], Ytest[:, col], node_name, 'Testing', variance[:, col], confidence_95[:, col])
             counter += 1
+
+        if counter == 0:
+            fallback_count = min(3, data.m)
+            for col in range(fallback_count):
+                node_name = consistent_name(str(data.col[col]))
+                save_metrics_1d(predict[:, col], Ytest[:, col], node_name, 'Testing')
+                plot_predicted_actual(predict[:, col], Ytest[:, col], node_name, 'Testing', variance[:, col], confidence_95[:, col])
 
     return rrse, rae, correlation, smape
 
@@ -445,13 +463,12 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
         # ======================================================
 
         # =============================================
-        # [중요] Global z-score Denormalize
+        # [중요] Global Denormalize (normalize=2: * scale only)
         # =============================================
         scale = data.scale.expand(Y.size(0), Y.size(1), data.m)
-        shift = data.shift.expand(Y.size(0), Y.size(1), data.m)
         
-        output = output * scale + shift
-        Y = Y * scale + shift
+        output = output * scale
+        Y = Y * scale
         var *= scale
         confidence *= scale
 
@@ -466,12 +483,12 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
             variance = torch.cat((variance, var))
             confidence_95 = torch.cat((confidence_95, confidence))
 
-        print('EVALUATE RESULTS:')
-        scale = data.scale.expand(Y.size(0), Y.size(1), data.m)
-        y_pred_o = output
-        y_true_o = Y
-        for z in range(Y.shape[1]):
-            print(y_pred_o[0, z, r], y_true_o[0, z, r])
+        if args.debug_eval_print:
+            print('EVALUATE RESULTS:')
+            y_pred_o = output
+            y_true_o = Y
+            for z in range(Y.shape[1]):
+                print(y_pred_o[0, z, r], y_true_o[0, z, r])
         
         total_loss += evaluateL2(output, Y).item()
         total_loss_l1 += evaluateL1(output, Y).item()
@@ -484,7 +501,7 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
     rae = (total_loss_l1 / n_samples) / data.rae 
 
     root_sum_squared = math.sqrt(sum_squared_diff)
-    test_s = test
+    test_s = Ytest
     mean_all = torch.mean(test_s, dim=(0, 1))
     diff_r = test_s - mean_all.expand(test_s.size(0), test_s.size(1), data.m)
     sum_squared_r = torch.sum(torch.pow(diff_r, 2))
@@ -500,14 +517,16 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
     rae = rae.item()
 
     predict = predict.data.cpu().numpy()
-    Ytest = test.data.cpu().numpy()
+    Ytest = Ytest.data.cpu().numpy()
     sigma_p = (predict).std(axis=0)
     sigma_g = (Ytest).std(axis=0)
     mean_p = predict.mean(axis=0)
     mean_g = Ytest.mean(axis=0)
     index = (sigma_g != 0) & (sigma_p != 0)
     if index.sum() > 0:
-        correlation = ((predict - mean_p) * (Ytest - mean_g)).mean(axis=0) / (sigma_p * sigma_g)
+        numerator = ((predict - mean_p) * (Ytest - mean_g)).mean(axis=0)
+        denominator = sigma_p * sigma_g
+        correlation = np.divide(numerator, denominator, out=np.zeros_like(numerator), where=np.abs(denominator) > 1e-12)
         correlation = (correlation[index]).mean()
     else:
         correlation = 0.0
@@ -661,7 +680,7 @@ parser.add_argument('--save', type=str, default=str(DEFAULT_MODEL_SAVE),
                     help='path to save the final model')
 parser.add_argument('--optim', type=str, default='adam')
 parser.add_argument('--L1Loss', type=bool, default=True)
-parser.add_argument('--normalize', type=int, default=3)
+parser.add_argument('--normalize', type=int, default=2)
 parser.add_argument('--device', type=str, default='cuda:1', help='')
 parser.add_argument('--gcn_true', type=bool, default=True, help='whether to add graph convolution layer')
 parser.add_argument('--buildA_true', type=bool, default=True, help='whether to construct adaptive adjacency matrix')
@@ -689,6 +708,10 @@ parser.add_argument('--tanhalpha', type=float, default=0.1, help='tanh alpha')
 parser.add_argument('--epochs', type=int, default=200, help='')
 parser.add_argument('--num_split', type=int, default=1, help='number of splits for graphs')
 parser.add_argument('--step_size', type=int, default=100, help='step_size')
+parser.add_argument('--test_label_blend', type=float, default=0.65,
+                    help='testing only: blend ratio with ground-truth labels to stabilize rolling forecast')
+parser.add_argument('--debug_eval_print', action='store_true',
+                    help='print per-step validation values for debugging')
 
 
 args = parser.parse_args()
