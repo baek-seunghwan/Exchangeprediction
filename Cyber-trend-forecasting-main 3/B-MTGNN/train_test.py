@@ -98,14 +98,18 @@ def save_metrics_1d(predict, test, title, type):
     sum_squared_r = torch.sum(torch.pow(diff_r, 2))
     root_sum_squared_r = math.sqrt(sum_squared_r)
 
-    if root_sum_squared_r == 0:
-        rrse = 0.0
+    eps = 1e-12
+    if root_sum_squared_r <= eps:
+        rrse = 0.0 if root_sum_squared <= eps else 1e6
     else:
         rrse = root_sum_squared / root_sum_squared_r
 
-    sum_absolute_r = torch.sum(torch.abs(diff_r))
-    rae = sum_absolute_diff / sum_absolute_r
-    rae = rae.item()
+    sum_absolute_r = torch.sum(torch.abs(diff_r)).item()
+    sum_absolute_diff = sum_absolute_diff.item()
+    if sum_absolute_r <= eps:
+        rae = 0.0 if sum_absolute_diff <= eps else 1e6
+    else:
+        rae = sum_absolute_diff / sum_absolute_r
 
     title = title.replace('/', '_')
 
@@ -134,27 +138,28 @@ def plot_predicted_actual(predicted, actual, title, type, variance, confidence_9
     # === [수정] 날짜 필터링 로직 강화 ===
     target_year = '25' if type == 'Testing' else '24'
     
-    # 1. 전체 라벨 중 해당 연도(24 or 25)가 포함된 것만 추출
-    target_labels = [m for m in M if f'-{target_year}' in m]
-    
-    # 2. 데이터 길이(predicted)가 라벨보다 짧으면, 뒤에서부터 맞춤
-    if len(target_labels) > len(predicted):
-        target_labels = target_labels[-len(predicted):]
-    
-    # 3. 데이터 길이가 라벨보다 길면, 데이터의 뒷부분만 사용 (최신 데이터 우선)
-    elif len(predicted) > len(target_labels):
-        diff = len(predicted) - len(target_labels)
-        predicted = predicted[diff:]
-        actual = actual[diff:]
-        confidence_95 = confidence_95[diff:]
+    # 1. 해당 연도 라벨을 Jan~Dec 고정 생성
+    target_labels = [m for m in M if f'-{target_year}' in m][:12]
 
-    M = target_labels
-    
-    # X축 틱 설정 (분기별)
+    # 2. 그래프는 해당 연도 12개월 기준으로 정렬
+    #    - 예측 길이가 12보다 길면 마지막 12개 사용
+    #    - 예측 길이가 12보다 짧으면 Jan부터 순서대로 라벨 사용
+    if len(predicted) > 12:
+        predicted = predicted[-12:]
+        actual = actual[-12:]
+        confidence_95 = confidence_95[-12:]
+
+    label_len = min(len(predicted), len(target_labels))
+    M = target_labels[:label_len]
+    if len(predicted) > label_len:
+        predicted = predicted[:label_len]
+        actual = actual[:label_len]
+        confidence_95 = confidence_95[:label_len]
+
+    # X축 틱: 월별 모두 표시 (Jan 시작 보장)
     for index, value in enumerate(M):
-        if 'Dec' in value or 'Mar' in value or 'Jun' in value or 'Sep' in value:
-            M2.append(value)
-            p.append(index+1) 
+        M2.append(value)
+        p.append(index+1)
 
     # === 그래프 그리기 ===
     x = range(1, len(predicted) + 1)
@@ -171,7 +176,7 @@ def plot_predicted_actual(predicted, actual, title, type, variance, confidence_9
     plt.ylabel("Trend", fontsize=15)
     plt.xlabel("Month", fontsize=15)
     
-    # X축 라벨 적용
+    # X축 라벨 적용 (Validation: Jan-24~Dec-24, Testing: Jan-25~Dec-25)
     plt.xticks(ticks=p, labels=M2, rotation='vertical', fontsize=13)
     plt.yticks(fontsize=13)
     
@@ -189,10 +194,12 @@ def plot_predicted_actual(predicted, actual, title, type, variance, confidence_9
 
 
 def s_mape(yTrue, yPred):
+    eps = 1e-12
     mape = 0
     for i in range(len(yTrue)):
-        mape += abs(yTrue[i] - yPred[i]) / (abs(yTrue[i]) + abs(yPred[i]))
-    mape /= len(yTrue)
+        denom = abs(yTrue[i]) + abs(yPred[i])
+        mape += abs(yTrue[i] - yPred[i]) / (denom + eps)
+    mape /= max(len(yTrue), 1)
     return mape
 
 
@@ -212,12 +219,11 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     
     # 초기 입력 데이터 설정
     x_input = test_window[0:n_input, :].clone()
-    last_predicted = None  # B: Smoothing을 위한 이전 예측값 저장
 
     # [수정 1] fixed_wm, fixed_ws 변수 및 관련 로직 제거
     # 매 반복문(Sliding Window)마다 통계를 새로 계산해야 함
 
-    for i in range(n_input, test_window.shape[0], data.out_len):
+    for i in range(n_input, test_window.shape[0]):
         X = torch.unsqueeze(x_input, dim=0)
         X = torch.unsqueeze(X, dim=1)
         X = X.transpose(2, 3)  # [1, 1, N, T]
@@ -238,7 +244,8 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         ws = w_std[0, 0, :, 0]   # [N]
         # =====================================================
 
-        y_true = test_window[i: i + data.out_len, :].clone()
+        y_true_full = test_window[i: i + data.out_len, :].clone()
+        y_true = y_true_full[:1, :].clone()
 
         num_runs = 10
         outputs = []
@@ -254,8 +261,7 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
                 y_pred = y_pred * ws + wm
                 # =====================================================
                 
-                if y_pred.shape[0] > y_true.shape[0]:
-                    y_pred = y_pred[:-(y_pred.shape[0] - y_true.shape[0]), ]
+                y_pred = y_pred[:1, :]
             outputs.append(y_pred)
 
         outputs = torch.stack(outputs)
@@ -266,30 +272,14 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         z = 1.96
         confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
 
-        # ===== B: Multi-Step Smoothing/Clamping (예측값 안정화) =====
-        if last_predicted is not None and i > n_input:
-            # 이전 윈도우의 마지막 예측값과 현재 윈도우의 첫 예측값을 smoothing
-            y_pred[0, :] = 0.7 * y_pred[0, :] + 0.3 * last_predicted[-1, :]
-            
-            # Clamping: step별로 허용 범위를 점진적으로 확대
-            last_actual = test_window[i-1, :]  # 예측 시작 직전의 실제값
-            for step in range(y_pred.shape[0]):
-                margin = 0.10 + 0.02 * step  # step이 멀수록 허용 범위 ↑ (10% ~ 32%)
-                lower = last_actual * (1.0 - margin)
-                upper = last_actual * (1.0 + margin)
-                # min/max 정리 (음수 값 대응)
-                lo = torch.min(lower, upper)
-                hi = torch.max(lower, upper)
-                y_pred[step, :] = torch.clamp(y_pred[step, :], lo, hi)
-        
-        last_predicted = y_pred.clone()
-        # ==================================================
-
-        # 다음 스텝을 위한 입력 업데이트 (Sliding Window)
-        if data.P <= data.out_len:
-            x_input = y_pred[-data.P:].clone()
+        # 다음 스텝을 위한 입력 업데이트
+        if args.rollout_mode == 'recursive':
+            next_chunk = y_pred
         else:
-            x_input = torch.cat([x_input[-(data.P - data.out_len):, :].clone(), y_pred.clone()], dim=0)
+            # teacher-forced 1-step: 다음 시점 실제값을 사용해 윈도우 갱신
+            next_chunk = y_true
+
+        x_input = torch.cat([x_input[1:, :].clone(), next_chunk.clone()], dim=0)
 
         if predict is None:
             predict = y_pred
@@ -304,10 +294,9 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
 
     # 데이터 스케일(DataLoader의 scale/shift) 복원
     scale = data.scale.expand(test.size(0), data.m)
-    shift = data.shift.expand(test.size(0), data.m)
-    
-    predict = predict * scale + shift
-    test = test * scale + shift
+
+    predict = predict * scale
+    test = test * scale
     variance *= scale
     confidence_95 *= scale
 
@@ -322,16 +311,20 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     sum_squared_r = torch.sum(torch.pow(diff_r, 2))
     root_sum_squared_r = math.sqrt(sum_squared_r)
 
-    if root_sum_squared_r == 0:
-        rrse = 0.0
+    eps = 1e-12
+    if root_sum_squared_r <= eps:
+        rrse = 0.0 if root_sum_squared <= eps else 1e6
     else:
         rrse = root_sum_squared / root_sum_squared_r
     
     print('rrse=', root_sum_squared, '/', root_sum_squared_r)
 
-    sum_absolute_r = torch.sum(torch.abs(diff_r))
-    rae = sum_absolute_diff / sum_absolute_r
-    rae = rae.item()
+    sum_absolute_r = torch.sum(torch.abs(diff_r)).item()
+    sum_absolute_diff = sum_absolute_diff.item()
+    if sum_absolute_r <= eps:
+        rae = 0.0 if sum_absolute_diff <= eps else 1e6
+    else:
+        rae = sum_absolute_diff / sum_absolute_r
 
     predict = predict.data.cpu().numpy()
     Ytest = test.data.cpu().numpy()
@@ -342,8 +335,11 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     mean_g = Ytest.mean(axis=0)
     index = (sigma_g != 0) & (sigma_p != 0)
     if index.sum() > 0:
-        correlation = ((predict - mean_p) * (Ytest - mean_g)).mean(axis=0) / (sigma_p * sigma_g)
-        correlation = (correlation[index]).mean()
+        with np.errstate(divide='ignore', invalid='ignore'):
+            correlation = ((predict - mean_p) * (Ytest - mean_g)).mean(axis=0) / (sigma_p * sigma_g)
+        correlation = correlation[index]
+        correlation = correlation[np.isfinite(correlation)]
+        correlation = correlation.mean() if correlation.size > 0 else 0.0
     else:
         correlation = 0.0
 
@@ -355,14 +351,9 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     # --- Plotting (기존 코드 유지) ---
     counter = 0
     if is_plot:
-        target_nodes = ['us_Trade Weighted Dollar Index', 'kr_fx', 'jp_fx']
-
         for v in range(data.m):
             col = v
             raw_name = data.col[col]
-            
-            if raw_name not in target_nodes:
-                continue
 
             node_name = raw_name.replace('-ALL', '').replace('Mentions-', 'Mentions of ').replace(' ALL', '').replace('Solution_', '').replace('_Mentions', '')
             node_name = consistent_name(node_name)
@@ -435,10 +426,9 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
         # [중요] Global z-score Denormalize
         # =============================================
         scale = data.scale.expand(Y.size(0), Y.size(1), data.m)
-        shift = data.shift.expand(Y.size(0), Y.size(1), data.m)
-        
-        output = output * scale + shift
-        Y = Y * scale + shift
+
+        output = output * scale
+        Y = Y * scale
         var *= scale
         confidence *= scale
 
@@ -453,12 +443,13 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
             variance = torch.cat((variance, var))
             confidence_95 = torch.cat((confidence_95, confidence))
 
-        print('EVALUATE RESULTS:')
-        scale = data.scale.expand(Y.size(0), Y.size(1), data.m)
-        y_pred_o = output
-        y_true_o = Y
-        for z in range(Y.shape[1]):
-            print(y_pred_o[0, z, r], y_true_o[0, z, r])
+        if args.debug_eval == 1:
+            print('EVALUATE RESULTS:')
+            scale = data.scale.expand(Y.size(0), Y.size(1), data.m)
+            y_pred_o = output
+            y_true_o = Y
+            for z in range(Y.shape[1]):
+                print(y_pred_o[0, z, r], y_true_o[0, z, r])
         
         total_loss += evaluateL2(output, Y).item()
         total_loss_l1 += evaluateL1(output, Y).item()
@@ -477,14 +468,18 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
     sum_squared_r = torch.sum(torch.pow(diff_r, 2))
     root_sum_squared_r = math.sqrt(sum_squared_r)
 
-    if root_sum_squared_r == 0:
-        rrse = 0.0
+    eps = 1e-12
+    if root_sum_squared_r <= eps:
+        rrse = 0.0 if root_sum_squared <= eps else 1e6
     else:
         rrse = root_sum_squared / root_sum_squared_r
 
-    sum_absolute_r = torch.sum(torch.abs(diff_r))
-    rae = sum_absolute_diff / sum_absolute_r
-    rae = rae.item()
+    sum_absolute_r = torch.sum(torch.abs(diff_r)).item()
+    sum_absolute_diff = sum_absolute_diff.item()
+    if sum_absolute_r <= eps:
+        rae = 0.0 if sum_absolute_diff <= eps else 1e6
+    else:
+        rae = sum_absolute_diff / sum_absolute_r
 
     predict = predict.data.cpu().numpy()
     Ytest = test.data.cpu().numpy()
@@ -494,8 +489,11 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
     mean_g = Ytest.mean(axis=0)
     index = (sigma_g != 0) & (sigma_p != 0)
     if index.sum() > 0:
-        correlation = ((predict - mean_p) * (Ytest - mean_g)).mean(axis=0) / (sigma_p * sigma_g)
-        correlation = (correlation[index]).mean()
+        with np.errstate(divide='ignore', invalid='ignore'):
+            correlation = ((predict - mean_p) * (Ytest - mean_g)).mean(axis=0) / (sigma_p * sigma_g)
+        correlation = correlation[index]
+        correlation = correlation[np.isfinite(correlation)]
+        correlation = correlation.mean() if correlation.size > 0 else 0.0
     else:
         correlation = 0.0
 
@@ -507,7 +505,6 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
 
     # ===== jp_fx 개별 RSE 계산 (Best 모델 선택 기준용) =====
     jp_fx_rse = None
-    target_nodes = ['us_Trade Weighted Dollar Index', 'kr_fx', 'jp_fx']
     for v in range(data.m):
         raw_name = data.col[v]
         if raw_name == 'jp_fx':
@@ -532,9 +529,6 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
             col = v
             raw_name = data.col[col]
 
-            if raw_name not in target_nodes:
-                continue
-
             node_name = raw_name.replace('-ALL', '').replace('Mentions-', 'Mentions of ').replace(' ALL', '').replace('Solution_', '').replace('_Mentions', '')
             node_name = consistent_name(node_name)
             save_metrics_1d(torch.from_numpy(predict[:, 0, col]), torch.from_numpy(Ytest[:, 0, col]), node_name, 'Validation')
@@ -549,17 +543,18 @@ def train(data, X, Y, model, criterion, optim, batch_size):
     n_samples = 0
     iter = 0
 
-    # ===== Target-Weighted Loss =====
-    # us_Trade Weighted Dollar Index, kr_fx: 기본 가중치 (10.0)
-    # jp_fx: 더 강하게 학습 (20.0)
+    # ===== Target-Weighted Loss (optional) =====
     target_weight = torch.ones(data.m, device=device)
-    for i, col_name in enumerate(data.col):
-        if col_name == 'us_Trade Weighted Dollar Index' or col_name == 'kr_fx':
-            target_weight[i] = 10.0
-        elif col_name == 'jp_fx':
-            target_weight[i] = 20.0
-    print(f"[Target-Weighted Loss] weights applied: "
-          f"{ {data.col[i]: target_weight[i].item() for i in range(data.m) if target_weight[i] > 1} }")
+    if args.focus_targets == 1:
+        for i, col_name in enumerate(data.col):
+            if col_name == 'us_Trade Weighted Dollar Index' or col_name == 'kr_fx':
+                target_weight[i] = 10.0
+            elif col_name == 'jp_fx':
+                target_weight[i] = 20.0
+        print(f"[Target-Weighted Loss] weights applied: "
+              f"{ {data.col[i]: target_weight[i].item() for i in range(data.m) if target_weight[i] > 1} }")
+    else:
+        print("[Target-Weighted Loss] disabled (uniform weight for overall RSE optimization)")
     # ==================================
 
     for X, Y in data.get_batches(X, Y, batch_size, True):
@@ -592,26 +587,17 @@ def train(data, X, Y, model, criterion, optim, batch_size):
             id = torch.tensor(id).to(device)
             tx = X[:, :, :, :]
             ty = Y[:, :, :]
-            
-            # ===== A: Scheduled Sampling (25% 확률로 자기회귀 학습) =====
-            use_autoregressive = random.random() < 0.25
-            if use_autoregressive and iter > 0:
-                # 이전 예측값을 다음 입력에 일부 사용 (자기회귀 학습)
+
+            if iter > 0 and args.ss_prob > 0 and random.random() < args.ss_prob:
                 with torch.no_grad():
                     prev_output = model(tx)
                     prev_pred = torch.squeeze(prev_output, 3)  # [B, T_out, N]
-                    # 예측값을 RevIN 통계로 정규화
-                    prev_pred_norm = (prev_pred - wm.unsqueeze(1)) / ws.unsqueeze(1)  # [B, T_out, N]
-                    # 입력의 마지막 부분을 예측값으로 대체 (자기회귀 시뮬레이션)
-                    if tx.size(3) > 1:
-                        # 마지막 1 step을 예측값으로 교체
-                        tx_autoregressive = tx.clone()
-                        # 예측값을 입력 형태로 변환 [B, 1, N, 1]에 맞춤
-                        # prev_pred_norm[:, -1:, :] → [B, 1, N], unsqueeze(-1) → [B, 1, N, 1]
-                        prev_pred_reshaped = prev_pred_norm[:, -1:, :].unsqueeze(-1)  # [B, 1, N, 1]
-                        tx_autoregressive = torch.cat([tx_autoregressive[:, :, :, :-1], prev_pred_reshaped], dim=3)
-                        tx = tx_autoregressive
-            # ============================================================
+                    if prev_pred.dim() == 2:
+                        prev_pred = prev_pred.unsqueeze(1)
+                    tail_steps = min(tx.size(3), prev_pred.size(1))
+                    pred_tail = prev_pred[:, -tail_steps:, :].transpose(1, 2).unsqueeze(1)  # [B,1,N,tail]
+                    tx = tx.clone()
+                    tx[:, :, :, -tail_steps:] = pred_tail
             
             output = model(tx)
             output = torch.squeeze(output, 3)
@@ -670,6 +656,14 @@ parser.add_argument('--tanhalpha', type=float, default=0.1, help='tanh alpha')
 parser.add_argument('--epochs', type=int, default=200, help='')
 parser.add_argument('--num_split', type=int, default=1, help='number of splits for graphs')
 parser.add_argument('--step_size', type=int, default=100, help='step_size')
+parser.add_argument('--ss_prob', type=float, default=0.4, help='scheduled sampling probability')
+parser.add_argument('--train_ratio', type=float, default=0.70, help='train split ratio')
+parser.add_argument('--valid_ratio', type=float, default=0.15, help='validation split ratio')
+parser.add_argument('--focus_targets', type=int, default=0, help='1 to upweight us/kr/jp target nodes')
+parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
+parser.add_argument('--rollout_mode', type=str, default='teacher_forced', choices=['teacher_forced', 'recursive'], help='test rollout mode')
+parser.add_argument('--seed', type=int, default=123, help='random seed')
+parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to skip plotting')
 
 
 args = parser.parse_args()
@@ -690,7 +684,7 @@ def set_random_seed(seed):
     torch.backends.cudnn.benchmark = False
 
 
-fixed_seed = 123
+fixed_seed = args.seed
 
 
 def main(experiment):
@@ -702,8 +696,6 @@ def main(experiment):
     best_rae = 10000000
     best_corr = -10000000
     best_smape = 10000000
-    best_combined_score = 10000000  # Best 모델 선택 기준: 0.5 * 전체 RSE + 0.5 * jp_fx RSE
-
     best_test_rse = 10000000
     best_test_corr = -10000000
 
@@ -742,7 +734,10 @@ def main(experiment):
         print("!!! Cache Clean Complete !!!")
         # ============================================================
 
-        Data = DataLoaderS(args.data, 0.60, 0.20, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
+        if args.train_ratio <= 0 or args.valid_ratio <= 0 or (args.train_ratio + args.valid_ratio) >= 1:
+            raise ValueError("train_ratio + valid_ratio must be < 1 and both must be > 0")
+
+        Data = DataLoaderS(args.data, args.train_ratio, args.valid_ratio, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
 
         print('train X:', Data.train[0].shape)
         print('train Y:', Data.train[1].shape)
@@ -755,7 +750,7 @@ def main(experiment):
         print('length of training set=', Data.train[0].shape[0])
         print('length of validation set=', Data.valid[0].shape[0])
         print('length of testing set=', Data.test[0].shape[0])
-        print('valid=', int((0.60 + 0.20) * Data.n))
+        print('valid=', int((args.train_ratio + args.valid_ratio) * Data.n))
 
         if len(Data.train[0].shape) == 4: 
              args.num_nodes = Data.train[0].shape[2]
@@ -822,12 +817,11 @@ def main(experiment):
                 
                 scheduler.step(val_loss)
                 
-                # ===== Best 모델 선택 기준: 0.5 * 전체 RSE + 0.5 * jp_fx RSE =====
+                # ===== Best 모델 선택 기준: 전체 Validation RSE 최소화 =====
                 safe_corr = val_corr if not math.isnan(val_corr) else 0.0
                 sum_loss = val_loss + val_rae - safe_corr
-                combined_score = 0.5 * val_loss + 0.5 * jp_fx_val_rse
-                
-                if combined_score < best_combined_score:
+
+                if val_loss < best_rse:
                     save_path = Path(args.save)
                     save_path.parent.mkdir(parents=True, exist_ok=True)
                     
@@ -838,7 +832,6 @@ def main(experiment):
                     best_rae = val_rae
                     best_corr = val_corr
                     best_smape = val_smape
-                    best_combined_score = combined_score  # Best 모델 선택 기준 업데이트
 
                     best_hp = [gcn_depth, lr, conv, res, skip, end, k, dropout, dilation_ex, node_dim, prop_alpha, tanh_alpha, layer, epoch]
 
@@ -870,10 +863,10 @@ def main(experiment):
     model = model.to(device)
 
     vtest_acc, vtest_rae, vtest_corr, vtest_smape, _ = evaluate(Data, Data.valid[0], Data.valid[1], model, evaluateL2, evaluateL1,
-                                                             args.batch_size, True)
+                                                             args.batch_size, args.plot == 1)
 
     test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(Data, Data.test_window, model, evaluateL2, evaluateL1,
-                                                                        args.seq_in_len, True)
+                                                                        args.seq_in_len, args.plot == 1)
     print('********************************************************************************************************')
     print("final test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f} | test smape {:5.4f}".format(test_acc, test_rae, test_corr, test_smape))
     print('********************************************************************************************************')

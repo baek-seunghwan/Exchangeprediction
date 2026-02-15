@@ -1,0 +1,149 @@
+CUDA not available, using CPU
+!!! Cleaning Cache Files in /Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data !!!
+!!! Cache Clean Complete !!!
+Loading data from /Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/ExchangeRate_data.csv...
+Data loaded and converted to numeric successfully.
+Graph loaded with 1 attacks...
+33 columns loaded
+Adjacency created...
+train X: torch.Size([131, 24, 33])
+train Y: torch.Size([131, 1, 33])
+valid X: torch.Size([11, 24, 33])
+valid Y: torch.Size([11, 1, 33])
+test X: torch.Size([11, 24, 33])
+test Y: torch.Size([11, 1, 33])
+test window: torch.Size([60, 33])
+length of training set= 131
+length of validation set= 11
+length of testing set= 11
+valid= 168
+Auto-detected num_nodes: 33
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/ExchangeRate_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/AXIS/model/Bayesian/model.pt', optim='adam', L1Loss=True, normalize=2, device='cuda:1', gcn_true=True, buildA_true=True, gcn_depth=1, num_nodes=33, dropout=0.1, subgraph_size=40, node_dim=30, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=24, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.0002, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=2, num_split=1, step_size=100, ss_prob=0.2, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=0, debug_eval=0, rollout_mode='teacher_forced', seed=123, plot=0)
+The recpetive field size is 19
+Number of model parameters is 628545
+begin training
+Experiment: 1
+Iter: 0
+epoch: 1
+hp= [1, 0.0002, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best sum= 10000000
+best rrse= 10000000
+best rrae= 10000000
+best corr= -10000000
+best smape= 10000000
+best hps= []
+best test rse= 10000000
+best test corr= -10000000
+[Target-Weighted Loss] disabled (uniform weight for overall RSE optimization)
+iter:  0 | loss: 1.374
+iter:  1 | loss: 1.216
+iter:  2 | loss: 1.174
+iter:  3 | loss: 1.009
+iter:  4 | loss: 1.038
+iter:  5 | loss: 1.207
+iter:  6 | loss: 1.300
+iter:  7 | loss: 1.169
+iter:  8 | loss: 1.037
+iter:  9 | loss: 1.180
+iter: 10 | loss: 1.036
+iter: 11 | loss: 1.079
+iter: 12 | loss: 1.183
+iter: 13 | loss: 1.232
+iter: 14 | loss: 1.082
+iter: 15 | loss: 1.072
+iter: 16 | loss: 1.291
+iter: 17 | loss: 1.270
+iter: 18 | loss: 1.156
+iter: 19 | loss: 1.175
+iter: 20 | loss: 1.173
+iter: 21 | loss: 0.993
+iter: 22 | loss: 1.079
+iter: 23 | loss: 1.226
+iter: 24 | loss: 1.414
+iter: 25 | loss: 1.223
+iter: 26 | loss: 1.915
+iter: 27 | loss: 1.130
+iter: 28 | loss: 1.139
+iter: 29 | loss: 1.103
+iter: 30 | loss: 0.982
+iter: 31 | loss: 1.216
+iter: 32 | loss: 1.317
+validation r= 5
+| end of epoch   1 | time:  2.08s | train_loss 1.1866 | valid rse 16.4818 | valid rae 16.2960 | valid corr  0.2193 | valid smape  0.3558 | jp_fx_rse 2.3293
+testing r= 5
+rrse= 99825719884665.83 / 88570152023798.0
+********************************************************************************************************
+test rse 1.1271 | test rae 1.4251 | test corr 0.2226| test smape 0.3434
+********************************************************************************************************
+Experiment: 1
+Iter: 0
+epoch: 2
+hp= [1, 0.0002, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 2]
+best sum= 32.55851035051646
+best rrse= 16.48179946097505
+best rrae= 16.295989269816175
+best corr= 0.21927838
+best smape= 0.3558033336220865
+best hps= [1, 0.0002, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.1270808235470067
+best test corr= 0.22258863
+[Target-Weighted Loss] disabled (uniform weight for overall RSE optimization)
+iter:  0 | loss: 1.012
+iter:  1 | loss: 1.043
+iter:  2 | loss: 0.973
+iter:  3 | loss: 0.977
+iter:  4 | loss: 1.312
+iter:  5 | loss: 1.101
+iter:  6 | loss: 1.008
+iter:  7 | loss: 1.405
+iter:  8 | loss: 1.402
+iter:  9 | loss: 1.253
+iter: 10 | loss: 1.151
+iter: 11 | loss: 0.950
+iter: 12 | loss: 1.224
+iter: 13 | loss: 1.225
+iter: 14 | loss: 1.314
+iter: 15 | loss: 1.047
+iter: 16 | loss: 1.383
+iter: 17 | loss: 1.155
+iter: 18 | loss: 1.177
+iter: 19 | loss: 0.929
+iter: 20 | loss: 1.918
+iter: 21 | loss: 1.406
+iter: 22 | loss: 1.173
+iter: 23 | loss: 1.099
+iter: 24 | loss: 1.364
+iter: 25 | loss: 0.979
+iter: 26 | loss: 1.198
+iter: 27 | loss: 1.028
+iter: 28 | loss: 1.092
+iter: 29 | loss: 1.318
+iter: 30 | loss: 1.117
+iter: 31 | loss: 1.147
+iter: 32 | loss: 1.108
+validation r= 5
+| end of epoch   2 | time:  2.04s | train_loss 1.1820 | valid rse 16.5197 | valid rae 16.3273 | valid corr  0.2172 | valid smape  0.3556 | jp_fx_rse 2.3350
+best val loss= 32.55851035051646
+best hps= [1, 0.0002, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+validation r= 5
+testing r= 5
+rrse= 99904861201552.92 / 88570152023798.0
+********************************************************************************************************
+final test rse 1.1280 | test rae 1.4262 | test corr 0.2219 | test smape 0.3437
+********************************************************************************************************
+
+
+
+1 run average
+
+
+
+valid	rse	rae
+mean	16.5008	16.3131
+std	0.0000	0.0000
+
+
+
+test	rse	rae
+mean	1.1280	1.4262
+std	0.0000	0.0000
