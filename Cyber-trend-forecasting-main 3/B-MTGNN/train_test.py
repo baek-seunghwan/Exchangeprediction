@@ -200,7 +200,7 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     total_loss_l1 = 0
     n_samples = 0
     predict = None
-    Ytest=None
+    test = None
     variance = None
     confidence_95 = None
 
@@ -217,8 +217,6 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     # 매 반복문(Sliding Window)마다 통계를 새로 계산해야 함
 
     for i in range(n_input, test_window.shape[0], data.out_len):
-        if i + data.out_len > test_window.shape[0]:
-            break
         X = torch.unsqueeze(x_input, dim=0)
         X = torch.unsqueeze(X, dim=1)
         X = X.transpose(2, 3)  # [1, 1, N, T]
@@ -247,12 +245,12 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         for _ in range(num_runs):
             with torch.no_grad():
                 output = model(X)
-                y_pred = output.squeeze().clone()
+                y_pred = output[-1, :, :, -1].clone()
                 
                 # =====================================================
                 # [수정 3] 현재 윈도우의 통계로 복원 (Denormalization)
                 # =====================================================
-                y_pred = y_pred * ws.unsqueeze(0) + wm.unsqueeze(0)
+                y_pred = y_pred * ws + wm
                 # =====================================================
                 
                 if y_pred.shape[0] > y_true.shape[0]:
@@ -280,20 +278,6 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         last_predicted = y_pred.clone()
         # ==================================================
 
-        # ===== C: Partial Teacher Forcing (4 step마다 실제값 주입) =====
-        step_count = (i - n_input) // data.out_len
-        if step_count > 0 and step_count % 4 == 0:
-            # 4 step마다 실제값으로 입력 일부 리셋 (오차 누적 차단)
-            reset_len = min(data.out_len, data.P // 2)  # 입력의 절반 정도를 실제값으로 교체
-            if i + reset_len <= test_window.shape[0]:
-                actual_reset = test_window[i:i+reset_len, :].clone()
-                # 입력의 마지막 reset_len 부분을 실제값으로 교체
-                if data.P <= data.out_len:
-                    x_input = y_pred[-data.P:, :].clone()
-                else:
-                    x_input = torch.cat([x_input[data.out_len:, :], y_pred], dim=0)
-        # ================================================================
-
         # 다음 스텝을 위한 입력 업데이트 (Sliding Window)
         if data.P <= data.out_len:
             x_input = y_pred[-data.P:].clone()
@@ -302,12 +286,12 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
 
         if predict is None:
             predict = y_pred
-            Ytest = y_true
+            test = y_true
             variance = var
             confidence_95 = confidence
         else:
             predict = torch.cat((predict, y_pred))
-            Ytest = torch.cat((Ytest, y_true))
+            test = torch.cat((test, y_true))
             variance = torch.cat((variance, var))
             confidence_95 = torch.cat((confidence_95, confidence))
 
@@ -342,29 +326,25 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     rae = sum_absolute_diff / sum_absolute_r
     rae = rae.item()
 
-    predict_flat = predict.reshape(-1)
-    Ytest_flat = Ytest.reshape(-1)
+    predict = predict.data.cpu().numpy()
+    Ytest = test.data.cpu().numpy()
     
-    sigma_p = predict_flat.std()
-    sigma_g = Ytest_flat.std()
-    mean_p = predict_flat.mean()
-    mean_g = Ytest_flat.mean()
+    sigma_p = (predict).std(axis=0)
+    sigma_g = (Ytest).std(axis=0)
+    mean_p = predict.mean(axis=0)
+    mean_g = Ytest.mean(axis=0)
     index = (sigma_g != 0) & (sigma_p != 0)
-    eps = 1e-12
-    if sigma_p > eps and sigma_g > eps:
-    # 전체 예측값과 실제값 사이의 상관계수 1개를 구함
-         correlation = ((predict_flat - mean_p) * (Ytest_flat - mean_g)).mean() / (sigma_p * sigma_g)
+    if index.sum() > 0:
+        correlation = ((predict - mean_p) * (Ytest - mean_g)).mean(axis=0) / (sigma_p * sigma_g)
+        correlation = (correlation[index]).mean()
     else:
-      correlation = 0.0
+        correlation = 0.0
 
     smape = 0
-    num_nodes = Ytest.shape[2] # 실제 노드 개수 (33)
-    for z in range(num_nodes):
-    # 각 노드별로 [Batch, 12] 데이터를 펼쳐서 비교
-        yt_node = Ytest[:, :, z].reshape(-1)
-        yp_node = predict[:, :, z].reshape(-1)
-        smape += s_mape(yt_node, yp_node)
-    smape /= num_nodes
+    for z in range(Ytest.shape[1]):
+        smape += s_mape(Ytest[:, z], predict[:, z])
+    smape /= Ytest.shape[1]
+
     # --- Plotting (기존 코드 유지) ---
     counter = 0
     if is_plot:
@@ -392,7 +372,7 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
     total_loss_l1 = 0
     n_samples = 0
     predict = None
-    Ytest = None
+    test = None
     variance = None
     confidence_95 = None
     sum_squared_diff = 0
@@ -457,12 +437,12 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
 
         if predict is None:
             predict = output
-            Ytest = Y
+            test = Y
             variance = var
             confidence_95 = confidence
         else:
             predict = torch.cat((predict, output))
-            Ytest = torch.cat((Ytest, Y))
+            test = torch.cat((test, Y))
             variance = torch.cat((variance, var))
             confidence_95 = torch.cat((confidence_95, confidence))
 
@@ -525,16 +505,15 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
         raw_name = data.col[v]
         if raw_name == 'jp_fx':
             # jp_fx 노드의 RSE 계산
-            jp_pred = predict[:, :, v].reshape(-1)
-            jp_true = Ytest[:, :, v].reshape(-1)
-            
+            jp_pred = predict[:, 0, v]
+            jp_true = Ytest[:, 0, v]
             jp_diff_sq = np.sum((jp_pred - jp_true) ** 2)
             jp_mean = np.mean(jp_true)
             jp_diff_from_mean_sq = np.sum((jp_true - jp_mean) ** 2)
-            if jp_diff_from_mean_sq > 1e-12:
+            if jp_diff_from_mean_sq > 0:
                 jp_fx_rse = np.sqrt(jp_diff_sq / jp_diff_from_mean_sq)
             else:
-                jp_fx_rse = 1.0 # 분산이 없으면 오차를 높게 잡음
+                jp_fx_rse = 0.0
             break
     if jp_fx_rse is None:
         jp_fx_rse = rrse  # jp_fx를 찾지 못한 경우 전체 RSE 사용
@@ -617,14 +596,13 @@ def train(data, X, Y, model, criterion, optim, batch_size):
                     # 예측값을 RevIN 통계로 정규화
                     prev_pred_norm = (prev_pred - wm.unsqueeze(1)) / ws.unsqueeze(1)  # [B, T_out, N]
                     # 입력의 마지막 부분을 예측값으로 대체 (자기회귀 시뮬레이션)
-                    if tx.size(3) > data.out_len:
+                    if tx.size(3) > 1:
                         # 마지막 1 step을 예측값으로 교체
                         tx_autoregressive = tx.clone()
-                        new_input = prev_pred_norm.transpose(1, 2).unsqueeze(1)
                         # 예측값을 입력 형태로 변환 [B, 1, N, 1]에 맞춤
                         # prev_pred_norm[:, -1:, :] → [B, 1, N], unsqueeze(-1) → [B, 1, N, 1]
-                        
-                        tx_autoregressive = torch.cat([tx_autoregressive[:, :, :, :-data.out_len], new_input], dim=3)
+                        prev_pred_reshaped = prev_pred_norm[:, -1:, :].unsqueeze(-1)  # [B, 1, N, 1]
+                        tx_autoregressive = torch.cat([tx_autoregressive[:, :, :, :-1], prev_pred_reshaped], dim=3)
                         tx = tx_autoregressive
             # ============================================================
             
@@ -648,17 +626,13 @@ def train(data, X, Y, model, criterion, optim, batch_size):
     return total_loss / n_samples
 
 
-DEFAULT_DATA_PATH = AXIS_DIR / 'ExchangeRate_data.csv'
+DEFAULT_DATA_PATH = AXIS_DIR / 'ExchangeRate_dataset.csv'
 DEFAULT_MODEL_SAVE = MODEL_BASE_DIR / 'model.pt'
 
 parser = argparse.ArgumentParser(description='PyTorch Time series forecasting')
-parser.add_argument('--data', type=str, 
-    default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'ExchangeRate_data.csv'),
-    help='location of the data file')
-parser.add_argument('--log_interval', type=int, default=2000, metavar='N',
-                    help='report interval')
-parser.add_argument('--save', type=str, default=str(DEFAULT_MODEL_SAVE),
-                    help='path to save the final model')
+parser.add_argument('--data', type=str, default=str(DEFAULT_DATA_PATH), help='location of the data file')
+parser.add_argument('--log_interval', type=int, default=2000, metavar='N', help='report interval')
+parser.add_argument('--save', type=str, default=str(DEFAULT_MODEL_SAVE), help='path to save the final model')
 parser.add_argument('--optim', type=str, default='adam')
 parser.add_argument('--L1Loss', type=bool, default=True)
 parser.add_argument('--normalize', type=int, default=3)
@@ -677,8 +651,8 @@ parser.add_argument('--skip_channels', type=int, default=128, help='skip channel
 parser.add_argument('--end_channels', type=int, default=1024, help='end channels')
 parser.add_argument('--in_dim', type=int, default=1, help='inputs dimension')
 parser.add_argument('--seq_in_len', type=int, default=24, help='input sequence length')
-parser.add_argument('--seq_out_len', type=int, default=12, help='output sequence length')
-parser.add_argument('--horizon', type=int, default=12)
+parser.add_argument('--seq_out_len', type=int, default=1, help='output sequence length')
+parser.add_argument('--horizon', type=int, default=1)
 parser.add_argument('--layers', type=int, default=1, help='number of layers')
 parser.add_argument('--batch_size', type=int, default=4, help='batch size')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
