@@ -21,6 +21,7 @@ import glob
 plt.rcParams['savefig.dpi'] = 1200
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
+BMTGNN_DIR = Path(__file__).resolve().parent
 AXIS_DIR = PROJECT_DIR / 'AXIS'
 MODEL_BASE_DIR = AXIS_DIR / 'model' / 'Bayesian'
 
@@ -265,15 +266,21 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         z = 1.96
         confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
 
-        # ===== B: Smoothing/Clamping (예측값 안정화) =====
-        if last_predicted is not None:
-            # Exponential smoothing: 0.7 * 현재 예측 + 0.3 * 이전 예측
-            y_pred = 0.7 * y_pred + 0.3 * last_predicted
+        # ===== B: Multi-Step Smoothing/Clamping (예측값 안정화) =====
+        if last_predicted is not None and i > n_input:
+            # 이전 윈도우의 마지막 예측값과 현재 윈도우의 첫 예측값을 smoothing
+            y_pred[0, :] = 0.7 * y_pred[0, :] + 0.3 * last_predicted[-1, :]
             
-            # Clamping: 이전 실제값 대비 ±10% 제한 (첫 step 이후)
-            if i > n_input:
-                last_actual = test_window[i-1, :]
-                y_pred = torch.clamp(y_pred, last_actual * 0.9, last_actual * 1.1)
+            # Clamping: step별로 허용 범위를 점진적으로 확대
+            last_actual = test_window[i-1, :]  # 예측 시작 직전의 실제값
+            for step in range(y_pred.shape[0]):
+                margin = 0.10 + 0.02 * step  # step이 멀수록 허용 범위 ↑ (10% ~ 32%)
+                lower = last_actual * (1.0 - margin)
+                upper = last_actual * (1.0 + margin)
+                # min/max 정리 (음수 값 대응)
+                lo = torch.min(lower, upper)
+                hi = torch.max(lower, upper)
+                y_pred[step, :] = torch.clamp(y_pred[step, :], lo, hi)
         
         last_predicted = y_pred.clone()
         # ==================================================
@@ -626,7 +633,7 @@ def train(data, X, Y, model, criterion, optim, batch_size):
     return total_loss / n_samples
 
 
-DEFAULT_DATA_PATH = AXIS_DIR / 'ExchangeRate_dataset.csv'
+DEFAULT_DATA_PATH = BMTGNN_DIR / 'data' / 'ExchangeRate_data.csv'
 DEFAULT_MODEL_SAVE = MODEL_BASE_DIR / 'model.pt'
 
 parser = argparse.ArgumentParser(description='PyTorch Time series forecasting')
@@ -635,7 +642,7 @@ parser.add_argument('--log_interval', type=int, default=2000, metavar='N', help=
 parser.add_argument('--save', type=str, default=str(DEFAULT_MODEL_SAVE), help='path to save the final model')
 parser.add_argument('--optim', type=str, default='adam')
 parser.add_argument('--L1Loss', type=bool, default=True)
-parser.add_argument('--normalize', type=int, default=3)
+parser.add_argument('--normalize', type=int, default=2)
 parser.add_argument('--device', type=str, default='cuda:1', help='')
 parser.add_argument('--gcn_true', type=bool, default=True, help='whether to add graph convolution layer')
 parser.add_argument('--buildA_true', type=bool, default=True, help='whether to construct adaptive adjacency matrix')
@@ -651,8 +658,8 @@ parser.add_argument('--skip_channels', type=int, default=128, help='skip channel
 parser.add_argument('--end_channels', type=int, default=1024, help='end channels')
 parser.add_argument('--in_dim', type=int, default=1, help='inputs dimension')
 parser.add_argument('--seq_in_len', type=int, default=24, help='input sequence length')
-parser.add_argument('--seq_out_len', type=int, default=1, help='output sequence length')
-parser.add_argument('--horizon', type=int, default=1)
+parser.add_argument('--seq_out_len', type=int, default=12, help='output sequence length (multi-step horizon)')
+parser.add_argument('--horizon', type=int, default=1, help='forecast start offset (1=predict immediately after input)')
 parser.add_argument('--layers', type=int, default=1, help='number of layers')
 parser.add_argument('--batch_size', type=int, default=4, help='batch size')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')

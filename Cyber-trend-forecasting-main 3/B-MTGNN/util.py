@@ -116,12 +116,13 @@ class DataLoaderS(object):
 
         self.rawdat = torch.from_numpy(self.rawdat_np).float()
 
-        self.shift = 0
         self.min_data = torch.min(self.rawdat)
         if(self.min_data < 0):
             self.shift = (self.min_data * -1) + 1
         elif (self.min_data == 0):
-            self.shift = 1
+            self.shift = torch.tensor(1.0)
+        else:
+            self.shift = torch.tensor(0.0)
 
         self.dat = torch.zeros_like(self.rawdat)
         self.n, self.m = self.dat.shape
@@ -141,8 +142,9 @@ class DataLoaderS(object):
         except:
              self.col = [str(i) for i in range(self.m)]
 
-        self.adj = build_predefined_adj(self.col) 
-        # 만약 그래프 파일 경로가 다르다면 build_predefined_adj(self.col, '경로') 로 수정 필요
+        # graph.csv는 데이터 파일과 같은 디렉토리에 있다고 가정
+        graph_path = os.path.join(os.path.dirname(file_name), 'graph.csv')
+        self.adj = build_predefined_adj(self.col, graph_path)
 
         # Calculate metrics using Test set
         tmp = self.test[1] * self.scale.expand(self.test[1].size(0), self.test[1].size(1), self.m)
