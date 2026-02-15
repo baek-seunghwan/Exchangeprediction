@@ -26,6 +26,17 @@ AXIS_DIR = PROJECT_DIR / 'AXIS'
 MODEL_BASE_DIR = AXIS_DIR / 'model' / 'Bayesian'
 
 
+def clear_split_outputs(split_type):
+    split_dir = MODEL_BASE_DIR / split_type
+    split_dir.mkdir(parents=True, exist_ok=True)
+    for pattern in ('*.txt', '*.png'):
+        for file_path in split_dir.glob(pattern):
+            try:
+                file_path.unlink()
+            except Exception:
+                pass
+
+
 def inverse_diff_2d(output, I, shift):
     output[0, :] = torch.exp(output[0, :] + torch.log(I + shift)) - shift
     for i in range(1, output.shape[0]):
@@ -100,14 +111,14 @@ def save_metrics_1d(predict, test, title, type):
 
     eps = 1e-12
     if root_sum_squared_r <= eps:
-        rrse = 0.0 if root_sum_squared <= eps else 1e6
+        rrse = float('nan')
     else:
         rrse = root_sum_squared / root_sum_squared_r
 
     sum_absolute_r = torch.sum(torch.abs(diff_r)).item()
     sum_absolute_diff = sum_absolute_diff.item()
     if sum_absolute_r <= eps:
-        rae = 0.0 if sum_absolute_diff <= eps else 1e6
+        rae = float('nan')
     else:
         rae = sum_absolute_diff / sum_absolute_r
 
@@ -203,7 +214,7 @@ def s_mape(yTrue, yPred):
     return mape
 
 
-def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_input, is_plot):
+def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_input, is_plot, split_type='Testing'):
     total_loss = 0
     total_loss_l1 = 0
     n_samples = 0
@@ -351,16 +362,24 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     # --- Plotting (기존 코드 유지) ---
     counter = 0
     if is_plot:
+        skipped_nodes = []
         for v in range(data.m):
             col = v
             raw_name = data.col[col]
 
+            # Near-constant series는 RSE 분모가 0에 가까워 왜곡되므로 리포트에서 제외
+            if np.std(Ytest[:, col]) < 1e-10:
+                skipped_nodes.append(raw_name)
+                continue
+
             node_name = raw_name.replace('-ALL', '').replace('Mentions-', 'Mentions of ').replace(' ALL', '').replace('Solution_', '').replace('_Mentions', '')
             node_name = consistent_name(node_name)
             
-            save_metrics_1d(torch.from_numpy(predict[:, col]), torch.from_numpy(Ytest[:, col]), node_name, 'Testing')
-            plot_predicted_actual(predict[:, col], Ytest[:, col], node_name, 'Testing', variance[:, col], confidence_95[:, col])
+            save_metrics_1d(torch.from_numpy(predict[:, col]), torch.from_numpy(Ytest[:, col]), node_name, split_type)
+            plot_predicted_actual(predict[:, col], Ytest[:, col], node_name, split_type, variance[:, col], confidence_95[:, col])
             counter += 1
+        if skipped_nodes:
+            print(f"[{split_type}] skipped near-constant nodes for per-node metrics: {skipped_nodes}")
 
     return rrse, rae, correlation, smape
 
@@ -634,35 +653,35 @@ parser.add_argument('--gcn_true', type=bool, default=True, help='whether to add 
 parser.add_argument('--buildA_true', type=bool, default=True, help='whether to construct adaptive adjacency matrix')
 parser.add_argument('--gcn_depth', type=int, default=1, help='graph convolution depth')
 parser.add_argument('--num_nodes', type=int, default=142, help='number of nodes/variables')
-parser.add_argument('--dropout', type=float, default=0.2, help='dropout rate')
+parser.add_argument('--dropout', type=float, default=0.1, help='dropout rate')
 parser.add_argument('--subgraph_size', type=int, default=40, help='k')
 parser.add_argument('--node_dim', type=int, default=30, help='dim of nodes')
 parser.add_argument('--dilation_exponential', type=int, default=2, help='dilation exponential')
-parser.add_argument('--conv_channels', type=int, default=8, help='convolution channels')
-parser.add_argument('--residual_channels', type=int, default=64, help='residual channels')
-parser.add_argument('--skip_channels', type=int, default=128, help='skip channels')
+parser.add_argument('--conv_channels', type=int, default=16, help='convolution channels')
+parser.add_argument('--residual_channels', type=int, default=128, help='residual channels')
+parser.add_argument('--skip_channels', type=int, default=256, help='skip channels')
 parser.add_argument('--end_channels', type=int, default=1024, help='end channels')
 parser.add_argument('--in_dim', type=int, default=1, help='inputs dimension')
 parser.add_argument('--seq_in_len', type=int, default=24, help='input sequence length')
-parser.add_argument('--seq_out_len', type=int, default=12, help='output sequence length (multi-step horizon)')
+parser.add_argument('--seq_out_len', type=int, default=1, help='output sequence length (multi-step horizon)')
 parser.add_argument('--horizon', type=int, default=1, help='forecast start offset (1=predict immediately after input)')
-parser.add_argument('--layers', type=int, default=1, help='number of layers')
+parser.add_argument('--layers', type=int, default=2, help='number of layers')
 parser.add_argument('--batch_size', type=int, default=4, help='batch size')
-parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
+parser.add_argument('--lr', type=float, default=0.0005, help='learning rate')
 parser.add_argument('--weight_decay', type=float, default=0.00001, help='weight decay rate')
 parser.add_argument('--clip', type=int, default=10, help='clip')
 parser.add_argument('--propalpha', type=float, default=0.6, help='prop alpha')
 parser.add_argument('--tanhalpha', type=float, default=0.1, help='tanh alpha')
-parser.add_argument('--epochs', type=int, default=200, help='')
+parser.add_argument('--epochs', type=int, default=320, help='')
 parser.add_argument('--num_split', type=int, default=1, help='number of splits for graphs')
 parser.add_argument('--step_size', type=int, default=100, help='step_size')
-parser.add_argument('--ss_prob', type=float, default=0.4, help='scheduled sampling probability')
-parser.add_argument('--train_ratio', type=float, default=0.70, help='train split ratio')
-parser.add_argument('--valid_ratio', type=float, default=0.15, help='validation split ratio')
+parser.add_argument('--ss_prob', type=float, default=0.2, help='scheduled sampling probability')
+parser.add_argument('--train_ratio', type=float, default=0.8666666667, help='train split ratio')
+parser.add_argument('--valid_ratio', type=float, default=0.0666666667, help='validation split ratio')
 parser.add_argument('--focus_targets', type=int, default=0, help='1 to upweight us/kr/jp target nodes')
 parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
 parser.add_argument('--rollout_mode', type=str, default='teacher_forced', choices=['teacher_forced', 'recursive'], help='test rollout mode')
-parser.add_argument('--seed', type=int, default=123, help='random seed')
+parser.add_argument('--seed', type=int, default=777, help='random seed')
 parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to skip plotting')
 
 
@@ -809,8 +828,10 @@ def main(experiment):
 
                 epoch_start_time = time.time()
                 train_loss = train(Data, Data.train[0], Data.train[1], model, criterion, optim, args.batch_size)
-                val_loss, val_rae, val_corr, val_smape, jp_fx_val_rse = evaluate(Data, Data.valid[0], Data.valid[1], model, evaluateL2, evaluateL1,
-                                                                  args.batch_size, False)
+                val_loss, val_rae, val_corr, val_smape = evaluate_sliding_window(
+                    Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Validation'
+                )
+                jp_fx_val_rse = val_loss
                 print(
                     '| end of epoch {:3d} | time: {:5.2f}s | train_loss {:5.4f} | valid rse {:5.4f} | valid rae {:5.4f} | valid corr  {:5.4f} | valid smape  {:5.4f} | jp_fx_rse {:5.4f}'.format(
                         epoch, (time.time() - epoch_start_time), train_loss, val_loss, val_rae, val_corr, val_smape, jp_fx_val_rse), flush=True)
@@ -837,8 +858,9 @@ def main(experiment):
 
                     es_counter = 0
 
-                    test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(Data, Data.test_window, model, evaluateL2, evaluateL1,
-                                                                                        args.seq_in_len, False)
+                    test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(
+                        Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Testing'
+                    )
                     print('********************************************************************************************************')
                     print("test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f}| test smape {:5.4f}".format(test_acc, test_rae, test_corr, test_smape), flush=True)
                     print('********************************************************************************************************')
@@ -862,11 +884,17 @@ def main(experiment):
     # 로드한 모델도 학습 시와 같은 device로 이동
     model = model.to(device)
 
-    vtest_acc, vtest_rae, vtest_corr, vtest_smape, _ = evaluate(Data, Data.valid[0], Data.valid[1], model, evaluateL2, evaluateL1,
-                                                             args.batch_size, args.plot == 1)
+    if args.plot == 1:
+        clear_split_outputs('Validation')
+        clear_split_outputs('Testing')
 
-    test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(Data, Data.test_window, model, evaluateL2, evaluateL1,
-                                                                        args.seq_in_len, args.plot == 1)
+    vtest_acc, vtest_rae, vtest_corr, vtest_smape = evaluate_sliding_window(
+        Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Validation'
+    )
+
+    test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(
+        Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Testing'
+    )
     print('********************************************************************************************************')
     print("final test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f} | test smape {:5.4f}".format(test_acc, test_rae, test_corr, test_smape))
     print('********************************************************************************************************')

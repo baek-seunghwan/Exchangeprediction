@@ -179,8 +179,12 @@ class DataLoaderS(object):
         self.train = self._batchify(train_set, self.h)
         self.valid = self._batchify(valid_set, self.h)
         self.test =  self._batchify(test_set, self.h)
-        
-        self.test_window = self.dat[-(36+self.P):, :].clone()
+
+        # Year-aligned rolling windows for fair validation/testing comparison
+        valid_start = max(0, train - self.P)
+        test_start = max(0, valid - self.P)
+        self.valid_window = self.dat[valid_start:valid, :].clone()
+        self.test_window = self.dat[test_start:test, :].clone()
 
     def _batchify(self, idx_set, horizon):
         n = len(idx_set) 
