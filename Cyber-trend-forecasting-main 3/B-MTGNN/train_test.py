@@ -64,7 +64,7 @@ def plot_data(data, title):
     plt.xticks(rotation='vertical', fontsize=13)
     plt.yticks(fontsize=13)
     fig = plt.gcf()
-    plt.show()
+    #plt.show()
 
 
 def consistent_name(name):
