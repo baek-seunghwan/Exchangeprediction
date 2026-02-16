@@ -638,7 +638,7 @@ def train(data, X, Y, model, criterion, optim, batch_size):
     return total_loss / n_samples
 
 
-DEFAULT_DATA_PATH = BMTGNN_DIR / 'data' / 'ExchangeRate_data.csv'
+DEFAULT_DATA_PATH = BMTGNN_DIR / 'data' / 'sm_data.csv'
 DEFAULT_MODEL_SAVE = MODEL_BASE_DIR / 'model.pt'
 
 parser = argparse.ArgumentParser(description='PyTorch Time series forecasting')
