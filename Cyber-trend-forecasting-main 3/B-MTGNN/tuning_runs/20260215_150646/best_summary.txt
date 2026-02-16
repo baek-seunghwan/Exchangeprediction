@@ -1,4 +1,0 @@
-best_final_test_rse=0.6125
-best_seed=777
-best_trial={"lr": 0.0005, "dropout": 0.1, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2}
-log_file=/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260215_150646/run_008.log

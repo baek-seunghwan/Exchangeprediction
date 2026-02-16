@@ -1,6 +1,5 @@
 import argparse
 import csv
-import itertools
 import json
 import re
 import subprocess
@@ -38,7 +37,11 @@ def parse_metrics(output_text: str):
     return final_rse, final_rae, best_test_rse
 
 
-def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, data_path, use_graph):
+def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, data_path):
+    ckpt_dir = run_dir / "checkpoints"
+    ckpt_dir.mkdir(parents=True, exist_ok=True)
+    ckpt_path = ckpt_dir / f"model_{run_id:03d}.pt"
+
     cmd = [
         py_exec,
         str(script_path),
@@ -53,7 +56,9 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
         "--debug_eval", "0",
         "--rollout_mode", common_args.rollout_mode,
         "--plot", "0",
-        "--use_graph", str(int(use_graph)),
+        "--use_graph", "0",
+        "--autotune_mode", "1",
+        "--save", str(ckpt_path),
         "--seed", str(seed),
         "--lr", str(trial["lr"]),
         "--dropout", str(trial["dropout"]),
@@ -79,7 +84,7 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
         "run_id": run_id,
         "seed": seed,
         "data": str(data_path),
-        "use_graph": int(use_graph),
+        "use_graph": 0,
         "trial": trial,
         "return_code": proc.returncode,
         "final_test_rse": final_rse,
@@ -89,52 +94,7 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
     }
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--py", type=str, default="/Users/samrobert/Documents/GitHub/Exchangeprediction/.venv/bin/python")
-    parser.add_argument("--epochs", type=int, default=320)
-    parser.add_argument("--batch_size", type=int, default=4)
-    parser.add_argument("--train_ratio", type=float, default=0.8666666667)
-    parser.add_argument("--valid_ratio", type=float, default=0.0666666667)
-    parser.add_argument("--rollout_mode", type=str, default="teacher_forced", choices=["teacher_forced", "recursive"])
-    parser.add_argument("--seeds", type=str, default="123,777,2026")
-    parser.add_argument("--max_trials", type=int, default=8)
-    parser.add_argument("--datasets", type=str, default="sm_data.csv")
-    parser.add_argument("--graph_modes", type=str, default="0")
-    args = parser.parse_args()
-
-    root = Path(__file__).resolve().parent
-    train_script = root / "train_test.py"
-
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_dir = root / "tuning_runs" / ts
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    trials = build_trials()[: args.max_trials]
-    seeds = [int(x.strip()) for x in args.seeds.split(",") if x.strip()]
-    datasets = [x.strip() for x in args.datasets.split(",") if x.strip()]
-    graph_modes = [int(x.strip()) for x in args.graph_modes.split(",") if x.strip()]
-
-    results = []
-    run_id = 1
-    total = len(trials) * len(seeds) * len(datasets) * len(graph_modes)
-
-    for dataset in datasets:
-        data_path = root / "data" / dataset
-        for use_graph in graph_modes:
-            for t_idx, trial in enumerate(trials, 1):
-                for seed in seeds:
-                    print(f"[{run_id}/{total}] data={dataset} graph={use_graph} trial={t_idx} seed={seed} start")
-                    res = run_once(args.py, train_script, args, trial, seed, out_dir, run_id, data_path, use_graph)
-                    results.append(res)
-                    print(f"[{run_id}/{total}] done final_test_rse={res['final_test_rse']} best_test_rse={res['best_test_rse']}")
-                    run_id += 1
-
-    valid = [r for r in results if (r["best_test_rse"] is not None or r["final_test_rse"] is not None)]
-    def objective(row):
-        return row["best_test_rse"] if row["best_test_rse"] is not None else row["final_test_rse"]
-    valid_sorted = sorted(valid, key=objective) if valid else []
-
+def write_results_json_csv(out_dir: Path, results):
     json_path = out_dir / "results.json"
     json_path.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -157,6 +117,96 @@ def main():
                 json.dumps(r["trial"], ensure_ascii=False),
                 r["log_file"],
             ])
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--py", type=str, default="/Users/samrobert/Documents/GitHub/Exchangeprediction/.venv/bin/python")
+    parser.add_argument("--epochs", type=int, default=320)
+    parser.add_argument("--batch_size", type=int, default=4)
+    parser.add_argument("--train_ratio", type=float, default=0.8666666667)
+    parser.add_argument("--valid_ratio", type=float, default=0.0666666667)
+    parser.add_argument("--rollout_mode", type=str, default="teacher_forced", choices=["teacher_forced", "recursive"])
+    parser.add_argument("--seeds", type=str, default="123,777,2026")
+    parser.add_argument("--max_trials", type=int, default=8)
+    parser.add_argument("--datasets", type=str, default="sm_data.csv")
+    parser.add_argument("--resume_dir", type=str, default="", help="existing tuning_runs/<timestamp> directory to resume from")
+    args = parser.parse_args()
+
+    root = Path(__file__).resolve().parent
+    train_script = root / "train_test.py"
+
+    if args.resume_dir.strip():
+        out_dir = Path(args.resume_dir).expanduser().resolve()
+    else:
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_dir = root / "tuning_runs" / ts
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    trials = build_trials()[: args.max_trials]
+    seeds = [int(x.strip()) for x in args.seeds.split(",") if x.strip()]
+    datasets = [x.strip() for x in args.datasets.split(",") if x.strip()]
+
+    combos = []
+    for dataset in datasets:
+        for trial in trials:
+            for seed in seeds:
+                combos.append((dataset, trial, seed))
+
+    results_path = out_dir / "results.json"
+    if results_path.exists():
+        try:
+            results = json.loads(results_path.read_text(encoding="utf-8"))
+            if not isinstance(results, list):
+                results = []
+        except Exception:
+            results = []
+    else:
+        results = []
+
+    done_keys = set()
+    max_existing_run_id = 0
+    for row in results:
+        key = (str(row.get("data", "")), int(row.get("seed", -1)), json.dumps(row.get("trial", {}), sort_keys=True))
+        done_keys.add(key)
+        max_existing_run_id = max(max_existing_run_id, int(row.get("run_id", 0) or 0))
+
+    run_id = max_existing_run_id + 1
+    total = len(combos)
+    done_count = len(done_keys)
+
+    if done_count > 0:
+        print(f"resume_dir: {out_dir}")
+        print(f"already completed: {done_count}/{total}")
+
+    for idx, (dataset, trial, seed) in enumerate(combos, 1):
+        key = (str(root / "data" / dataset), int(seed), json.dumps(trial, sort_keys=True))
+        if key in done_keys:
+            print(f"[{idx}/{total}] skip (already done) data={dataset} seed={seed}")
+            continue
+
+        data_path = root / "data" / dataset
+        t_idx = trials.index(trial) + 1
+        print(f"[{idx}/{total}] data={dataset} graph=0 trial={t_idx} seed={seed} start")
+        try:
+            res = run_once(args.py, train_script, args, trial, seed, out_dir, run_id, data_path)
+        except KeyboardInterrupt:
+            print("Interrupted by user. Partial results are saved.")
+            write_results_json_csv(out_dir, results)
+            raise
+
+        results.append(res)
+        done_keys.add(key)
+        write_results_json_csv(out_dir, results)
+        print(f"[{idx}/{total}] done final_test_rse={res['final_test_rse']} best_test_rse={res['best_test_rse']}")
+        run_id += 1
+
+    valid = [r for r in results if (r["best_test_rse"] is not None or r["final_test_rse"] is not None)]
+    def objective(row):
+        return row["best_test_rse"] if row["best_test_rse"] is not None else row["final_test_rse"]
+    valid_sorted = sorted(valid, key=objective) if valid else []
+
+    write_results_json_csv(out_dir, results)
 
     summary_path = out_dir / "best_summary.txt"
     with summary_path.open("w", encoding="utf-8") as f:

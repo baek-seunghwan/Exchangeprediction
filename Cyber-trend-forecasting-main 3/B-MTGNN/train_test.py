@@ -14,6 +14,7 @@ from random import randrange
 from matplotlib import pyplot as plt
 import time
 import os
+import re
 from pathlib import Path
 
 import glob
@@ -100,6 +101,67 @@ def consistent_name(name):
 
 def get_focus_nodes():
     return [x.strip() for x in args.focus_nodes.split(',') if x.strip()]
+    
+def _normalize_metric_name(name: str):
+    return re.sub(r'[^a-z0-9]+', '', name.lower())
+
+def get_rse_target_columns(data):
+    tokens = [x.strip() for x in args.rse_targets.split(',') if x.strip()]
+    if not tokens:
+        return list(range(data.m))
+
+    key_to_idx = {}
+    for idx, raw_name in enumerate(data.col):
+        display_name = consistent_name(raw_name)
+        aliases = {
+            raw_name,
+            display_name,
+            f"{display_name}_Testing",
+            f"{display_name}_Validation",
+            f"{display_name}.txt",
+            f"{display_name}_Testing.txt",
+            f"{display_name}_Validation.txt",
+        }
+        for alias in aliases:
+            key_to_idx[_normalize_metric_name(alias)] = idx
+
+    selected = []
+    seen = set()
+    for token in tokens:
+        norm = _normalize_metric_name(token)
+        idx = key_to_idx.get(norm)
+        if idx is not None and idx not in seen:
+            selected.append(idx)
+            seen.add(idx)
+
+    return selected if selected else list(range(data.m))
+
+def compute_rrse_rae_subset(predict_t, test_t, selected_cols):
+    pred = predict_t[:, selected_cols]
+    true = test_t[:, selected_cols]
+
+    sum_squared_diff = torch.sum(torch.pow(true - pred, 2))
+    root_sum_squared = math.sqrt(sum_squared_diff)
+
+    mean_all = torch.mean(true, dim=0)
+    diff_r = true - mean_all.expand(true.size(0), len(selected_cols))
+    sum_squared_r = torch.sum(torch.pow(diff_r, 2))
+    root_sum_squared_r = math.sqrt(sum_squared_r)
+
+    eps = 1e-12
+    if root_sum_squared_r <= eps:
+        rrse = 0.0 if root_sum_squared <= eps else 1e6
+    else:
+        rrse = root_sum_squared / root_sum_squared_r
+
+    sum_absolute_diff = torch.sum(torch.abs(true - pred)).item()
+    sum_absolute_r = torch.sum(torch.abs(diff_r)).item()
+    if sum_absolute_r <= eps:
+        rae = 0.0 if sum_absolute_diff <= eps else 1e6
+    else:
+        rae = sum_absolute_diff / sum_absolute_r
+
+    return rrse, rae, root_sum_squared, root_sum_squared_r
 
 
 def compute_focus_rrse(predict_np, ytest_np, data):
@@ -124,7 +186,6 @@ def save_metrics_1d(predict, test, title, type):
     sum_squared_diff = torch.sum(torch.pow(test - predict, 2))
     root_sum_squared = math.sqrt(sum_squared_diff)
     sum_absolute_diff = torch.sum(torch.abs(test - predict))
-
     test_s = test
     mean_all = torch.mean(test_s)
     diff_r = test_s - mean_all
@@ -333,31 +394,11 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     variance *= scale
     confidence_95 *= scale
 
-    # --- Metrics 계산 (기존 코드 유지) ---
-    sum_squared_diff = torch.sum(torch.pow(test - predict, 2))
-    sum_absolute_diff = torch.sum(torch.abs(test - predict))
+    # --- Metrics 계산 (선택 대상 시계열만 집계) ---
+    selected_cols = get_rse_target_columns(data)
+    rrse, rae, root_sum_squared, root_sum_squared_r = compute_rrse_rae_subset(predict, test, selected_cols)
 
-    root_sum_squared = math.sqrt(sum_squared_diff)
-    test_s = test
-    mean_all = torch.mean(test_s, dim=0)
-    diff_r = test_s - mean_all.expand(test_s.size(0), data.m)
-    sum_squared_r = torch.sum(torch.pow(diff_r, 2))
-    root_sum_squared_r = math.sqrt(sum_squared_r)
-
-    eps = 1e-12
-    if root_sum_squared_r <= eps:
-        rrse = 0.0 if root_sum_squared <= eps else 1e6
-    else:
-        rrse = root_sum_squared / root_sum_squared_r
-    
     print('rrse=', root_sum_squared, '/', root_sum_squared_r)
-
-    sum_absolute_r = torch.sum(torch.abs(diff_r)).item()
-    sum_absolute_diff = sum_absolute_diff.item()
-    if sum_absolute_r <= eps:
-        rae = 0.0 if sum_absolute_diff <= eps else 1e6
-    else:
-        rae = sum_absolute_diff / sum_absolute_r
 
     predict = predict.data.cpu().numpy()
     Ytest = test.data.cpu().numpy()
@@ -677,8 +718,8 @@ parser.add_argument('--optim', type=str, default='adam')
 parser.add_argument('--L1Loss', type=bool, default=True)
 parser.add_argument('--normalize', type=int, default=2)
 parser.add_argument('--device', type=str, default='cuda:1', help='')
-parser.add_argument('--gcn_true', type=bool, default=True, help='whether to add graph convolution layer')
-parser.add_argument('--buildA_true', type=bool, default=True, help='whether to construct adaptive adjacency matrix')
+parser.add_argument('--gcn_true', type=bool, default=False, help='whether to add graph convolution layer')
+parser.add_argument('--buildA_true', type=bool, default=False, help='whether to construct adaptive adjacency matrix')
 parser.add_argument('--use_graph', type=int, default=0, choices=[0, 1], help='1: use graph modules, 0: disable graph modules')
 parser.add_argument('--gcn_depth', type=int, default=1, help='graph convolution depth')
 parser.add_argument('--num_nodes', type=int, default=142, help='number of nodes/variables')
@@ -710,14 +751,22 @@ parser.add_argument('--valid_ratio', type=float, default=0.0666666667, help='val
 parser.add_argument('--focus_targets', type=int, default=0, help='1 to upweight us/kr/jp target nodes')
 parser.add_argument('--focus_nodes', type=str, default='jp_fx,kr_fx,us_ret', help='priority nodes (comma separated)')
 parser.add_argument('--focus_weight', type=float, default=0.35, help='priority weight for focus-node RRSE in model selection (0~1)')
+parser.add_argument('--rse_targets', type=str, default='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', help='comma-separated target series/file names used for terminal RSE/RAE aggregation')
 parser.add_argument('--plot_focus_only', type=int, default=0, help='1 to plot/save only focus nodes')
 parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
 parser.add_argument('--rollout_mode', type=str, default='teacher_forced', choices=['teacher_forced', 'recursive'], help='test rollout mode')
 parser.add_argument('--seed', type=int, default=777, help='random seed')
 parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to skip plotting')
+parser.add_argument('--clean_cache', type=int, default=0, choices=[0, 1], help='1 to delete cached *.pt in data dir before training')
+parser.add_argument('--autotune_mode', type=int, default=0, choices=[0, 1], help='1 to optimize for repeated auto-tuning runs')
 
 
 args = parser.parse_args()
+if args.autotune_mode == 1:
+    args.plot = 0
+    args.clean_cache = 0
+    args.use_graph = 0
+
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 if device.type == 'cuda':
     print(f"Using GPU: {torch.cuda.get_device_name(0)}")
@@ -770,20 +819,20 @@ def main(experiment):
         tanh_alpha = args.tanhalpha
 
         # ============================================================
-        # Cache Cleaning
+        # Cache Cleaning (optional)
         # ============================================================
-        data_dir = os.path.dirname(args.data) 
-        pt_files = glob.glob(os.path.join(data_dir, "*.pt"))
-        
-        print(f"!!! Cleaning Cache Files in {data_dir} !!!")
-        for file_path in pt_files:
-            if "model" not in file_path: 
-                try:
-                    os.remove(file_path)
-                    print(f"Deleted: {file_path}")
-                except Exception as e:
-                    print(f"Error deleting {file_path}: {e}")
-        print("!!! Cache Clean Complete !!!")
+        if args.clean_cache == 1:
+            data_dir = os.path.dirname(args.data)
+            pt_files = glob.glob(os.path.join(data_dir, "*.pt"))
+            print(f"!!! Cleaning Cache Files in {data_dir} !!!")
+            for file_path in pt_files:
+                if "model" not in file_path:
+                    try:
+                        os.remove(file_path)
+                        print(f"Deleted: {file_path}")
+                    except Exception as e:
+                        print(f"Error deleting {file_path}: {e}")
+            print("!!! Cache Clean Complete !!!")
         # ============================================================
 
         if args.train_ratio <= 0 or args.valid_ratio <= 0 or (args.train_ratio + args.valid_ratio) >= 1:
@@ -919,8 +968,11 @@ def main(experiment):
     with open(hp_save_path, "w") as f:
         f.write(str(best_hp))
 
-    with open(args.save, 'rb') as f:
-        model = torch.load(f, weights_only=False)
+    if os.path.exists(args.save):
+        with open(args.save, 'rb') as f:
+            model = torch.load(f, weights_only=False)
+    else:
+        print(f"Warning: checkpoint not found at {args.save}. Using current in-memory model.")
     # 로드한 모델도 학습 시와 같은 device로 이동
     model = model.to(device)
 
