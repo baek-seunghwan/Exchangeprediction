@@ -98,6 +98,28 @@ def consistent_name(name):
     return result
 
 
+def get_focus_nodes():
+    return [x.strip() for x in args.focus_nodes.split(',') if x.strip()]
+
+
+def compute_focus_rrse(predict_np, ytest_np, data):
+    focus_nodes = get_focus_nodes()
+    values = []
+    for node_name in focus_nodes:
+        if node_name not in data.col:
+            continue
+        col = data.col.index(node_name)
+        pred = predict_np[:, col]
+        true = ytest_np[:, col]
+        num = np.sum((true - pred) ** 2)
+        den = np.sum((true - np.mean(true)) ** 2)
+        if den > 1e-12:
+            values.append(np.sqrt(num / den))
+    if not values:
+        return None
+    return float(np.mean(values))
+
+
 def save_metrics_1d(predict, test, title, type):
     sum_squared_diff = torch.sum(torch.pow(test - predict, 2))
     root_sum_squared = math.sqrt(sum_squared_diff)
@@ -359,13 +381,19 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         smape += s_mape(Ytest[:, z], predict[:, z])
     smape /= Ytest.shape[1]
 
+    focus_rrse = compute_focus_rrse(predict, Ytest, data)
+
     # --- Plotting (기존 코드 유지) ---
     counter = 0
     if is_plot:
         skipped_nodes = []
+        focus_nodes = set(get_focus_nodes())
         for v in range(data.m):
             col = v
             raw_name = data.col[col]
+
+            if args.plot_focus_only == 1 and raw_name not in focus_nodes:
+                continue
 
             # Near-constant series는 RSE 분모가 0에 가까워 왜곡되므로 리포트에서 제외
             if np.std(Ytest[:, col]) < 1e-10:
@@ -381,7 +409,7 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         if skipped_nodes:
             print(f"[{split_type}] skipped near-constant nodes for per-node metrics: {skipped_nodes}")
 
-    return rrse, rae, correlation, smape
+    return rrse, rae, correlation, smape, focus_rrse
 
 
 def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
@@ -651,6 +679,7 @@ parser.add_argument('--normalize', type=int, default=2)
 parser.add_argument('--device', type=str, default='cuda:1', help='')
 parser.add_argument('--gcn_true', type=bool, default=True, help='whether to add graph convolution layer')
 parser.add_argument('--buildA_true', type=bool, default=True, help='whether to construct adaptive adjacency matrix')
+parser.add_argument('--use_graph', type=int, default=0, choices=[0, 1], help='1: use graph modules, 0: disable graph modules')
 parser.add_argument('--gcn_depth', type=int, default=1, help='graph convolution depth')
 parser.add_argument('--num_nodes', type=int, default=142, help='number of nodes/variables')
 parser.add_argument('--dropout', type=float, default=0.1, help='dropout rate')
@@ -679,6 +708,9 @@ parser.add_argument('--ss_prob', type=float, default=0.2, help='scheduled sampli
 parser.add_argument('--train_ratio', type=float, default=0.8666666667, help='train split ratio')
 parser.add_argument('--valid_ratio', type=float, default=0.0666666667, help='validation split ratio')
 parser.add_argument('--focus_targets', type=int, default=0, help='1 to upweight us/kr/jp target nodes')
+parser.add_argument('--focus_nodes', type=str, default='jp_fx,kr_fx,us_ret', help='priority nodes (comma separated)')
+parser.add_argument('--focus_weight', type=float, default=0.35, help='priority weight for focus-node RRSE in model selection (0~1)')
+parser.add_argument('--plot_focus_only', type=int, default=0, help='1 to plot/save only focus nodes')
 parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
 parser.add_argument('--rollout_mode', type=str, default='teacher_forced', choices=['teacher_forced', 'recursive'], help='test rollout mode')
 parser.add_argument('--seed', type=int, default=777, help='random seed')
@@ -715,6 +747,7 @@ def main(experiment):
     best_rae = 10000000
     best_corr = -10000000
     best_smape = 10000000
+    best_objective = 10000000
     best_test_rse = 10000000
     best_test_corr = -10000000
 
@@ -778,7 +811,8 @@ def main(experiment):
 
         print(f"Auto-detected num_nodes: {args.num_nodes}")
 
-        model = gtnet(args.gcn_true, args.buildA_true, gcn_depth, args.num_nodes,
+        use_graph = bool(args.use_graph)
+        model = gtnet(use_graph, use_graph, gcn_depth, args.num_nodes,
                       device, Data.adj, dropout=dropout, subgraph_size=k,
                       node_dim=node_dim, dilation_exponential=dilation_ex,
                       conv_channels=conv, residual_channels=res,
@@ -820,6 +854,7 @@ def main(experiment):
                 print('best rrae=', best_rae)
                 print('best corr=', best_corr)
                 print('best smape=', best_smape)
+                print('best objective=', best_objective)
                 print('best hps=', best_hp)
                 print('best test rse=', best_test_rse)
                 print('best test corr=', best_test_corr)
@@ -828,21 +863,24 @@ def main(experiment):
 
                 epoch_start_time = time.time()
                 train_loss = train(Data, Data.train[0], Data.train[1], model, criterion, optim, args.batch_size)
-                val_loss, val_rae, val_corr, val_smape = evaluate_sliding_window(
+                val_loss, val_rae, val_corr, val_smape, val_focus_rrse = evaluate_sliding_window(
                     Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Validation'
                 )
-                jp_fx_val_rse = val_loss
+                if val_focus_rrse is None:
+                    val_focus_rrse = val_loss
+                focus_weight = min(max(args.focus_weight, 0.0), 1.0)
+                objective_score = (1.0 - focus_weight) * val_loss + focus_weight * val_focus_rrse
                 print(
-                    '| end of epoch {:3d} | time: {:5.2f}s | train_loss {:5.4f} | valid rse {:5.4f} | valid rae {:5.4f} | valid corr  {:5.4f} | valid smape  {:5.4f} | jp_fx_rse {:5.4f}'.format(
-                        epoch, (time.time() - epoch_start_time), train_loss, val_loss, val_rae, val_corr, val_smape, jp_fx_val_rse), flush=True)
+                    '| end of epoch {:3d} | time: {:5.2f}s | train_loss {:5.4f} | valid rse {:5.4f} | valid rae {:5.4f} | valid corr  {:5.4f} | valid smape  {:5.4f} | focus_rrse {:5.4f} | obj {:5.4f}'.format(
+                        epoch, (time.time() - epoch_start_time), train_loss, val_loss, val_rae, val_corr, val_smape, val_focus_rrse, objective_score), flush=True)
                 
-                scheduler.step(val_loss)
+                scheduler.step(objective_score)
                 
-                # ===== Best 모델 선택 기준: 전체 Validation RSE 최소화 =====
+                # ===== Best 모델 선택 기준: 전체 RSE + 우선노드 RSE 가중 합 =====
                 safe_corr = val_corr if not math.isnan(val_corr) else 0.0
                 sum_loss = val_loss + val_rae - safe_corr
 
-                if val_loss < best_rse:
+                if objective_score < best_objective:
                     save_path = Path(args.save)
                     save_path.parent.mkdir(parents=True, exist_ok=True)
                     
@@ -853,16 +891,18 @@ def main(experiment):
                     best_rae = val_rae
                     best_corr = val_corr
                     best_smape = val_smape
+                    best_objective = objective_score
 
                     best_hp = [gcn_depth, lr, conv, res, skip, end, k, dropout, dilation_ex, node_dim, prop_alpha, tanh_alpha, layer, epoch]
 
                     es_counter = 0
 
-                    test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(
+                    test_acc, test_rae, test_corr, test_smape, test_focus_rrse = evaluate_sliding_window(
                         Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Testing'
                     )
                     print('********************************************************************************************************')
-                    print("test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f}| test smape {:5.4f}".format(test_acc, test_rae, test_corr, test_smape), flush=True)
+                    print("test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f}| test smape {:5.4f} | test focus_rrse {:5.4f}".format(
+                        test_acc, test_rae, test_corr, test_smape, test_focus_rrse if test_focus_rrse is not None else test_acc), flush=True)
                     print('********************************************************************************************************')
                     best_test_rse = test_acc
                     best_test_corr = test_corr
@@ -888,11 +928,11 @@ def main(experiment):
         clear_split_outputs('Validation')
         clear_split_outputs('Testing')
 
-    vtest_acc, vtest_rae, vtest_corr, vtest_smape = evaluate_sliding_window(
+    vtest_acc, vtest_rae, vtest_corr, vtest_smape, _ = evaluate_sliding_window(
         Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Validation'
     )
 
-    test_acc, test_rae, test_corr, test_smape = evaluate_sliding_window(
+    test_acc, test_rae, test_corr, test_smape, _ = evaluate_sliding_window(
         Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Testing'
     )
     print('********************************************************************************************************')
