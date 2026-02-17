@@ -822,6 +822,7 @@ parser.add_argument('--seed', type=int, default=777, help='random seed')
 parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to skip plotting')
 parser.add_argument('--clean_cache', type=int, default=0, choices=[0, 1], help='1 to delete cached *.pt in data dir before training')
 parser.add_argument('--autotune_mode', type=int, default=0, choices=[0, 1], help='1 to optimize for repeated auto-tuning runs')
+parser.add_argument('--apply_best_tuning', type=int, default=0, choices=[0, 1], help='1 to override args with best tuning run values')
 
 
 args = parser.parse_args()
@@ -829,6 +830,78 @@ if args.autotune_mode == 1:
     args.plot = 0
     args.clean_cache = 0
     args.use_graph = 0
+
+# If requested, load best tuning run from tuning_runs and override matching args
+if args.apply_best_tuning == 1:
+    try:
+        import json
+        from pathlib import Path
+        TR = Path(__file__).resolve().parent / 'tuning_runs'
+        # find latest tuning run folder by name (timestamped folders)
+        runs = sorted([p for p in TR.iterdir() if p.is_dir()])
+        if runs:
+            latest = runs[-1]
+            results_file = latest / 'results.json'
+            if results_file.exists():
+                with open(results_file, 'r') as f:
+                    results = json.load(f)
+                # pick the run with smallest best_test_rse when available
+                best = None
+                for r in results:
+                    if 'best_test_rse' in r and r.get('best_test_rse') is not None:
+                        if best is None or r.get('best_test_rse') < best.get('best_test_rse'):
+                            best = r
+                if best is None and results:
+                    best = results[0]
+
+                if best is not None:
+                    run_id = best.get('run_id')
+                    log_path = latest / f"run_{int(run_id):03d}.log"
+                    if log_path.exists():
+                        # extract Namespace(...) line from log and convert to dict
+                        import re
+                        ns_line = None
+                        with open(log_path, 'r') as lf:
+                            for line in lf:
+                                if line.strip().startswith('Namespace('):
+                                    ns_line = line.strip()
+                                    break
+                        if ns_line:
+                            m = re.search(r"Namespace\((.*)\)", ns_line)
+                            if m:
+                                inner = m.group(1)
+                                try:
+                                    parsed = eval('dict(' + inner + ')')
+                                except Exception:
+                                    parsed = None
+
+                                if isinstance(parsed, dict):
+                                    # Only override args that the parser defines.
+                                    # Do not overwrite user-run controls like epochs/plot/autotune_mode/clean_cache
+                                    skip_keys = {'epochs', 'plot', 'autotune_mode', 'clean_cache'}
+                                    for k, v in parsed.items():
+                                        if k in skip_keys:
+                                            continue
+                                        if hasattr(args, k):
+                                            try:
+                                                setattr(args, k, v)
+                                            except Exception:
+                                                pass
+                                    # ensure autotune mode off when applying tuned HPs
+                                    args.autotune_mode = 0
+                                    print(f"[apply_best_tuning] Applied params from {log_path} (preserved epochs/plot)")
+                                else:
+                                    print(f"[apply_best_tuning] failed to parse Namespace in {log_path}")
+                        else:
+                            print(f"[apply_best_tuning] Namespace line not found in {log_path}")
+                    else:
+                        print(f"[apply_best_tuning] log file not found: {log_path}")
+            else:
+                print(f"[apply_best_tuning] results.json not found in {latest}")
+        else:
+            print("[apply_best_tuning] no tuning_runs directories found")
+    except Exception as e:
+        print(f"[apply_best_tuning] error while loading tuning run: {e}")
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 if device.type == 'cuda':
