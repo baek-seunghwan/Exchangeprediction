@@ -774,7 +774,7 @@ parser.add_argument('--log_interval', type=int, default=2000, metavar='N', help=
 parser.add_argument('--save', type=str, default=str(DEFAULT_MODEL_SAVE), help='path to save the final model')
 parser.add_argument('--optim', type=str, default='adam')
 parser.add_argument('--L1Loss', type=bool, default=True)
-parser.add_argument('--loss_mode', type=str, default='l1', choices=['l1', 'mse'], help='training loss type; mse generally aligns better with RSE minimization')
+parser.add_argument('--loss_mode', type=str, default='mse', choices=['l1', 'mse'], help='training loss type; mse generally aligns better with RSE minimization')
 parser.add_argument('--normalize', type=int, default=2)
 parser.add_argument('--device', type=str, default='cuda:1', help='')
 parser.add_argument('--gcn_true', type=bool, default=False, help='whether to add graph convolution layer')
@@ -796,35 +796,35 @@ parser.add_argument('--seq_out_len', type=int, default=1, help='output sequence 
 parser.add_argument('--horizon', type=int, default=1, help='forecast start offset (1=predict immediately after input)')
 parser.add_argument('--layers', type=int, default=2, help='number of layers')
 parser.add_argument('--batch_size', type=int, default=4, help='batch size')
-parser.add_argument('--lr', type=float, default=0.0005, help='learning rate')
+parser.add_argument('--lr', type=float, default=0.0002, help='learning rate')
 parser.add_argument('--weight_decay', type=float, default=0.00001, help='weight decay rate')
 parser.add_argument('--clip', type=int, default=10, help='clip')
 parser.add_argument('--propalpha', type=float, default=0.6, help='prop alpha')
 parser.add_argument('--tanhalpha', type=float, default=0.1, help='tanh alpha')
-parser.add_argument('--epochs', type=int, default=320, help='')
+parser.add_argument('--epochs', type=int, default=120, help='')
 parser.add_argument('--num_split', type=int, default=1, help='number of splits for graphs')
 parser.add_argument('--step_size', type=int, default=100, help='step_size')
 parser.add_argument('--ss_prob', type=float, default=0.2, help='scheduled sampling probability')
 parser.add_argument('--train_ratio', type=float, default=0.8666666667, help='train split ratio')
 parser.add_argument('--valid_ratio', type=float, default=0.0666666667, help='validation split ratio')
-parser.add_argument('--focus_targets', type=int, default=0, help='1 to upweight us/kr/jp target nodes')
-parser.add_argument('--focus_nodes', type=str, default='us_Trade Weighted Dollar Index,jp_fx,kr_fx', help='priority nodes (comma separated)')
-parser.add_argument('--focus_weight', type=float, default=0.7, help='priority weight for focus-node RRSE in model selection (0~1)')
-parser.add_argument('--focus_target_gain', type=float, default=12.0, help='loss weight applied to focus target columns when focus_targets=1')
-parser.add_argument('--focus_only_loss', type=int, default=0, choices=[0, 1], help='1 to optimize loss only on focus/rse target columns')
-parser.add_argument('--anchor_focus_to_last', type=float, default=0.0, help='0~1 level anchoring strength for focus columns during evaluation/forecast')
-parser.add_argument('--rse_targets', type=str, default='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', help='comma-separated target series/file names used for terminal RSE/RAE aggregation')
+parser.add_argument('--focus_targets', type=int, default=1, help='1 to upweight us/kr/jp target nodes')
+parser.add_argument('--focus_nodes', type=str, default='us_Trade Weighted Dollar Index', help='priority nodes (comma separated)')
+parser.add_argument('--focus_weight', type=float, default=1.0, help='priority weight for focus-node RRSE in model selection (0~1)')
+parser.add_argument('--focus_target_gain', type=float, default=40.0, help='loss weight applied to focus target columns when focus_targets=1')
+parser.add_argument('--focus_only_loss', type=int, default=1, choices=[0, 1], help='1 to optimize loss only on focus/rse target columns')
+parser.add_argument('--anchor_focus_to_last', type=float, default=0.8, help='0~1 level anchoring strength for focus columns during evaluation/forecast')
+parser.add_argument('--rse_targets', type=str, default='Us_Trade Weighted Dollar Index_Testing.txt', help='comma-separated target series/file names used for terminal RSE/RAE aggregation')
 parser.add_argument('--rse_report_mode', type=str, default='targets', choices=['targets', 'all'], help='which RSE/RAE to report in terminal and final summary')
 parser.add_argument('--plot_focus_only', type=int, default=0, help='1 to plot/save only focus nodes')
 parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
 parser.add_argument('--rollout_mode', type=str, default='teacher_forced', choices=['teacher_forced', 'recursive'], help='test rollout mode')
-parser.add_argument('--seed', type=int, default=777, help='random seed')
+parser.add_argument('--seed', type=int, default=2026, help='random seed')
 parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to skip plotting')
 parser.add_argument('--clean_cache', type=int, default=0, choices=[0, 1], help='1 to delete cached *.pt in data dir before training')
 parser.add_argument('--autotune_mode', type=int, default=0, choices=[0, 1], help='1 to optimize for repeated auto-tuning runs')
 parser.add_argument('--apply_best_tuning', type=int, default=0, choices=[0, 1], help='1 to override args with best tuning run values')
 parser.add_argument('--eval_best_tuning', type=int, default=0, choices=[0, 1], help='1 to skip training and evaluate best tuned checkpoint with plotting')
-parser.add_argument('--target_profile', type=str, default='none', choices=['none', 'triple_050'], help='preset for target-focused optimization setup')
+parser.add_argument('--target_profile', type=str, default='run001_us', choices=['none', 'triple_050', 'run001_us'], help='preset for target-focused optimization setup')
 
 
 args = parser.parse_args()
@@ -924,6 +924,28 @@ if args.target_profile == 'triple_050':
     args.rollout_mode = 'teacher_forced'
     args.use_graph = 0
     print('[target_profile] applied: triple_050')
+
+if args.target_profile == 'run001_us':
+    args.loss_mode = 'mse'
+    args.use_graph = 0
+    args.lr = 0.0002
+    args.dropout = 0.1
+    args.layers = 2
+    args.seq_in_len = 24
+    args.seq_out_len = 1
+    args.ss_prob = 0.2
+    args.epochs = 120
+    args.seed = 2026
+    args.focus_targets = 1
+    args.focus_nodes = 'us_Trade Weighted Dollar Index'
+    args.focus_weight = 1.0
+    args.focus_target_gain = 40.0
+    args.focus_only_loss = 1
+    args.anchor_focus_to_last = 0.8
+    args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt'
+    args.rse_report_mode = 'targets'
+    args.rollout_mode = 'teacher_forced'
+    print('[target_profile] applied: run001_us')
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 if device.type == 'cuda':
