@@ -1,0 +1,140 @@
+[
+  {
+    "run_id": 1,
+    "seed": 123,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 0.0002,
+      "dropout": 0.1,
+      "layers": 2,
+      "conv_channels": 16,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "seq_in_len": 24,
+      "seq_out_len": 1,
+      "ss_prob": 0.2
+    },
+    "return_code": 0,
+    "final_test_rse": 2.2922,
+    "final_test_rae": 2.5414,
+    "best_test_rse": 2.2897817195340866,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260217_121252/run_001.log"
+  },
+  {
+    "run_id": 2,
+    "seed": 777,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 0.0002,
+      "dropout": 0.1,
+      "layers": 2,
+      "conv_channels": 16,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "seq_in_len": 24,
+      "seq_out_len": 1,
+      "ss_prob": 0.2
+    },
+    "return_code": 0,
+    "final_test_rse": 2.1443,
+    "final_test_rae": 2.3211,
+    "best_test_rse": 2.146479235562697,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260217_121252/run_002.log"
+  },
+  {
+    "run_id": 3,
+    "seed": 2026,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 0.0002,
+      "dropout": 0.1,
+      "layers": 2,
+      "conv_channels": 16,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "seq_in_len": 24,
+      "seq_out_len": 1,
+      "ss_prob": 0.2
+    },
+    "return_code": 0,
+    "final_test_rse": 1.9467,
+    "final_test_rae": 2.1395,
+    "best_test_rse": 1.9353434506020337,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260217_121252/run_003.log"
+  },
+  {
+    "run_id": 4,
+    "seed": 123,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 0.0003,
+      "dropout": 0.1,
+      "layers": 2,
+      "conv_channels": 16,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "seq_in_len": 24,
+      "seq_out_len": 1,
+      "ss_prob": 0.3
+    },
+    "return_code": 0,
+    "final_test_rse": 2.1192,
+    "final_test_rae": 2.3681,
+    "best_test_rse": 2.1126509083869704,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260217_121252/run_004.log"
+  },
+  {
+    "run_id": 5,
+    "seed": 777,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 0.0003,
+      "dropout": 0.1,
+      "layers": 2,
+      "conv_channels": 16,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "seq_in_len": 24,
+      "seq_out_len": 1,
+      "ss_prob": 0.3
+    },
+    "return_code": 0,
+    "final_test_rse": 1.8671,
+    "final_test_rae": 2.0294,
+    "best_test_rse": 1.8591319394456343,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260217_121252/run_005.log"
+  },
+  {
+    "run_id": 6,
+    "seed": 2026,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 0.0003,
+      "dropout": 0.1,
+      "layers": 2,
+      "conv_channels": 16,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "seq_in_len": 24,
+      "seq_out_len": 1,
+      "ss_prob": 0.3
+    },
+    "return_code": 0,
+    "final_test_rse": 1.7503,
+    "final_test_rae": 1.9477,
+    "best_test_rse": 1.7517000580970357,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260217_121252/run_006.log"
+  }
+]

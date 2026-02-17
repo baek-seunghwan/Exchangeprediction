@@ -1,0 +1,102 @@
+CUDA not available, using CPU
+Loading data from /Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv...
+Data loaded and converted to numeric successfully.
+Graph loaded with 1 attacks...
+33 columns loaded
+Adjacency created...
+train X: torch.Size([131, 24, 33])
+train Y: torch.Size([131, 1, 33])
+valid X: torch.Size([11, 24, 33])
+valid Y: torch.Size([11, 1, 33])
+test X: torch.Size([11, 24, 33])
+test Y: torch.Size([11, 1, 33])
+test window: torch.Size([36, 33])
+length of training set= 131
+length of validation set= 11
+length of testing set= 11
+valid= 168
+Auto-detected num_nodes: 33
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260217_115029/checkpoints/model_001.pt', optim='adam', L1Loss=True, normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=0, gcn_depth=1, num_nodes=33, dropout=0.1, subgraph_size=40, node_dim=30, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=24, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.0002, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=1, num_split=1, step_size=100, ss_prob=0.2, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx', focus_weight=0.7, focus_target_gain=12.0, rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', plot_focus_only=0, debug_eval=0, rollout_mode='teacher_forced', seed=2026, plot=0, clean_cache=0, autotune_mode=1)
+The recpetive field size is 19
+Number of model parameters is 611649
+begin training
+Experiment: 1
+Iter: 0
+epoch: 1
+hp= [1, 0.0002, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best sum= 10000000
+best rrse= 10000000
+best rrae= 10000000
+best corr= -10000000
+best smape= 10000000
+best objective= 10000000
+best hps= []
+best test rse= 10000000
+best test corr= -10000000
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 3.193
+iter:  1 | loss: 2.511
+iter:  2 | loss: 2.592
+iter:  3 | loss: 2.197
+iter:  4 | loss: 2.743
+iter:  5 | loss: 2.281
+iter:  6 | loss: 2.553
+iter:  7 | loss: 2.389
+iter:  8 | loss: 2.452
+iter:  9 | loss: 2.737
+iter: 10 | loss: 2.492
+iter: 11 | loss: 3.296
+iter: 12 | loss: 2.536
+iter: 13 | loss: 2.823
+iter: 14 | loss: 2.503
+iter: 15 | loss: 2.498
+iter: 16 | loss: 2.096
+iter: 17 | loss: 2.586
+iter: 18 | loss: 2.229
+iter: 19 | loss: 2.384
+iter: 20 | loss: 2.289
+iter: 21 | loss: 2.120
+iter: 22 | loss: 2.633
+iter: 23 | loss: 2.621
+iter: 24 | loss: 2.324
+iter: 25 | loss: 2.556
+iter: 26 | loss: 2.462
+iter: 27 | loss: 3.058
+iter: 28 | loss: 2.282
+iter: 29 | loss: 2.854
+iter: 30 | loss: 2.622
+iter: 31 | loss: 2.699
+iter: 32 | loss: 2.734
+testing r= 5
+rrse= 148.3616253449658 / 34.875950297872706
+| end of epoch   1 | time:  2.17s | train_loss 2.5545 | valid rse 4.2540 | valid rae 4.8492 | valid corr  0.0632 | valid smape  0.3149 | focus_rrse 3.5085 | obj 3.7322
+testing r= 5
+rrse= 162.49295056824772 / 87.05324564957357
+********************************************************************************************************
+test rse 1.8666 | test rae 2.0523 | test corr 0.1428| test smape 0.2634 | test focus_rrse 1.4819
+********************************************************************************************************
+best val loss= 9.03992025008916
+best hps= [1, 0.0002, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+testing r= 5
+rrse= 149.49821016905184 / 34.875950297872706
+testing r= 5
+rrse= 162.70216390885832 / 87.05324564957357
+********************************************************************************************************
+final test rse 1.8690 | test rae 2.0557 | test corr 0.1432 | test smape 0.2637
+********************************************************************************************************
+
+
+
+1 run average
+
+
+
+valid	rse	rae
+mean	4.2866	4.8800
+std	0.0000	0.0000
+
+
+
+test	rse	rae
+mean	1.8690	2.0557
+std	0.0000	0.0000

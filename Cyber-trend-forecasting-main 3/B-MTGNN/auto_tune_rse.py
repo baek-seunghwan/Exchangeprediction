@@ -12,6 +12,11 @@ def build_trials():
         {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
         {"lr": 3e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.3},
         {"lr": 5e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
+        {"lr": 5e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.1},
+        {"lr": 7e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.1},
+        {"lr": 3e-4, "dropout": 0.00, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.0},
+        {"lr": 5e-4, "dropout": 0.00, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.0},
+        {"lr": 3e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.2},
         {"lr": 2e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
         {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 12, "seq_out_len": 1, "ss_prob": 0.2},
         {"lr": 3e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 12, "seq_out_len": 1, "ss_prob": 0.3},
@@ -52,7 +57,15 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
         "--batch_size", str(common_args.batch_size),
         "--train_ratio", str(common_args.train_ratio),
         "--valid_ratio", str(common_args.valid_ratio),
-        "--focus_targets", "0",
+        "--focus_targets", str(common_args.focus_targets),
+        "--focus_nodes", common_args.focus_nodes,
+        "--focus_weight", str(common_args.focus_weight),
+        "--focus_target_gain", str(common_args.focus_target_gain),
+        "--focus_only_loss", str(common_args.focus_only_loss),
+        "--anchor_focus_to_last", str(common_args.anchor_focus_to_last),
+        "--rse_targets", common_args.rse_targets,
+        "--rse_report_mode", common_args.rse_report_mode,
+        "--loss_mode", common_args.loss_mode,
         "--debug_eval", "0",
         "--rollout_mode", common_args.rollout_mode,
         "--plot", "0",
@@ -126,6 +139,16 @@ def main():
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--train_ratio", type=float, default=0.8666666667)
     parser.add_argument("--valid_ratio", type=float, default=0.0666666667)
+    parser.add_argument("--focus_targets", type=int, default=1)
+    parser.add_argument("--focus_nodes", type=str, default="us_Trade Weighted Dollar Index,jp_fx,kr_fx")
+    parser.add_argument("--focus_weight", type=float, default=0.7)
+    parser.add_argument("--focus_target_gain", type=float, default=12.0)
+    parser.add_argument("--focus_only_loss", type=int, default=0, choices=[0, 1])
+    parser.add_argument("--anchor_focus_to_last", type=float, default=0.0)
+    parser.add_argument("--rse_targets", type=str, default="Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt")
+    parser.add_argument("--rse_report_mode", type=str, default="targets", choices=["targets", "all"])
+    parser.add_argument("--loss_mode", type=str, default="mse", choices=["l1", "mse"])
+    parser.add_argument("--goal_rse", type=float, default=0.5, help="stop sweep early when objective_rse <= goal")
     parser.add_argument("--rollout_mode", type=str, default="teacher_forced", choices=["teacher_forced", "recursive"])
     parser.add_argument("--seeds", type=str, default="123,777,2026")
     parser.add_argument("--max_trials", type=int, default=8)
@@ -199,6 +222,12 @@ def main():
         done_keys.add(key)
         write_results_json_csv(out_dir, results)
         print(f"[{idx}/{total}] done final_test_rse={res['final_test_rse']} best_test_rse={res['best_test_rse']}")
+
+        obj = res["best_test_rse"] if res["best_test_rse"] is not None else res["final_test_rse"]
+        if obj is not None and obj <= args.goal_rse:
+            print(f"goal reached: objective_rse={obj} <= goal_rse={args.goal_rse}. stopping early.")
+            break
+
         run_id += 1
 
     valid = [r for r in results if (r["best_test_rse"] is not None or r["final_test_rse"] is not None)]

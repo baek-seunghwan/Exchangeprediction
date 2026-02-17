@@ -1,0 +1,6062 @@
+CUDA not available, using CPU
+Loading data from /Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv...
+Data loaded and converted to numeric successfully.
+Graph loaded with 1 attacks...
+33 columns loaded
+Adjacency created...
+train X: torch.Size([131, 24, 33])
+train Y: torch.Size([131, 1, 33])
+valid X: torch.Size([11, 24, 33])
+valid Y: torch.Size([11, 1, 33])
+test X: torch.Size([11, 24, 33])
+test Y: torch.Size([11, 1, 33])
+test window: torch.Size([36, 33])
+length of training set= 131
+length of validation set= 11
+length of testing set= 11
+valid= 168
+Auto-detected num_nodes: 33
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260217_122235/checkpoints/model_003.pt', optim='adam', L1Loss=True, loss_mode='mse', normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=0, gcn_depth=1, num_nodes=33, dropout=0.1, subgraph_size=40, node_dim=30, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=24, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.0005, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=120, num_split=1, step_size=100, ss_prob=0.2, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='kr_fx', focus_weight=1.0, focus_target_gain=30.0, rse_targets='Kr_fx_Testing.txt', rse_report_mode='targets', plot_focus_only=0, debug_eval=0, rollout_mode='teacher_forced', seed=2026, plot=0, clean_cache=0, autotune_mode=1)
+The recpetive field size is 19
+Number of model parameters is 611649
+begin training
+Experiment: 1
+Iter: 0
+epoch: 1
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best sum= 10000000
+best rrse= 10000000
+best rrae= 10000000
+best corr= -10000000
+best smape= 10000000
+best objective= 10000000
+best hps= []
+best test rse= 10000000
+best test corr= -10000000
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.023
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.017
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.014
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.014
+iter: 15 | loss: 0.020
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.007
+iter: 22 | loss: 0.008
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.013
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.011
+testing r= 5
+rrse(target)=78.74827317055117 / 34.29840899189057 | rrse(all)=68148732099767.09 / 34622965068576.312 | report_mode=targets
+| end of epoch   1 | time:  3.04s | train_loss 0.0114 | valid rse 2.2960 | valid rae 2.8245 | valid corr  0.5347 | valid smape  0.2686 | focus_rrse 2.2960 | obj 2.2960
+testing r= 5
+rrse(target)=125.75533894605628 / 86.48607863046514 | rrse(all)=10375763201622.23 / 13118447315149.623 | report_mode=targets
+********************************************************************************************************
+test rse 1.4541 | test rae 1.7377 | test corr 0.4776| test smape 0.2063 | test focus_rrse 1.4541
+********************************************************************************************************
+Experiment: 1
+Iter: 0
+epoch: 2
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 2]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.018
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.008
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.013
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.015
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.015
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=78.77624810579012 / 34.29840899189057 | rrse(all)=67846848919778.75 / 34622965068576.312 | report_mode=targets
+| end of epoch   2 | time:  2.96s | train_loss 0.0112 | valid rse 2.2968 | valid rae 2.8216 | valid corr  0.5262 | valid smape  0.2665 | focus_rrse 2.2968 | obj 2.2968
+Experiment: 1
+Iter: 0
+epoch: 3
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 3]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.028
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.007
+iter: 27 | loss: 0.008
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.020
+testing r= 5
+rrse(target)=79.65588833774312 / 34.29840899189057 | rrse(all)=68331791004124.52 / 34622965068576.312 | report_mode=targets
+| end of epoch   3 | time:  2.85s | train_loss 0.0110 | valid rse 2.3224 | valid rae 2.8550 | valid corr  0.5219 | valid smape  0.2675 | focus_rrse 2.3224 | obj 2.3224
+Experiment: 1
+Iter: 0
+epoch: 4
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 4]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.007
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.018
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.019
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.007
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.019
+testing r= 5
+rrse(target)=79.47663891240306 / 34.29840899189057 | rrse(all)=68234740052273.734 / 34622965068576.312 | report_mode=targets
+| end of epoch   4 | time:  2.74s | train_loss 0.0112 | valid rse 2.3172 | valid rae 2.8469 | valid corr  0.5214 | valid smape  0.2672 | focus_rrse 2.3172 | obj 2.3172
+Experiment: 1
+Iter: 0
+epoch: 5
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 5]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.013
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.022
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.008
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.006
+iter: 32 | loss: 0.020
+testing r= 5
+rrse(target)=79.70769964572118 / 34.29840899189057 | rrse(all)=68028110516454.0 / 34622965068576.312 | report_mode=targets
+| end of epoch   5 | time:  3.22s | train_loss 0.0112 | valid rse 2.3239 | valid rae 2.8637 | valid corr  0.5266 | valid smape  0.2673 | focus_rrse 2.3239 | obj 2.3239
+Experiment: 1
+Iter: 0
+epoch: 6
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 6]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.007
+iter:  1 | loss: 0.016
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.015
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.018
+iter: 15 | loss: 0.019
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=81.50221371130817 / 34.29840899189057 | rrse(all)=67695216108423.195 / 34622965068576.312 | report_mode=targets
+| end of epoch   6 | time:  2.63s | train_loss 0.0113 | valid rse 2.3763 | valid rae 2.9125 | valid corr  0.5226 | valid smape  0.2676 | focus_rrse 2.3763 | obj 2.3763
+Experiment: 1
+Iter: 0
+epoch: 7
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 7]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.007
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.015
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.021
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.015
+iter: 19 | loss: 0.007
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.007
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.019
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.017
+testing r= 5
+rrse(target)=78.75291723267304 / 34.29840899189057 | rrse(all)=68412469589827.35 / 34622965068576.312 | report_mode=targets
+| end of epoch   7 | time:  2.33s | train_loss 0.0111 | valid rse 2.2961 | valid rae 2.8228 | valid corr  0.5252 | valid smape  0.2683 | focus_rrse 2.2961 | obj 2.2961
+Experiment: 1
+Iter: 0
+epoch: 8
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 8]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.005
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.019
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.015
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.017
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=79.52668822870093 / 34.29840899189057 | rrse(all)=68056153894066.39 / 34622965068576.312 | report_mode=targets
+| end of epoch   8 | time:  2.61s | train_loss 0.0113 | valid rse 2.3187 | valid rae 2.8445 | valid corr  0.5231 | valid smape  0.2668 | focus_rrse 2.3187 | obj 2.3187
+Experiment: 1
+Iter: 0
+epoch: 9
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 9]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.006
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.007
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.016
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.013
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.021
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=79.13541598108903 / 34.29840899189057 | rrse(all)=68306386431420.44 / 34622965068576.312 | report_mode=targets
+| end of epoch   9 | time:  2.73s | train_loss 0.0110 | valid rse 2.3073 | valid rae 2.8344 | valid corr  0.5282 | valid smape  0.2679 | focus_rrse 2.3073 | obj 2.3073
+Experiment: 1
+Iter: 0
+epoch: 10
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 10]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.024
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.016
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.023
+testing r= 5
+rrse(target)=79.5384789199935 / 34.29840899189057 | rrse(all)=68314256573112.96 / 34622965068576.312 | report_mode=targets
+| end of epoch  10 | time:  2.56s | train_loss 0.0113 | valid rse 2.3190 | valid rae 2.8467 | valid corr  0.5204 | valid smape  0.2680 | focus_rrse 2.3190 | obj 2.3190
+Experiment: 1
+Iter: 0
+epoch: 11
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 11]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.008
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.017
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.020
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.007
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.010
+testing r= 5
+rrse(target)=80.41235280959636 / 34.29840899189057 | rrse(all)=68377239052065.3 / 34622965068576.312 | report_mode=targets
+| end of epoch  11 | time:  3.12s | train_loss 0.0110 | valid rse 2.3445 | valid rae 2.8808 | valid corr  0.5248 | valid smape  0.2673 | focus_rrse 2.3445 | obj 2.3445
+Experiment: 1
+Iter: 0
+epoch: 12
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best sum= 4.585765567942483
+best rrse= 2.295974521417895
+best rrae= 2.8245003808980624
+best corr= 0.53470933
+best smape= 0.2685523205098573
+best objective= 2.2959744930267334
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.4540529636379924
+best test corr= 0.47762448
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.017
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.017
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.016
+iter: 15 | loss: 0.015
+iter: 16 | loss: 0.005
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.006
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.016
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.007
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=78.71648592416966 / 34.29840899189057 | rrse(all)=68368072425877.17 / 34622965068576.312 | report_mode=targets
+| end of epoch  12 | time:  3.35s | train_loss 0.0112 | valid rse 2.2950 | valid rae 2.8237 | valid corr  0.5224 | valid smape  0.2684 | focus_rrse 2.2950 | obj 2.2950
+testing r= 5
+rrse(target)=124.08101247269866 / 86.48607863046514 | rrse(all)=11121754578354.557 / 13118447315149.623 | report_mode=targets
+********************************************************************************************************
+test rse 1.4347 | test rae 1.7128 | test corr 0.4736| test smape 0.2039 | test focus_rrse 1.4347
+********************************************************************************************************
+Experiment: 1
+Iter: 0
+epoch: 13
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 13]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.021
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.013
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.021
+iter: 17 | loss: 0.006
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.018
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.007
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.020
+testing r= 5
+rrse(target)=80.3693530529906 / 34.29840899189057 | rrse(all)=68598552912756.51 / 34622965068576.312 | report_mode=targets
+| end of epoch  13 | time:  3.57s | train_loss 0.0114 | valid rse 2.3432 | valid rae 2.8771 | valid corr  0.5231 | valid smape  0.2672 | focus_rrse 2.3432 | obj 2.3432
+Experiment: 1
+Iter: 0
+epoch: 14
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 14]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.016
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.017
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.017
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.008
+iter: 27 | loss: 0.013
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.005
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=79.78477212652331 / 34.29840899189057 | rrse(all)=68359949427005.84 / 34622965068576.312 | report_mode=targets
+| end of epoch  14 | time:  3.52s | train_loss 0.0111 | valid rse 2.3262 | valid rae 2.8548 | valid corr  0.5243 | valid smape  0.2675 | focus_rrse 2.3262 | obj 2.3262
+Experiment: 1
+Iter: 0
+epoch: 15
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 15]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.015
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.022
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.007
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.007
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.014
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.019
+testing r= 5
+rrse(target)=80.00151670925527 / 34.29840899189057 | rrse(all)=68219664094029.875 / 34622965068576.312 | report_mode=targets
+| end of epoch  15 | time:  3.21s | train_loss 0.0111 | valid rse 2.3325 | valid rae 2.8647 | valid corr  0.5243 | valid smape  0.2675 | focus_rrse 2.3325 | obj 2.3325
+Experiment: 1
+Iter: 0
+epoch: 16
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 16]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.007
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.008
+iter:  7 | loss: 0.018
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.023
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.008
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=79.08960442020019 / 34.29840899189057 | rrse(all)=68467079032376.02 / 34622965068576.312 | report_mode=targets
+| end of epoch  16 | time:  2.99s | train_loss 0.0112 | valid rse 2.3059 | valid rae 2.8397 | valid corr  0.5245 | valid smape  0.2671 | focus_rrse 2.3059 | obj 2.3059
+Experiment: 1
+Iter: 0
+epoch: 17
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 17]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.006
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.017
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.024
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.017
+testing r= 5
+rrse(target)=80.71168123810364 / 34.29840899189057 | rrse(all)=68318820969486.516 / 34622965068576.312 | report_mode=targets
+| end of epoch  17 | time:  3.28s | train_loss 0.0112 | valid rse 2.3532 | valid rae 2.8890 | valid corr  0.5251 | valid smape  0.2674 | focus_rrse 2.3532 | obj 2.3532
+Experiment: 1
+Iter: 0
+epoch: 18
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 18]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.017
+iter:  3 | loss: 0.016
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.008
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.015
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.007
+iter: 30 | loss: 0.021
+iter: 31 | loss: 0.015
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=79.72136841544587 / 34.29840899189057 | rrse(all)=68075708015485.68 / 34622965068576.312 | report_mode=targets
+| end of epoch  18 | time:  2.94s | train_loss 0.0112 | valid rse 2.3243 | valid rae 2.8592 | valid corr  0.5224 | valid smape  0.2668 | focus_rrse 2.3243 | obj 2.3243
+Experiment: 1
+Iter: 0
+epoch: 19
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 19]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.016
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.013
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.019
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.014
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.016
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=80.73909985932312 / 34.29840899189057 | rrse(all)=67621588795878.53 / 34622965068576.312 | report_mode=targets
+| end of epoch  19 | time:  3.61s | train_loss 0.0112 | valid rse 2.3540 | valid rae 2.8914 | valid corr  0.5237 | valid smape  0.2681 | focus_rrse 2.3540 | obj 2.3540
+Experiment: 1
+Iter: 0
+epoch: 20
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 20]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.005
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.015
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.007
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.006
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.016
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.007
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.017
+iter: 27 | loss: 0.019
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.015
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.021
+testing r= 5
+rrse(target)=79.12083754355581 / 34.29840899189057 | rrse(all)=68428715093890.69 / 34622965068576.312 | report_mode=targets
+| end of epoch  20 | time:  3.00s | train_loss 0.0114 | valid rse 2.3068 | valid rae 2.8411 | valid corr  0.5248 | valid smape  0.2678 | focus_rrse 2.3068 | obj 2.3068
+Experiment: 1
+Iter: 0
+epoch: 21
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 21]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.007
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.023
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.016
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.007
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.018
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.007
+testing r= 5
+rrse(target)=79.56877491457469 / 34.29840899189057 | rrse(all)=68233165559912.27 / 34622965068576.312 | report_mode=targets
+| end of epoch  21 | time:  2.96s | train_loss 0.0112 | valid rse 2.3199 | valid rae 2.8535 | valid corr  0.5225 | valid smape  0.2668 | focus_rrse 2.3199 | obj 2.3199
+Experiment: 1
+Iter: 0
+epoch: 22
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 22]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.019
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.006
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.021
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=80.11161951946328 / 34.29840899189057 | rrse(all)=68769956273506.08 / 34622965068576.312 | report_mode=targets
+| end of epoch  22 | time:  2.74s | train_loss 0.0111 | valid rse 2.3357 | valid rae 2.8709 | valid corr  0.5276 | valid smape  0.2667 | focus_rrse 2.3357 | obj 2.3357
+Experiment: 1
+Iter: 0
+epoch: 23
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 23]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.005
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.015
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.015
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.006
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.021
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.008
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.008
+iter: 31 | loss: 0.007
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=80.00321038480268 / 34.29840899189057 | rrse(all)=68242043231992.695 / 34622965068576.312 | report_mode=targets
+| end of epoch  23 | time:  2.84s | train_loss 0.0112 | valid rse 2.3326 | valid rae 2.8668 | valid corr  0.5250 | valid smape  0.2684 | focus_rrse 2.3326 | obj 2.3326
+Experiment: 1
+Iter: 0
+epoch: 24
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best sum= 4.596431824092897
+best rrse= 2.2950477365518966
+best rrae= 2.823746617772476
+best corr= 0.52236253
+best smape= 0.2683719391255151
+best objective= 2.2950477600097656
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 12]
+best test rse= 1.4346934724936242
+best test corr= 0.4735966
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.016
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.006
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.007
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.022
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.007
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.017
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=77.71318021356642 / 34.29840899189057 | rrse(all)=68213258507089.61 / 34622965068576.312 | report_mode=targets
+| end of epoch  24 | time:  2.93s | train_loss 0.0114 | valid rse 2.2658 | valid rae 2.7893 | valid corr  0.5296 | valid smape  0.2674 | focus_rrse 2.2658 | obj 2.2658
+testing r= 5
+rrse(target)=124.35141893289759 / 86.48607863046514 | rrse(all)=10559927183074.9 / 13118447315149.623 | report_mode=targets
+********************************************************************************************************
+test rse 1.4378 | test rae 1.7172 | test corr 0.4792| test smape 0.2046 | test focus_rrse 1.4378
+********************************************************************************************************
+Experiment: 1
+Iter: 0
+epoch: 25
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 25]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.007
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.014
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.024
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.007
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.006
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.018
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.010
+testing r= 5
+rrse(target)=80.60191045347499 / 34.29840899189057 | rrse(all)=68179293004807.09 / 34622965068576.312 | report_mode=targets
+| end of epoch  25 | time:  3.20s | train_loss 0.0112 | valid rse 2.3500 | valid rae 2.8823 | valid corr  0.5256 | valid smape  0.2668 | focus_rrse 2.3500 | obj 2.3500
+Experiment: 1
+Iter: 0
+epoch: 26
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 26]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.017
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.015
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=80.12907373126966 / 34.29840899189057 | rrse(all)=68437159851922.15 / 34622965068576.312 | report_mode=targets
+| end of epoch  26 | time:  3.77s | train_loss 0.0112 | valid rse 2.3362 | valid rae 2.8767 | valid corr  0.5297 | valid smape  0.2678 | focus_rrse 2.3362 | obj 2.3362
+Experiment: 1
+Iter: 0
+epoch: 27
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 27]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.026
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.006
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.007
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.014
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.007
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.008
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=79.14213812719335 / 34.29840899189057 | rrse(all)=68577135836050.336 / 34622965068576.312 | report_mode=targets
+| end of epoch  27 | time:  3.15s | train_loss 0.0110 | valid rse 2.3075 | valid rae 2.8453 | valid corr  0.5287 | valid smape  0.2679 | focus_rrse 2.3075 | obj 2.3075
+Experiment: 1
+Iter: 0
+epoch: 28
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 28]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.016
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.016
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.019
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.017
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.015
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.006
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.019
+testing r= 5
+rrse(target)=79.03592994743751 / 34.29840899189057 | rrse(all)=68262947156011.61 / 34622965068576.312 | report_mode=targets
+| end of epoch  28 | time:  3.06s | train_loss 0.0113 | valid rse 2.3044 | valid rae 2.8317 | valid corr  0.5233 | valid smape  0.2675 | focus_rrse 2.3044 | obj 2.3044
+Experiment: 1
+Iter: 0
+epoch: 29
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 29]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.016
+iter:  6 | loss: 0.005
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.016
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.016
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.007
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.020
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=79.79200561557687 / 34.29840899189057 | rrse(all)=68739973558130.555 / 34622965068576.312 | report_mode=targets
+| end of epoch  29 | time:  2.92s | train_loss 0.0112 | valid rse 2.3264 | valid rae 2.8610 | valid corr  0.5226 | valid smape  0.2671 | focus_rrse 2.3264 | obj 2.3264
+Experiment: 1
+Iter: 0
+epoch: 30
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 30]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.007
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.013
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.020
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.017
+testing r= 5
+rrse(target)=78.87443046545566 / 34.29840899189057 | rrse(all)=68533993063008.484 / 34622965068576.312 | report_mode=targets
+| end of epoch  30 | time:  2.83s | train_loss 0.0110 | valid rse 2.2997 | valid rae 2.8270 | valid corr  0.5230 | valid smape  0.2666 | focus_rrse 2.2997 | obj 2.2997
+Experiment: 1
+Iter: 0
+epoch: 31
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 31]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.015
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.007
+iter:  3 | loss: 0.016
+iter:  4 | loss: 0.017
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.017
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.008
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.015
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.005
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.021
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=79.342343799079 / 34.29840899189057 | rrse(all)=67842744374370.72 / 34622965068576.312 | report_mode=targets
+| end of epoch  31 | time:  2.95s | train_loss 0.0115 | valid rse 2.3133 | valid rae 2.8438 | valid corr  0.5281 | valid smape  0.2672 | focus_rrse 2.3133 | obj 2.3133
+Experiment: 1
+Iter: 0
+epoch: 32
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 32]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.007
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.017
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.007
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.025
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.018
+testing r= 5
+rrse(target)=79.11917126536873 / 34.29840899189057 | rrse(all)=68798443730544.586 / 34622965068576.312 | report_mode=targets
+| end of epoch  32 | time:  3.30s | train_loss 0.0113 | valid rse 2.3068 | valid rae 2.8420 | valid corr  0.5232 | valid smape  0.2683 | focus_rrse 2.3068 | obj 2.3068
+Experiment: 1
+Iter: 0
+epoch: 33
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 33]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.020
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.006
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.008
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=80.32668892170895 / 34.29840899189057 | rrse(all)=68364145962561.875 / 34622965068576.312 | report_mode=targets
+| end of epoch  33 | time:  2.72s | train_loss 0.0110 | valid rse 2.3420 | valid rae 2.8736 | valid corr  0.5246 | valid smape  0.2677 | focus_rrse 2.3420 | obj 2.3420
+Experiment: 1
+Iter: 0
+epoch: 34
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 34]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.022
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.017
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.016
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.019
+testing r= 5
+rrse(target)=80.3283757411959 / 34.29840899189057 | rrse(all)=68571092919380.805 / 34622965068576.312 | report_mode=targets
+| end of epoch  34 | time:  2.79s | train_loss 0.0110 | valid rse 2.3420 | valid rae 2.8761 | valid corr  0.5214 | valid smape  0.2674 | focus_rrse 2.3420 | obj 2.3420
+Experiment: 1
+Iter: 0
+epoch: 35
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 35]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.016
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.004
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.007
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.016
+iter: 26 | loss: 0.023
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.016
+iter: 30 | loss: 0.007
+iter: 31 | loss: 0.007
+iter: 32 | loss: 0.018
+testing r= 5
+rrse(target)=80.62912416777513 / 34.29840899189057 | rrse(all)=67601263701101.44 / 34622965068576.312 | report_mode=targets
+| end of epoch  35 | time:  2.94s | train_loss 0.0113 | valid rse 2.3508 | valid rae 2.8854 | valid corr  0.5209 | valid smape  0.2666 | focus_rrse 2.3508 | obj 2.3508
+Experiment: 1
+Iter: 0
+epoch: 36
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 36]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.022
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.015
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.016
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.021
+testing r= 5
+rrse(target)=78.8988455684318 / 34.29840899189057 | rrse(all)=68279316850056.12 / 34622965068576.312 | report_mode=targets
+| end of epoch  36 | time:  3.23s | train_loss 0.0112 | valid rse 2.3004 | valid rae 2.8303 | valid corr  0.5194 | valid smape  0.2677 | focus_rrse 2.3004 | obj 2.3004
+Experiment: 1
+Iter: 0
+epoch: 37
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 37]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.022
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.005
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.014
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.015
+iter: 23 | loss: 0.006
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.016
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.017
+testing r= 5
+rrse(target)=79.58901082769687 / 34.29840899189057 | rrse(all)=68276193660655.78 / 34622965068576.312 | report_mode=targets
+| end of epoch  37 | time:  3.03s | train_loss 0.0113 | valid rse 2.3205 | valid rae 2.8492 | valid corr  0.5227 | valid smape  0.2675 | focus_rrse 2.3205 | obj 2.3205
+Experiment: 1
+Iter: 0
+epoch: 38
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 38]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.007
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.015
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.018
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.008
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=78.18839615293787 / 34.29840899189057 | rrse(all)=68353947760801.63 / 34622965068576.312 | report_mode=targets
+| end of epoch  38 | time:  2.86s | train_loss 0.0110 | valid rse 2.2797 | valid rae 2.8042 | valid corr  0.5279 | valid smape  0.2669 | focus_rrse 2.2797 | obj 2.2797
+Experiment: 1
+Iter: 0
+epoch: 39
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 39]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.022
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.015
+iter: 27 | loss: 0.008
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.008
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=80.4035020663357 / 34.29840899189057 | rrse(all)=68445888169543.914 / 34622965068576.312 | report_mode=targets
+| end of epoch  39 | time:  3.09s | train_loss 0.0111 | valid rse 2.3442 | valid rae 2.8790 | valid corr  0.5245 | valid smape  0.2663 | focus_rrse 2.3442 | obj 2.3442
+Experiment: 1
+Iter: 0
+epoch: 40
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 40]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.015
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.015
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.021
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.006
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.019
+testing r= 5
+rrse(target)=81.12917699185047 / 34.29840899189057 | rrse(all)=68233187187800.7 / 34622965068576.312 | report_mode=targets
+| end of epoch  40 | time:  3.40s | train_loss 0.0111 | valid rse 2.3654 | valid rae 2.9064 | valid corr  0.5266 | valid smape  0.2680 | focus_rrse 2.3654 | obj 2.3654
+Experiment: 1
+Iter: 0
+epoch: 41
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 41]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.018
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.021
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.017
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.006
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.008
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.008
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=80.14867166904577 / 34.29840899189057 | rrse(all)=68552013778785.86 / 34622965068576.312 | report_mode=targets
+| end of epoch  41 | time:  3.06s | train_loss 0.0112 | valid rse 2.3368 | valid rae 2.8727 | valid corr  0.5241 | valid smape  0.2684 | focus_rrse 2.3368 | obj 2.3368
+Experiment: 1
+Iter: 0
+epoch: 42
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 42]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.015
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.024
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.016
+iter: 13 | loss: 0.006
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.008
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.015
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=79.4967815779356 / 34.29840899189057 | rrse(all)=67879789398693.19 / 34622965068576.312 | report_mode=targets
+| end of epoch  42 | time:  2.91s | train_loss 0.0111 | valid rse 2.3178 | valid rae 2.8445 | valid corr  0.5220 | valid smape  0.2676 | focus_rrse 2.3178 | obj 2.3178
+Experiment: 1
+Iter: 0
+epoch: 43
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 43]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.019
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.016
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.016
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.008
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.007
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.015
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.011
+testing r= 5
+rrse(target)=78.7867814648736 / 34.29840899189057 | rrse(all)=68714382715982.83 / 34622965068576.312 | report_mode=targets
+| end of epoch  43 | time:  2.94s | train_loss 0.0114 | valid rse 2.2971 | valid rae 2.8298 | valid corr  0.5257 | valid smape  0.2680 | focus_rrse 2.2971 | obj 2.2971
+Experiment: 1
+Iter: 0
+epoch: 44
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 44]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.007
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.016
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.021
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.013
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=79.48767224584263 / 34.29840899189057 | rrse(all)=67979429002323.87 / 34622965068576.312 | report_mode=targets
+| end of epoch  44 | time:  3.00s | train_loss 0.0115 | valid rse 2.3175 | valid rae 2.8454 | valid corr  0.5239 | valid smape  0.2688 | focus_rrse 2.3175 | obj 2.3175
+Experiment: 1
+Iter: 0
+epoch: 45
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 45]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.008
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.014
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.006
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.021
+iter: 32 | loss: 0.018
+testing r= 5
+rrse(target)=80.11834812969654 / 34.29840899189057 | rrse(all)=68361030966211.234 / 34622965068576.312 | report_mode=targets
+| end of epoch  45 | time:  2.79s | train_loss 0.0112 | valid rse 2.3359 | valid rae 2.8770 | valid corr  0.5211 | valid smape  0.2671 | focus_rrse 2.3359 | obj 2.3359
+Experiment: 1
+Iter: 0
+epoch: 46
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 46]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.006
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.013
+iter: 15 | loss: 0.015
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.006
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.013
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.015
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.014
+iter: 27 | loss: 0.008
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.008
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.025
+iter: 32 | loss: 0.007
+testing r= 5
+rrse(target)=79.80849270480242 / 34.29840899189057 | rrse(all)=68135783531715.25 / 34622965068576.312 | report_mode=targets
+| end of epoch  46 | time:  2.87s | train_loss 0.0112 | valid rse 2.3269 | valid rae 2.8600 | valid corr  0.5214 | valid smape  0.2678 | focus_rrse 2.3269 | obj 2.3269
+Experiment: 1
+Iter: 0
+epoch: 47
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 47]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.024
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.015
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.016
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.010
+testing r= 5
+rrse(target)=78.95184635566638 / 34.29840899189057 | rrse(all)=68683544235222.78 / 34622965068576.312 | report_mode=targets
+| end of epoch  47 | time:  2.91s | train_loss 0.0115 | valid rse 2.3019 | valid rae 2.8296 | valid corr  0.5269 | valid smape  0.2676 | focus_rrse 2.3019 | obj 2.3019
+Experiment: 1
+Iter: 0
+epoch: 48
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 48]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.016
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.008
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.021
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.016
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.007
+iter: 29 | loss: 0.007
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.025
+testing r= 5
+rrse(target)=79.79773625196081 / 34.29840899189057 | rrse(all)=68249576993405.64 / 34622965068576.312 | report_mode=targets
+| end of epoch  48 | time:  3.19s | train_loss 0.0113 | valid rse 2.3266 | valid rae 2.8579 | valid corr  0.5237 | valid smape  0.2673 | focus_rrse 2.3266 | obj 2.3266
+Experiment: 1
+Iter: 0
+epoch: 49
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 49]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.006
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.015
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.021
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.016
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=80.0828367516255 / 34.29840899189057 | rrse(all)=68259555135974.97 / 34622965068576.312 | report_mode=targets
+| end of epoch  49 | time:  3.13s | train_loss 0.0113 | valid rse 2.3349 | valid rae 2.8738 | valid corr  0.5223 | valid smape  0.2671 | focus_rrse 2.3349 | obj 2.3349
+Experiment: 1
+Iter: 0
+epoch: 50
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 50]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.017
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.007
+iter: 14 | loss: 0.013
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.026
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.008
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=80.72215258507883 / 34.29840899189057 | rrse(all)=67996852278005.234 / 34622965068576.312 | report_mode=targets
+| end of epoch  50 | time:  3.34s | train_loss 0.0112 | valid rse 2.3535 | valid rae 2.8915 | valid corr  0.5212 | valid smape  0.2674 | focus_rrse 2.3535 | obj 2.3535
+Experiment: 1
+Iter: 0
+epoch: 51
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 51]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.021
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.017
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.005
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.006
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.013
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.011
+testing r= 5
+rrse(target)=79.00635667167073 / 34.29840899189057 | rrse(all)=68236781647611.86 / 34622965068576.312 | report_mode=targets
+| end of epoch  51 | time:  2.93s | train_loss 0.0111 | valid rse 2.3035 | valid rae 2.8296 | valid corr  0.5237 | valid smape  0.2672 | focus_rrse 2.3035 | obj 2.3035
+Experiment: 1
+Iter: 0
+epoch: 52
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 52]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.015
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.022
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.015
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.016
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.006
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.007
+iter: 31 | loss: 0.008
+iter: 32 | loss: 0.017
+testing r= 5
+rrse(target)=80.7278504597004 / 34.29840899189057 | rrse(all)=67999532552656.29 / 34622965068576.312 | report_mode=targets
+| end of epoch  52 | time:  3.51s | train_loss 0.0112 | valid rse 2.3537 | valid rae 2.8946 | valid corr  0.5278 | valid smape  0.2686 | focus_rrse 2.3537 | obj 2.3537
+Experiment: 1
+Iter: 0
+epoch: 53
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 53]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.007
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.017
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.006
+iter: 14 | loss: 0.014
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.007
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.015
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.006
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.026
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=79.1185541163939 / 34.29840899189057 | rrse(all)=68165722415432.29 / 34622965068576.312 | report_mode=targets
+| end of epoch  53 | time:  3.21s | train_loss 0.0113 | valid rse 2.3068 | valid rae 2.8389 | valid corr  0.5237 | valid smape  0.2679 | focus_rrse 2.3068 | obj 2.3068
+Experiment: 1
+Iter: 0
+epoch: 54
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 54]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.026
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.004
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.007
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.008
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=79.52192356906993 / 34.29840899189057 | rrse(all)=68047273657224.055 / 34622965068576.312 | report_mode=targets
+| end of epoch  54 | time:  3.31s | train_loss 0.0113 | valid rse 2.3185 | valid rae 2.8506 | valid corr  0.5242 | valid smape  0.2683 | focus_rrse 2.3185 | obj 2.3185
+Experiment: 1
+Iter: 0
+epoch: 55
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 55]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.016
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.022
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=79.2090261537077 / 34.29840899189057 | rrse(all)=68570361191046.64 / 34622965068576.312 | report_mode=targets
+| end of epoch  55 | time:  3.50s | train_loss 0.0112 | valid rse 2.3094 | valid rae 2.8415 | valid corr  0.5227 | valid smape  0.2673 | focus_rrse 2.3094 | obj 2.3094
+Experiment: 1
+Iter: 0
+epoch: 56
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 56]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.008
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.015
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.017
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.007
+iter: 26 | loss: 0.021
+iter: 27 | loss: 0.013
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.015
+iter: 32 | loss: 0.011
+testing r= 5
+rrse(target)=78.87663429368675 / 34.29840899189057 | rrse(all)=68528896022546.1 / 34622965068576.312 | report_mode=targets
+| end of epoch  56 | time:  3.25s | train_loss 0.0113 | valid rse 2.2997 | valid rae 2.8262 | valid corr  0.5281 | valid smape  0.2679 | focus_rrse 2.2997 | obj 2.2997
+Experiment: 1
+Iter: 0
+epoch: 57
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 57]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.007
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.022
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.015
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.018
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=79.3510052315029 / 34.29840899189057 | rrse(all)=68638021650395.1 / 34622965068576.312 | report_mode=targets
+| end of epoch  57 | time:  2.90s | train_loss 0.0112 | valid rse 2.3135 | valid rae 2.8434 | valid corr  0.5256 | valid smape  0.2678 | focus_rrse 2.3135 | obj 2.3135
+Experiment: 1
+Iter: 0
+epoch: 58
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 58]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.008
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.015
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.007
+iter: 31 | loss: 0.020
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=79.23694625831911 / 34.29840899189057 | rrse(all)=68161340458192.91 / 34622965068576.312 | report_mode=targets
+| end of epoch  58 | time:  3.05s | train_loss 0.0112 | valid rse 2.3102 | valid rae 2.8388 | valid corr  0.5289 | valid smape  0.2689 | focus_rrse 2.3102 | obj 2.3102
+Experiment: 1
+Iter: 0
+epoch: 59
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 59]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.016
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.016
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.005
+iter: 21 | loss: 0.005
+iter: 22 | loss: 0.020
+iter: 23 | loss: 0.017
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.015
+iter: 29 | loss: 0.007
+iter: 30 | loss: 0.006
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.022
+testing r= 5
+rrse(target)=79.15591998055957 / 34.29840899189057 | rrse(all)=68275999132022.27 / 34622965068576.312 | report_mode=targets
+| end of epoch  59 | time:  2.90s | train_loss 0.0111 | valid rse 2.3079 | valid rae 2.8375 | valid corr  0.5215 | valid smape  0.2674 | focus_rrse 2.3079 | obj 2.3079
+Experiment: 1
+Iter: 0
+epoch: 60
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 60]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.006
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.022
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.017
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.017
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=79.72459002030836 / 34.29840899189057 | rrse(all)=67846020200092.87 / 34622965068576.312 | report_mode=targets
+| end of epoch  60 | time:  2.83s | train_loss 0.0111 | valid rse 2.3244 | valid rae 2.8578 | valid corr  0.5258 | valid smape  0.2672 | focus_rrse 2.3244 | obj 2.3244
+Experiment: 1
+Iter: 0
+epoch: 61
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 61]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.004
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.021
+iter: 23 | loss: 0.015
+iter: 24 | loss: 0.007
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.007
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.021
+testing r= 5
+rrse(target)=79.85995432435145 / 34.29840899189057 | rrse(all)=68096071372574.945 / 34622965068576.312 | report_mode=targets
+| end of epoch  61 | time:  2.85s | train_loss 0.0112 | valid rse 2.3284 | valid rae 2.8634 | valid corr  0.5266 | valid smape  0.2666 | focus_rrse 2.3284 | obj 2.3284
+Experiment: 1
+Iter: 0
+epoch: 62
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 62]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.018
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.015
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.008
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=79.98364090550017 / 34.29840899189057 | rrse(all)=68177663118229.11 / 34622965068576.312 | report_mode=targets
+| end of epoch  62 | time:  2.79s | train_loss 0.0112 | valid rse 2.3320 | valid rae 2.8667 | valid corr  0.5281 | valid smape  0.2668 | focus_rrse 2.3320 | obj 2.3320
+Experiment: 1
+Iter: 0
+epoch: 63
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 63]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.016
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.006
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.025
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=79.19019764051451 / 34.29840899189057 | rrse(all)=68752381192686.15 / 34622965068576.312 | report_mode=targets
+| end of epoch  63 | time:  2.77s | train_loss 0.0111 | valid rse 2.3089 | valid rae 2.8409 | valid corr  0.5289 | valid smape  0.2681 | focus_rrse 2.3089 | obj 2.3089
+Experiment: 1
+Iter: 0
+epoch: 64
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 64]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.006
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.026
+iter: 31 | loss: 0.016
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=79.51165647642489 / 34.29840899189057 | rrse(all)=68318527198305.78 / 34622965068576.312 | report_mode=targets
+| end of epoch  64 | time:  2.91s | train_loss 0.0113 | valid rse 2.3182 | valid rae 2.8467 | valid corr  0.5220 | valid smape  0.2674 | focus_rrse 2.3182 | obj 2.3182
+Experiment: 1
+Iter: 0
+epoch: 65
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 65]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.019
+iter:  4 | loss: 0.017
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.008
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.008
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.015
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.008
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.007
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.020
+testing r= 5
+rrse(target)=79.81403556666898 / 34.29840899189057 | rrse(all)=68113969625001.32 / 34622965068576.312 | report_mode=targets
+| end of epoch  65 | time:  2.82s | train_loss 0.0111 | valid rse 2.3270 | valid rae 2.8579 | valid corr  0.5220 | valid smape  0.2688 | focus_rrse 2.3270 | obj 2.3270
+Experiment: 1
+Iter: 0
+epoch: 66
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 66]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.015
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.015
+iter: 28 | loss: 0.017
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.018
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=78.4173872371029 / 34.29840899189057 | rrse(all)=68241619379142.41 / 34622965068576.312 | report_mode=targets
+| end of epoch  66 | time:  2.94s | train_loss 0.0112 | valid rse 2.2863 | valid rae 2.8147 | valid corr  0.5262 | valid smape  0.2679 | focus_rrse 2.2863 | obj 2.2863
+Experiment: 1
+Iter: 0
+epoch: 67
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 67]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.024
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.008
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.007
+iter: 24 | loss: 0.017
+iter: 25 | loss: 0.006
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.019
+testing r= 5
+rrse(target)=79.41720088793737 / 34.29840899189057 | rrse(all)=68037489959439.83 / 34622965068576.312 | report_mode=targets
+| end of epoch  67 | time:  3.04s | train_loss 0.0113 | valid rse 2.3155 | valid rae 2.8490 | valid corr  0.5271 | valid smape  0.2666 | focus_rrse 2.3155 | obj 2.3155
+Experiment: 1
+Iter: 0
+epoch: 68
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 68]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.018
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.017
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.008
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.021
+testing r= 5
+rrse(target)=78.3429272992304 / 34.29840899189057 | rrse(all)=68655737778911.74 / 34622965068576.312 | report_mode=targets
+| end of epoch  68 | time:  3.09s | train_loss 0.0112 | valid rse 2.2842 | valid rae 2.8079 | valid corr  0.5265 | valid smape  0.2675 | focus_rrse 2.2842 | obj 2.2842
+Experiment: 1
+Iter: 0
+epoch: 69
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 69]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.016
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.005
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.016
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.016
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.020
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.015
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.007
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.007
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=79.44797027280653 / 34.29840899189057 | rrse(all)=68023865047411.44 / 34622965068576.312 | report_mode=targets
+| end of epoch  69 | time:  3.08s | train_loss 0.0111 | valid rse 2.3164 | valid rae 2.8548 | valid corr  0.5284 | valid smape  0.2674 | focus_rrse 2.3164 | obj 2.3164
+Experiment: 1
+Iter: 0
+epoch: 70
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 70]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.007
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.015
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.016
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.015
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.013
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.021
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.017
+testing r= 5
+rrse(target)=79.43552380016293 / 34.29840899189057 | rrse(all)=68469934878017.72 / 34622965068576.312 | report_mode=targets
+| end of epoch  70 | time:  3.12s | train_loss 0.0112 | valid rse 2.3160 | valid rae 2.8522 | valid corr  0.5223 | valid smape  0.2673 | focus_rrse 2.3160 | obj 2.3160
+Experiment: 1
+Iter: 0
+epoch: 71
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 71]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.015
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.015
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.007
+iter: 28 | loss: 0.021
+iter: 29 | loss: 0.007
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=79.83434386864778 / 34.29840899189057 | rrse(all)=68672482314941.414 / 34622965068576.312 | report_mode=targets
+| end of epoch  71 | time:  2.96s | train_loss 0.0113 | valid rse 2.3276 | valid rae 2.8552 | valid corr  0.5275 | valid smape  0.2682 | focus_rrse 2.3276 | obj 2.3276
+Experiment: 1
+Iter: 0
+epoch: 72
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 72]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.016
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.016
+iter: 16 | loss: 0.021
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.015
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.008
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.020
+testing r= 5
+rrse(target)=78.70457829460273 / 34.29840899189057 | rrse(all)=68030631206131.68 / 34622965068576.312 | report_mode=targets
+| end of epoch  72 | time:  2.89s | train_loss 0.0113 | valid rse 2.2947 | valid rae 2.8248 | valid corr  0.5254 | valid smape  0.2677 | focus_rrse 2.2947 | obj 2.2947
+Experiment: 1
+Iter: 0
+epoch: 73
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 73]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.021
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.017
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.008
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=79.0604310500044 / 34.29840899189057 | rrse(all)=67934001563676.08 / 34622965068576.312 | report_mode=targets
+| end of epoch  73 | time:  2.87s | train_loss 0.0111 | valid rse 2.3051 | valid rae 2.8287 | valid corr  0.5250 | valid smape  0.2682 | focus_rrse 2.3051 | obj 2.3051
+Experiment: 1
+Iter: 0
+epoch: 74
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 74]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.005
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.015
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.020
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.017
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.013
+iter: 21 | loss: 0.016
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.015
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=78.82773011546286 / 34.29840899189057 | rrse(all)=68057268450005.48 / 34622965068576.312 | report_mode=targets
+| end of epoch  74 | time:  2.95s | train_loss 0.0113 | valid rse 2.2983 | valid rae 2.8263 | valid corr  0.5243 | valid smape  0.2678 | focus_rrse 2.2983 | obj 2.2983
+Experiment: 1
+Iter: 0
+epoch: 75
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 75]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.025
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.006
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.016
+iter: 25 | loss: 0.007
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.006
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.015
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.023
+testing r= 5
+rrse(target)=79.0389478259769 / 34.29840899189057 | rrse(all)=67919304272607.25 / 34622965068576.312 | report_mode=targets
+| end of epoch  75 | time:  2.80s | train_loss 0.0113 | valid rse 2.3044 | valid rae 2.8304 | valid corr  0.5321 | valid smape  0.2674 | focus_rrse 2.3044 | obj 2.3044
+Experiment: 1
+Iter: 0
+epoch: 76
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 76]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.016
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.015
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.007
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.017
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.007
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.024
+iter: 29 | loss: 0.008
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.006
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=79.70245570440412 / 34.29840899189057 | rrse(all)=67829572044060.17 / 34622965068576.312 | report_mode=targets
+| end of epoch  76 | time:  2.86s | train_loss 0.0112 | valid rse 2.3238 | valid rae 2.8583 | valid corr  0.5284 | valid smape  0.2680 | focus_rrse 2.3238 | obj 2.3238
+Experiment: 1
+Iter: 0
+epoch: 77
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 77]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.016
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.014
+iter: 12 | loss: 0.025
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.006
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.005
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.008
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=80.07720883622255 / 34.29840899189057 | rrse(all)=68526908353963.08 / 34622965068576.312 | report_mode=targets
+| end of epoch  77 | time:  2.91s | train_loss 0.0111 | valid rse 2.3347 | valid rae 2.8703 | valid corr  0.5200 | valid smape  0.2677 | focus_rrse 2.3347 | obj 2.3347
+Experiment: 1
+Iter: 0
+epoch: 78
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 78]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.024
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.004
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.016
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.017
+testing r= 5
+rrse(target)=79.42777219646634 / 34.29840899189057 | rrse(all)=67740073873936.18 / 34622965068576.312 | report_mode=targets
+| end of epoch  78 | time:  2.85s | train_loss 0.0111 | valid rse 2.3158 | valid rae 2.8574 | valid corr  0.5209 | valid smape  0.2670 | focus_rrse 2.3158 | obj 2.3158
+Experiment: 1
+Iter: 0
+epoch: 79
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 79]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.007
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.020
+iter: 27 | loss: 0.018
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=79.06002651763248 / 34.29840899189057 | rrse(all)=68336347750748.88 / 34622965068576.312 | report_mode=targets
+| end of epoch  79 | time:  2.87s | train_loss 0.0113 | valid rse 2.3051 | valid rae 2.8298 | valid corr  0.5195 | valid smape  0.2677 | focus_rrse 2.3051 | obj 2.3051
+Experiment: 1
+Iter: 0
+epoch: 80
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 80]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.021
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.016
+iter: 10 | loss: 0.016
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.015
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.016
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.015
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.010
+testing r= 5
+rrse(target)=80.5309983746554 / 34.29840899189057 | rrse(all)=67752923818378.375 / 34622965068576.312 | report_mode=targets
+| end of epoch  80 | time:  2.93s | train_loss 0.0114 | valid rse 2.3480 | valid rae 2.8876 | valid corr  0.5292 | valid smape  0.2678 | focus_rrse 2.3480 | obj 2.3480
+Experiment: 1
+Iter: 0
+epoch: 81
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 81]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.015
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.017
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.022
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.008
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.015
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=79.02438248631715 / 34.29840899189057 | rrse(all)=68460858264933.234 / 34622965068576.312 | report_mode=targets
+| end of epoch  81 | time:  2.96s | train_loss 0.0114 | valid rse 2.3040 | valid rae 2.8305 | valid corr  0.5282 | valid smape  0.2672 | focus_rrse 2.3040 | obj 2.3040
+Experiment: 1
+Iter: 0
+epoch: 82
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 82]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.020
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.007
+iter: 30 | loss: 0.016
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.008
+testing r= 5
+rrse(target)=78.37699359505952 / 34.29840899189057 | rrse(all)=67997108373589.51 / 34622965068576.312 | report_mode=targets
+| end of epoch  82 | time:  3.09s | train_loss 0.0112 | valid rse 2.2851 | valid rae 2.8112 | valid corr  0.5287 | valid smape  0.2672 | focus_rrse 2.2851 | obj 2.2851
+Experiment: 1
+Iter: 0
+epoch: 83
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 83]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.007
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.016
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.020
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.015
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.016
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.008
+iter: 32 | loss: 0.021
+testing r= 5
+rrse(target)=79.2736680942985 / 34.29840899189057 | rrse(all)=68853675098969.3 / 34622965068576.312 | report_mode=targets
+| end of epoch  83 | time:  3.30s | train_loss 0.0111 | valid rse 2.3113 | valid rae 2.8435 | valid corr  0.5265 | valid smape  0.2675 | focus_rrse 2.3113 | obj 2.3113
+Experiment: 1
+Iter: 0
+epoch: 84
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 84]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.017
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.007
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.015
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.007
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.021
+iter: 27 | loss: 0.008
+iter: 28 | loss: 0.006
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.020
+testing r= 5
+rrse(target)=79.20869635415671 / 34.29840899189057 | rrse(all)=68735535889759.98 / 34622965068576.312 | report_mode=targets
+| end of epoch  84 | time:  3.00s | train_loss 0.0113 | valid rse 2.3094 | valid rae 2.8420 | valid corr  0.5282 | valid smape  0.2684 | focus_rrse 2.3094 | obj 2.3094
+Experiment: 1
+Iter: 0
+epoch: 85
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 85]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.020
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.006
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.016
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.007
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.017
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=79.73328341649427 / 34.29840899189057 | rrse(all)=68502345228771.47 / 34622965068576.312 | report_mode=targets
+| end of epoch  85 | time:  2.88s | train_loss 0.0112 | valid rse 2.3247 | valid rae 2.8606 | valid corr  0.5258 | valid smape  0.2686 | focus_rrse 2.3247 | obj 2.3247
+Experiment: 1
+Iter: 0
+epoch: 86
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 86]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.022
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.008
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=80.08542497214303 / 34.29840899189057 | rrse(all)=68699682675944.81 / 34622965068576.312 | report_mode=targets
+| end of epoch  86 | time:  2.88s | train_loss 0.0113 | valid rse 2.3350 | valid rae 2.8671 | valid corr  0.5242 | valid smape  0.2676 | focus_rrse 2.3350 | obj 2.3350
+Experiment: 1
+Iter: 0
+epoch: 87
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 87]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.015
+iter:  1 | loss: 0.020
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.016
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.008
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.016
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.015
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.006
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.008
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.011
+testing r= 5
+rrse(target)=79.79032887531703 / 34.29840899189057 | rrse(all)=68021504651599.766 / 34622965068576.312 | report_mode=targets
+| end of epoch  87 | time:  2.86s | train_loss 0.0113 | valid rse 2.3264 | valid rae 2.8579 | valid corr  0.5257 | valid smape  0.2669 | focus_rrse 2.3264 | obj 2.3264
+Experiment: 1
+Iter: 0
+epoch: 88
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 88]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.016
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.014
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.022
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.008
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.008
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.010
+testing r= 5
+rrse(target)=80.15959118280077 / 34.29840899189057 | rrse(all)=67911344899790.74 / 34622965068576.312 | report_mode=targets
+| end of epoch  88 | time:  2.95s | train_loss 0.0112 | valid rse 2.3371 | valid rae 2.8671 | valid corr  0.5231 | valid smape  0.2679 | focus_rrse 2.3371 | obj 2.3371
+Experiment: 1
+Iter: 0
+epoch: 89
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 89]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.017
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.006
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.022
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.005
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=79.5819828364907 / 34.29840899189057 | rrse(all)=67833220524440.195 / 34622965068576.312 | report_mode=targets
+| end of epoch  89 | time:  2.89s | train_loss 0.0112 | valid rse 2.3203 | valid rae 2.8521 | valid corr  0.5268 | valid smape  0.2667 | focus_rrse 2.3203 | obj 2.3203
+Experiment: 1
+Iter: 0
+epoch: 90
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 90]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.018
+iter: 11 | loss: 0.019
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.019
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=79.38362096392271 / 34.29840899189057 | rrse(all)=68396427359593.414 / 34622965068576.312 | report_mode=targets
+| end of epoch  90 | time:  3.28s | train_loss 0.0114 | valid rse 2.3145 | valid rae 2.8460 | valid corr  0.5294 | valid smape  0.2671 | focus_rrse 2.3145 | obj 2.3145
+Experiment: 1
+Iter: 0
+epoch: 91
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 91]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.014
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.018
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.007
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.019
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.010
+testing r= 5
+rrse(target)=78.91580387705937 / 34.29840899189057 | rrse(all)=68385841224140.31 / 34622965068576.312 | report_mode=targets
+| end of epoch  91 | time:  3.16s | train_loss 0.0111 | valid rse 2.3009 | valid rae 2.8372 | valid corr  0.5309 | valid smape  0.2675 | focus_rrse 2.3009 | obj 2.3009
+Experiment: 1
+Iter: 0
+epoch: 92
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 92]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.015
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.015
+iter: 16 | loss: 0.006
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.022
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.014
+iter: 27 | loss: 0.007
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.017
+testing r= 5
+rrse(target)=79.11948292377168 / 34.29840899189057 | rrse(all)=68711088152873.945 / 34622965068576.312 | report_mode=targets
+| end of epoch  92 | time:  2.93s | train_loss 0.0111 | valid rse 2.3068 | valid rae 2.8432 | valid corr  0.5248 | valid smape  0.2673 | focus_rrse 2.3068 | obj 2.3068
+Experiment: 1
+Iter: 0
+epoch: 93
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 93]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.007
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.016
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.020
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=79.20791654227972 / 34.29840899189057 | rrse(all)=68271805824511.914 / 34622965068576.312 | report_mode=targets
+| end of epoch  93 | time:  2.84s | train_loss 0.0112 | valid rse 2.3094 | valid rae 2.8421 | valid corr  0.5233 | valid smape  0.2681 | focus_rrse 2.3094 | obj 2.3094
+Experiment: 1
+Iter: 0
+epoch: 94
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 94]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.018
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.013
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.008
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.008
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=79.18440453697306 / 34.29840899189057 | rrse(all)=68995766320939.914 / 34622965068576.312 | report_mode=targets
+| end of epoch  94 | time:  2.84s | train_loss 0.0110 | valid rse 2.3087 | valid rae 2.8341 | valid corr  0.5288 | valid smape  0.2675 | focus_rrse 2.3087 | obj 2.3087
+Experiment: 1
+Iter: 0
+epoch: 95
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 95]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.016
+iter:  5 | loss: 0.023
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.016
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.006
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.013
+iter: 28 | loss: 0.015
+iter: 29 | loss: 0.008
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.018
+testing r= 5
+rrse(target)=80.68305806905809 / 34.29840899189057 | rrse(all)=68622492361534.8 / 34622965068576.312 | report_mode=targets
+| end of epoch  95 | time:  2.95s | train_loss 0.0112 | valid rse 2.3524 | valid rae 2.8946 | valid corr  0.5287 | valid smape  0.2671 | focus_rrse 2.3524 | obj 2.3524
+Experiment: 1
+Iter: 0
+epoch: 96
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 96]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.008
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.007
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.014
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.023
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.015
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.007
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.008
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.010
+testing r= 5
+rrse(target)=79.24090851341401 / 34.29840899189057 | rrse(all)=68176414161507.86 / 34622965068576.312 | report_mode=targets
+| end of epoch  96 | time:  2.90s | train_loss 0.0110 | valid rse 2.3103 | valid rae 2.8386 | valid corr  0.5284 | valid smape  0.2674 | focus_rrse 2.3103 | obj 2.3103
+Experiment: 1
+Iter: 0
+epoch: 97
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 97]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.008
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.022
+iter:  7 | loss: 0.016
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.005
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.019
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.016
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.015
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.009
+testing r= 5
+rrse(target)=80.14464158144791 / 34.29840899189057 | rrse(all)=68210071714452.14 / 34622965068576.312 | report_mode=targets
+| end of epoch  97 | time:  2.99s | train_loss 0.0113 | valid rse 2.3367 | valid rae 2.8671 | valid corr  0.5263 | valid smape  0.2678 | focus_rrse 2.3367 | obj 2.3367
+Experiment: 1
+Iter: 0
+epoch: 98
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 98]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.021
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.015
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.008
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=80.03213465930419 / 34.29840899189057 | rrse(all)=68167283311405.35 / 34622965068576.312 | report_mode=targets
+| end of epoch  98 | time:  2.86s | train_loss 0.0111 | valid rse 2.3334 | valid rae 2.8596 | valid corr  0.5238 | valid smape  0.2678 | focus_rrse 2.3334 | obj 2.3334
+Experiment: 1
+Iter: 0
+epoch: 99
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 99]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.007
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.015
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.008
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.023
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.007
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=79.46194794915992 / 34.29840899189057 | rrse(all)=68389964962559.57 / 34622965068576.312 | report_mode=targets
+| end of epoch  99 | time:  2.85s | train_loss 0.0112 | valid rse 2.3168 | valid rae 2.8491 | valid corr  0.5176 | valid smape  0.2674 | focus_rrse 2.3168 | obj 2.3168
+Experiment: 1
+Iter: 0
+epoch: 100
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 100]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.016
+iter:  4 | loss: 0.023
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.013
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.006
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.018
+testing r= 5
+rrse(target)=79.14716933701736 / 34.29840899189057 | rrse(all)=67890267503626.055 / 34622965068576.312 | report_mode=targets
+| end of epoch 100 | time:  2.78s | train_loss 0.0111 | valid rse 2.3076 | valid rae 2.8323 | valid corr  0.5226 | valid smape  0.2671 | focus_rrse 2.3076 | obj 2.3076
+Experiment: 1
+Iter: 0
+epoch: 101
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 101]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.004
+iter:  3 | loss: 0.024
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.015
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.008
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.016
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.016
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.009
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.015
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=79.6599370223593 / 34.29840899189057 | rrse(all)=67933782159652.51 / 34622965068576.312 | report_mode=targets
+| end of epoch 101 | time:  3.00s | train_loss 0.0112 | valid rse 2.3226 | valid rae 2.8603 | valid corr  0.5234 | valid smape  0.2679 | focus_rrse 2.3226 | obj 2.3226
+Experiment: 1
+Iter: 0
+epoch: 102
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 102]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.017
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.008
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.017
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.021
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=78.70401993485625 / 34.29840899189057 | rrse(all)=68177598181701.75 / 34622965068576.312 | report_mode=targets
+| end of epoch 102 | time:  2.94s | train_loss 0.0113 | valid rse 2.2947 | valid rae 2.8190 | valid corr  0.5289 | valid smape  0.2677 | focus_rrse 2.2947 | obj 2.2947
+Experiment: 1
+Iter: 0
+epoch: 103
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 103]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.014
+iter: 12 | loss: 0.014
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.013
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.018
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.007
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.008
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.016
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=79.20885046626734 / 34.29840899189057 | rrse(all)=67593238495328.92 / 34622965068576.312 | report_mode=targets
+| end of epoch 103 | time:  2.84s | train_loss 0.0112 | valid rse 2.3094 | valid rae 2.8297 | valid corr  0.5211 | valid smape  0.2677 | focus_rrse 2.3094 | obj 2.3094
+Experiment: 1
+Iter: 0
+epoch: 104
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 104]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.017
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.022
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.016
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.008
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=79.74860096245419 / 34.29840899189057 | rrse(all)=68553548657842.94 / 34622965068576.312 | report_mode=targets
+| end of epoch 104 | time:  2.90s | train_loss 0.0113 | valid rse 2.3251 | valid rae 2.8578 | valid corr  0.5218 | valid smape  0.2678 | focus_rrse 2.3251 | obj 2.3251
+Experiment: 1
+Iter: 0
+epoch: 105
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 105]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.006
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.023
+iter: 14 | loss: 0.014
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.006
+iter: 17 | loss: 0.008
+iter: 18 | loss: 0.017
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.007
+iter: 32 | loss: 0.017
+testing r= 5
+rrse(target)=79.82628233584788 / 34.29840899189057 | rrse(all)=67755400294789.586 / 34622965068576.312 | report_mode=targets
+| end of epoch 105 | time:  2.90s | train_loss 0.0112 | valid rse 2.3274 | valid rae 2.8627 | valid corr  0.5246 | valid smape  0.2665 | focus_rrse 2.3274 | obj 2.3274
+Experiment: 1
+Iter: 0
+epoch: 106
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 106]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.019
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.017
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.007
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.007
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.015
+iter: 22 | loss: 0.006
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.013
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.008
+iter: 30 | loss: 0.016
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.019
+testing r= 5
+rrse(target)=79.11714699873062 / 34.29840899189057 | rrse(all)=68312070393577.336 / 34622965068576.312 | report_mode=targets
+| end of epoch 106 | time:  2.91s | train_loss 0.0112 | valid rse 2.3067 | valid rae 2.8363 | valid corr  0.5304 | valid smape  0.2680 | focus_rrse 2.3067 | obj 2.3067
+Experiment: 1
+Iter: 0
+epoch: 107
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 107]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.006
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.016
+iter: 24 | loss: 0.007
+iter: 25 | loss: 0.006
+iter: 26 | loss: 0.015
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.023
+iter: 29 | loss: 0.017
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.007
+iter: 32 | loss: 0.011
+testing r= 5
+rrse(target)=79.35693076812825 / 34.29840899189057 | rrse(all)=67854741913083.56 / 34622965068576.312 | report_mode=targets
+| end of epoch 107 | time:  2.90s | train_loss 0.0112 | valid rse 2.3137 | valid rae 2.8480 | valid corr  0.5208 | valid smape  0.2672 | focus_rrse 2.3137 | obj 2.3137
+Experiment: 1
+Iter: 0
+epoch: 108
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 108]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.016
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.019
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.020
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.008
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=80.57403306703407 / 34.29840899189057 | rrse(all)=68451610133422.41 / 34622965068576.312 | report_mode=targets
+| end of epoch 108 | time:  2.89s | train_loss 0.0112 | valid rse 2.3492 | valid rae 2.8834 | valid corr  0.5261 | valid smape  0.2668 | focus_rrse 2.3492 | obj 2.3492
+Experiment: 1
+Iter: 0
+epoch: 109
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 109]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.007
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.019
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.016
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.006
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.005
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.010
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=79.4140928584546 / 34.29840899189057 | rrse(all)=68095648778297.95 / 34622965068576.312 | report_mode=targets
+| end of epoch 109 | time:  2.96s | train_loss 0.0110 | valid rse 2.3154 | valid rae 2.8463 | valid corr  0.5250 | valid smape  0.2677 | focus_rrse 2.3154 | obj 2.3154
+Experiment: 1
+Iter: 0
+epoch: 110
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 110]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.006
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.008
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.018
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.015
+iter: 31 | loss: 0.009
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=77.94472011965435 / 34.29840899189057 | rrse(all)=67952620084119.945 / 34622965068576.312 | report_mode=targets
+| end of epoch 110 | time:  3.04s | train_loss 0.0112 | valid rse 2.2725 | valid rae 2.7957 | valid corr  0.5214 | valid smape  0.2679 | focus_rrse 2.2725 | obj 2.2725
+Experiment: 1
+Iter: 0
+epoch: 111
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 111]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.015
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.014
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.011
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.006
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.018
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.006
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.007
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.020
+iter: 31 | loss: 0.008
+iter: 32 | loss: 0.011
+testing r= 5
+rrse(target)=80.0438264962155 / 34.29840899189057 | rrse(all)=68265459174389.59 / 34622965068576.312 | report_mode=targets
+| end of epoch 111 | time:  2.86s | train_loss 0.0110 | valid rse 2.3337 | valid rae 2.8655 | valid corr  0.5195 | valid smape  0.2668 | focus_rrse 2.3337 | obj 2.3337
+Experiment: 1
+Iter: 0
+epoch: 112
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 112]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.021
+iter:  4 | loss: 0.016
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.014
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.007
+testing r= 5
+rrse(target)=79.3896393980348 / 34.29840899189057 | rrse(all)=68011953758063.8 / 34622965068576.312 | report_mode=targets
+| end of epoch 112 | time:  2.97s | train_loss 0.0112 | valid rse 2.3147 | valid rae 2.8389 | valid corr  0.5250 | valid smape  0.2674 | focus_rrse 2.3147 | obj 2.3147
+Experiment: 1
+Iter: 0
+epoch: 113
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 113]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.007
+iter:  1 | loss: 0.020
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.015
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.015
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.007
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.009
+iter: 30 | loss: 0.006
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.018
+testing r= 5
+rrse(target)=80.64523425840953 / 34.29840899189057 | rrse(all)=68282035745685.5 / 34622965068576.312 | report_mode=targets
+| end of epoch 113 | time:  2.94s | train_loss 0.0111 | valid rse 2.3513 | valid rae 2.8917 | valid corr  0.5353 | valid smape  0.2681 | focus_rrse 2.3513 | obj 2.3513
+Experiment: 1
+Iter: 0
+epoch: 114
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 114]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.019
+iter:  6 | loss: 0.022
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.005
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.015
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.015
+iter: 24 | loss: 0.008
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.009
+iter: 28 | loss: 0.017
+iter: 29 | loss: 0.015
+iter: 30 | loss: 0.008
+iter: 31 | loss: 0.015
+iter: 32 | loss: 0.009
+testing r= 5
+rrse(target)=80.4860145314467 / 34.29840899189057 | rrse(all)=68259403799094.555 / 34622965068576.312 | report_mode=targets
+| end of epoch 114 | time:  2.88s | train_loss 0.0111 | valid rse 2.3466 | valid rae 2.8814 | valid corr  0.5271 | valid smape  0.2673 | focus_rrse 2.3466 | obj 2.3466
+Experiment: 1
+Iter: 0
+epoch: 115
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 115]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.011
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.018
+iter: 17 | loss: 0.015
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.010
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.008
+iter: 31 | loss: 0.016
+iter: 32 | loss: 0.017
+testing r= 5
+rrse(target)=79.11694024907055 / 34.29840899189057 | rrse(all)=68127117293425.35 / 34622965068576.312 | report_mode=targets
+| end of epoch 115 | time:  2.91s | train_loss 0.0113 | valid rse 2.3067 | valid rae 2.8324 | valid corr  0.5305 | valid smape  0.2679 | focus_rrse 2.3067 | obj 2.3067
+Experiment: 1
+Iter: 0
+epoch: 116
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 116]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.021
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.015
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.007
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.006
+iter: 27 | loss: 0.011
+iter: 28 | loss: 0.015
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.012
+testing r= 5
+rrse(target)=78.79910423428048 / 34.29840899189057 | rrse(all)=68825600743242.305 / 34622965068576.312 | report_mode=targets
+| end of epoch 116 | time:  2.90s | train_loss 0.0113 | valid rse 2.2975 | valid rae 2.8212 | valid corr  0.5294 | valid smape  0.2675 | focus_rrse 2.2975 | obj 2.2975
+Experiment: 1
+Iter: 0
+epoch: 117
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 117]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.016
+iter:  2 | loss: 0.007
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.020
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.008
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.016
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.009
+iter: 27 | loss: 0.017
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=78.68507368181402 / 34.29840899189057 | rrse(all)=68324687488280.68 / 34622965068576.312 | report_mode=targets
+| end of epoch 117 | time:  2.79s | train_loss 0.0114 | valid rse 2.2941 | valid rae 2.8228 | valid corr  0.5275 | valid smape  0.2678 | focus_rrse 2.2941 | obj 2.2941
+Experiment: 1
+Iter: 0
+epoch: 118
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 118]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.007
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.016
+iter:  7 | loss: 0.015
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.015
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.016
+iter: 17 | loss: 0.008
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.012
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.006
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.008
+iter: 31 | loss: 0.017
+iter: 32 | loss: 0.011
+testing r= 5
+rrse(target)=80.22092907052061 / 34.29840899189057 | rrse(all)=68403592462305.945 / 34622965068576.312 | report_mode=targets
+| end of epoch 118 | time:  2.84s | train_loss 0.0111 | valid rse 2.3389 | valid rae 2.8757 | valid corr  0.5216 | valid smape  0.2676 | focus_rrse 2.3389 | obj 2.3389
+Experiment: 1
+Iter: 0
+epoch: 119
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 119]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.019
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.005
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.006
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.016
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.014
+iter: 27 | loss: 0.013
+iter: 28 | loss: 0.010
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.006
+iter: 32 | loss: 0.022
+testing r= 5
+rrse(target)=79.99072517036741 / 34.29840899189057 | rrse(all)=68494878050861.86 / 34622965068576.312 | report_mode=targets
+| end of epoch 119 | time:  2.89s | train_loss 0.0114 | valid rse 2.3322 | valid rae 2.8647 | valid corr  0.5252 | valid smape  0.2687 | focus_rrse 2.3322 | obj 2.3322
+Experiment: 1
+Iter: 0
+epoch: 120
+hp= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 120]
+best sum= 4.525503439652764
+best rrse= 2.2657954843310875
+best rrae= 2.789313165149099
+best corr= 0.5296052
+best smape= 0.2673972751869214
+best objective= 2.2657954692840576
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+best test rse= 1.437820061934155
+best test corr= 0.47924146
+[Target-Weighted Loss] weights applied: {'kr_fx': 30.0}
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.016
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.023
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.006
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.008
+iter: 24 | loss: 0.012
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.007
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.008
+iter: 30 | loss: 0.009
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=80.07294342992051 / 34.29840899189057 | rrse(all)=68693238066493.664 / 34622965068576.312 | report_mode=targets
+| end of epoch 120 | time:  2.95s | train_loss 0.0111 | valid rse 2.3346 | valid rae 2.8729 | valid corr  0.5238 | valid smape  0.2685 | focus_rrse 2.3346 | obj 2.3346
+best val loss= 4.525503439652764
+best hps= [1, 0.0005, 16, 128, 256, 1024, 40, 0.1, 2, 30, 0.6, 0.1, 2, 24]
+testing r= 5
+rrse(target)=80.28812555707569 / 34.29840899189057 | rrse(all)=68134891183180.33 / 34622965068576.312 | report_mode=targets
+testing r= 5
+rrse(target)=125.04709659639244 / 86.48607863046514 | rrse(all)=10490917220269.705 / 13118447315149.623 | report_mode=targets
+********************************************************************************************************
+final test rse 1.4459 | test rae 1.7319 | test corr 0.4796 | test smape 0.2045
+********************************************************************************************************
+
+
+
+1 run average
+
+
+
+valid	rse	rae
+mean	2.3409	2.8776
+std	0.0000	0.0000
+
+
+
+test	rse	rae
+mean	1.4459	1.7319
+std	0.0000	0.0000

@@ -101,6 +101,18 @@ def consistent_name(name):
 
 def get_focus_nodes():
     return [x.strip() for x in args.focus_nodes.split(',') if x.strip()]
+
+
+def get_focus_columns(data):
+    selected = get_rse_target_columns(data)
+    if selected:
+        return selected
+    focus_nodes = get_focus_nodes()
+    cols = []
+    for node_name in focus_nodes:
+        if node_name in data.col:
+            cols.append(data.col.index(node_name))
+    return cols
     
 def _normalize_metric_name(name: str):
     return re.sub(r'[^a-z0-9]+', '', name.lower())
@@ -165,12 +177,9 @@ def compute_rrse_rae_subset(predict_t, test_t, selected_cols):
 
 
 def compute_focus_rrse(predict_np, ytest_np, data):
-    focus_nodes = get_focus_nodes()
+    focus_cols = get_focus_columns(data)
     values = []
-    for node_name in focus_nodes:
-        if node_name not in data.col:
-            continue
-        col = data.col.index(node_name)
+    for col in focus_cols:
         pred = predict_np[:, col]
         true = ytest_np[:, col]
         num = np.sum((true - pred) ** 2)
@@ -360,6 +369,18 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
 
         outputs = torch.stack(outputs)
         y_pred = torch.mean(outputs, dim=0)
+
+        if args.anchor_focus_to_last > 0:
+            focus_cols = get_focus_columns(data)
+            if focus_cols:
+                alpha = min(max(args.anchor_focus_to_last, 0.0), 1.0)
+                focus_idx = torch.tensor(focus_cols, device=y_pred.device)
+                last_obs = x_input[-1, :].to(y_pred.device)
+                y_focus = torch.index_select(y_pred, dim=1, index=focus_idx)
+                last_focus = torch.index_select(last_obs, dim=0, index=focus_idx).unsqueeze(0)
+                y_focus = (1.0 - alpha) * y_focus + alpha * last_focus
+                y_pred[:, focus_idx] = y_focus
+
         var = torch.var(outputs, dim=0)
         std_dev = torch.std(outputs, dim=0)
 
@@ -394,11 +415,25 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     variance *= scale
     confidence_95 *= scale
 
-    # --- Metrics 계산 (선택 대상 시계열만 집계) ---
+    # --- Metrics 계산: target/all 동시 계산 후 report mode 선택 ---
     selected_cols = get_rse_target_columns(data)
-    rrse, rae, root_sum_squared, root_sum_squared_r = compute_rrse_rae_subset(predict, test, selected_cols)
+    rrse_target, rae_target, root_sum_squared_target, root_sum_squared_r_target = compute_rrse_rae_subset(predict, test, selected_cols)
 
-    print('rrse=', root_sum_squared, '/', root_sum_squared_r)
+    all_cols = list(range(data.m))
+    rrse_all, rae_all, root_sum_squared_all, root_sum_squared_r_all = compute_rrse_rae_subset(predict, test, all_cols)
+
+    if args.rse_report_mode == 'all':
+        rrse = rrse_all
+        rae = rae_all
+    else:
+        rrse = rrse_target
+        rae = rae_target
+
+    print(
+        f"rrse(target)={root_sum_squared_target} / {root_sum_squared_r_target} | "
+        f"rrse(all)={root_sum_squared_all} / {root_sum_squared_r_all} | "
+        f"report_mode={args.rse_report_mode}"
+    )
 
     predict = predict.data.cpu().numpy()
     Ytest = test.data.cpu().numpy()
@@ -468,6 +503,7 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
     print('validation r=', str(r))
 
     for X, Y in data.get_batches(X, Y, batch_size, False):
+        X_raw = X.clone()
         X = torch.unsqueeze(X, dim=1)
         X = X.transpose(2, 3)  # [B, 1, N, T]
 
@@ -519,6 +555,17 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
         Y = Y * scale
         var *= scale
         confidence *= scale
+
+        if args.anchor_focus_to_last > 0:
+            focus_cols = get_focus_columns(data)
+            if focus_cols:
+                alpha = min(max(args.anchor_focus_to_last, 0.0), 1.0)
+                focus_idx = torch.tensor(focus_cols, device=output.device)
+                last_obs = X_raw[:, -1, :] * data.scale.expand(X_raw.size(0), data.m)
+                y_focus = torch.index_select(output, dim=2, index=focus_idx)
+                last_focus = torch.index_select(last_obs, dim=1, index=focus_idx).unsqueeze(1)
+                y_focus = (1.0 - alpha) * y_focus + alpha * last_focus
+                output[:, :, focus_idx] = y_focus
 
         if predict is None:
             predict = output
@@ -634,13 +681,13 @@ def train(data, X, Y, model, criterion, optim, batch_size):
     # ===== Target-Weighted Loss (optional) =====
     target_weight = torch.ones(data.m, device=device)
     if args.focus_targets == 1:
-        for i, col_name in enumerate(data.col):
-            if col_name == 'us_Trade Weighted Dollar Index' or col_name == 'kr_fx':
-                target_weight[i] = 10.0
-            elif col_name == 'jp_fx':
-                target_weight[i] = 20.0
+        focus_cols = get_focus_columns(data)
+        for col in focus_cols:
+            target_weight[col] = args.focus_target_gain
         print(f"[Target-Weighted Loss] weights applied: "
               f"{ {data.col[i]: target_weight[i].item() for i in range(data.m) if target_weight[i] > 1} }")
+        if args.focus_only_loss == 1 and focus_cols:
+            print(f"[Target-Only Loss] enabled for columns: {[data.col[i] for i in focus_cols]}")
     else:
         print("[Target-Weighted Loss] disabled (uniform weight for overall RSE optimization)")
     # ==================================
@@ -691,9 +738,20 @@ def train(data, X, Y, model, criterion, optim, batch_size):
             output = torch.squeeze(output, 3)
 
             # ===== Target-Weighted Loss =====
-            diff = torch.abs(output - ty) if args.L1Loss else (output - ty) ** 2
+            use_l1 = (args.loss_mode == 'l1')
+            diff = torch.abs(output - ty) if use_l1 else (output - ty) ** 2
             w = target_weight.unsqueeze(0).unsqueeze(0)  # [1, 1, N]
-            loss = (diff * w).sum()
+            if args.focus_targets == 1 and args.focus_only_loss == 1:
+                focus_cols = get_focus_columns(data)
+                if focus_cols:
+                    focus_idx = torch.tensor(focus_cols, device=device)
+                    diff = torch.index_select(diff, dim=2, index=focus_idx)
+                    w_focus = torch.index_select(w, dim=2, index=focus_idx)
+                    loss = (diff * w_focus).mean() / torch.clamp(w_focus.mean(), min=1e-12)
+                else:
+                    loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
+            else:
+                loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
             # ==================================
             loss.backward()
             total_loss += loss.item()
@@ -716,6 +774,7 @@ parser.add_argument('--log_interval', type=int, default=2000, metavar='N', help=
 parser.add_argument('--save', type=str, default=str(DEFAULT_MODEL_SAVE), help='path to save the final model')
 parser.add_argument('--optim', type=str, default='adam')
 parser.add_argument('--L1Loss', type=bool, default=True)
+parser.add_argument('--loss_mode', type=str, default='l1', choices=['l1', 'mse'], help='training loss type; mse generally aligns better with RSE minimization')
 parser.add_argument('--normalize', type=int, default=2)
 parser.add_argument('--device', type=str, default='cuda:1', help='')
 parser.add_argument('--gcn_true', type=bool, default=False, help='whether to add graph convolution layer')
@@ -749,9 +808,13 @@ parser.add_argument('--ss_prob', type=float, default=0.2, help='scheduled sampli
 parser.add_argument('--train_ratio', type=float, default=0.8666666667, help='train split ratio')
 parser.add_argument('--valid_ratio', type=float, default=0.0666666667, help='validation split ratio')
 parser.add_argument('--focus_targets', type=int, default=0, help='1 to upweight us/kr/jp target nodes')
-parser.add_argument('--focus_nodes', type=str, default='jp_fx,kr_fx,us_ret', help='priority nodes (comma separated)')
-parser.add_argument('--focus_weight', type=float, default=0.35, help='priority weight for focus-node RRSE in model selection (0~1)')
+parser.add_argument('--focus_nodes', type=str, default='us_Trade Weighted Dollar Index,jp_fx,kr_fx', help='priority nodes (comma separated)')
+parser.add_argument('--focus_weight', type=float, default=0.7, help='priority weight for focus-node RRSE in model selection (0~1)')
+parser.add_argument('--focus_target_gain', type=float, default=12.0, help='loss weight applied to focus target columns when focus_targets=1')
+parser.add_argument('--focus_only_loss', type=int, default=0, choices=[0, 1], help='1 to optimize loss only on focus/rse target columns')
+parser.add_argument('--anchor_focus_to_last', type=float, default=0.0, help='0~1 level anchoring strength for focus columns during evaluation/forecast')
 parser.add_argument('--rse_targets', type=str, default='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', help='comma-separated target series/file names used for terminal RSE/RAE aggregation')
+parser.add_argument('--rse_report_mode', type=str, default='targets', choices=['targets', 'all'], help='which RSE/RAE to report in terminal and final summary')
 parser.add_argument('--plot_focus_only', type=int, default=0, help='1 to plot/save only focus nodes')
 parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
 parser.add_argument('--rollout_mode', type=str, default='teacher_forced', choices=['teacher_forced', 'recursive'], help='test rollout mode')
@@ -875,7 +938,7 @@ def main(experiment):
         nParams = sum([p.nelement() for p in model.parameters()])
         print('Number of model parameters is', nParams, flush=True)
 
-        if args.L1Loss:
+        if args.loss_mode == 'l1':
             criterion = nn.L1Loss(reduction='sum').to(device)
         else:
             criterion = nn.MSELoss(reduction='sum').to(device)

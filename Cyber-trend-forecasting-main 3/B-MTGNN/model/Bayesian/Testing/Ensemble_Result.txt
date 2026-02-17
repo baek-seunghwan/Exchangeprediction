@@ -1,3 +1,0 @@
-Ensemble Runs: 1
-ALL RSE: 1.140685
-ALL RAE: 1.262962

@@ -8,6 +8,8 @@ import numpy as np
 import os
 import torch
 import sys
+import re
+import argparse
 import pandas as pd
 from matplotlib import pyplot
 import matplotlib.dates as mdates
@@ -60,6 +62,13 @@ def zero_negative_curves(data, forecast):
     forecast = torch.clamp(forecast, min=0)
     return data, forecast
 
+
+def should_clamp_nonnegative(name):
+    lower = name.lower()
+    if 'trade_balance' in lower or 'balanced_of_trade' in lower:
+        return False
+    return True
+
 def save_data(data, forecast, confidence, variance, col, output_dir):
     """예측 데이터 저장"""
     if not os.path.exists(output_dir):
@@ -79,12 +88,51 @@ def save_data(data, forecast, confidence, variance, col, output_dir):
             ff.write('95% Confidence: ' + str(c.tolist()) + '\n')
             ff.write('Variance: ' + str(v.tolist()) + '\n')
 
+
+def resolve_latest_tuned_model(script_dir, fallback_model_file):
+    tuning_root = os.path.join(script_dir, 'tuning_runs')
+    if not os.path.isdir(tuning_root):
+        return fallback_model_file
+
+    run_dirs = [
+        os.path.join(tuning_root, d)
+        for d in os.listdir(tuning_root)
+        if os.path.isdir(os.path.join(tuning_root, d))
+    ]
+    run_dirs.sort(reverse=True)
+
+    for run_dir in run_dirs:
+        summary_path = os.path.join(run_dir, 'best_summary.txt')
+        if not os.path.exists(summary_path):
+            continue
+        try:
+            with open(summary_path, 'r', encoding='utf-8') as f:
+                text = f.read()
+            m = re.search(r'log_file=(.*run_(\d+)\.log)', text)
+            if not m:
+                continue
+            run_id = int(m.group(2))
+            ckpt_path = os.path.join(run_dir, 'checkpoints', f'model_{run_id:03d}.pt')
+            if os.path.exists(ckpt_path):
+                return ckpt_path
+        except Exception:
+            continue
+
+    return fallback_model_file
+
+
+def smooth_series(arr, alpha):
+    if alpha >= 0.999:
+        return arr
+    return np.array(exponential_smoothing(arr, alpha), dtype=np.float32)
+
 # ==========================================
 # Plotting Functions
 # ==========================================
-def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, output_dir, color="#1f77b4", linestyle='-', is_index=False):
+def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, output_dir, color="#1f77b4", linestyle='--', is_index=False):
     """개별 노드 플롯"""
-    data, forecast = zero_negative_curves(data, forecast)
+    if should_clamp_nonnegative(name):
+        data, forecast = zero_negative_curves(data, forecast)
     if torch.is_tensor(data): 
         data = data.cpu()
     if torch.is_tensor(forecast): 
@@ -158,7 +206,7 @@ def plot_multi_node(dates_hist, dates_future, smoothed_hist, smoothed_fut, smoot
         is_index = 'weighted' in col[i].lower() or 'trade' in col[i].lower()
 
         ax.plot(x_past, y_past, '-', label=consistent_name(col[i]), color=color, linewidth=1.5)
-        ax.plot(dates_future, y_fut, linestyle='-' if is_index else '--', color=color, linewidth=2)
+        ax.plot(dates_future, y_fut, linestyle='--', color=color, linewidth=2)
 
         # 신뢰도 영역 표시
         ax.fill_between(dates_future, y_fut - c_fut, y_fut + c_fut, color=color, alpha=0.25)
@@ -198,11 +246,23 @@ def plot_multi_node(dates_hist, dates_future, smoothed_hist, smoothed_fut, smoot
 # Main Execution Block
 # ==========================================
 
+parser = argparse.ArgumentParser(description='Forecast plotting and export')
+parser.add_argument('--model', type=str, default='', help='optional model checkpoint path (.pt)')
+parser.add_argument('--mc_runs', type=int, default=20)
+parser.add_argument('--horizon', type=int, default=36)
+parser.add_argument('--hist_alpha', type=float, default=0.3, help='history smoothing alpha')
+parser.add_argument('--future_alpha', type=float, default=1.0, help='future smoothing alpha (1.0 means no smoothing)')
+args = parser.parse_args()
+
 # 경로 설정
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(script_dir)
-data_file = os.path.join(script_dir, 'data', 'ExchangeRate_dataset.csv')
+data_file = os.path.join(script_dir, 'data', 'sm_data.csv')
 model_file = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'model.pt')
+if args.model.strip():
+    model_file = args.model
+else:
+    model_file = resolve_latest_tuned_model(script_dir, model_file)
 
 # 출력 디렉토리
 plot_dir = os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'forecast', 'plots')
@@ -299,7 +359,7 @@ print(f"Using input sequence length (seq_len) = {seq_len}")
 X_init = torch.from_numpy(dat[-seq_len:, :]).float().to(device)
 
 # Bayesian Estimation (Dropout MC)
-num_runs, horizon = 20, 36
+num_runs, horizon = args.mc_runs, args.horizon
 outputs = []
 
 print(f"Running Bayesian Forecast ({num_runs} MC runs, {horizon} month horizon)...")
@@ -321,10 +381,19 @@ for r in range(num_runs):
     with torch.no_grad():
         while len_preds < horizon:
             curr_input = curr_X.unsqueeze(0).unsqueeze(0).permute(0, 1, 3, 2).contiguous()
-            out = model(curr_input)
 
-            pred_block = out.squeeze(3).squeeze(0)
-            pred_level = pred_block
+            # train_test.py와 동일한 RevIN 전처리/복원
+            w_mean = curr_input.mean(dim=-1, keepdim=True)
+            w_std = curr_input.std(dim=-1, keepdim=True)
+            w_std[w_std == 0] = 1
+            curr_input_norm = (curr_input - w_mean) / w_std
+
+            out = model(curr_input_norm)
+
+            pred_block = out.squeeze(3).squeeze(0)  # [T_out, N]
+            wm = w_mean[0, 0, :, 0]
+            ws = w_std[0, 0, :, 0]
+            pred_level = pred_block * ws.unsqueeze(0) + wm.unsqueeze(0)
 
             # 인덱스를 강제로 1.0으로 고정하지 않음
             # if index_idx != -1:
@@ -364,16 +433,19 @@ save_data(dat_denorm, Y_denorm, confidence_denorm, variance_denorm, col, data_ou
 all_data = torch.cat((dat_denorm, Y_denorm), dim=0)
 all_conf = torch.cat((torch.zeros_like(dat_denorm), confidence_denorm), dim=0)
 
-smoothed_data_list, smoothed_conf_list = [], []
+hist_plot_list, fut_plot_list, conf_plot_list = [], [], []
 for i in range(m):
-    smoothed_data_list.append(exponential_smoothing(all_data[:, i].cpu().numpy(), 0.3))
-    smoothed_conf_list.append(exponential_smoothing(all_conf[:, i].cpu().numpy(), 0.1))
+    hist_arr = dat_denorm[:, i].cpu().numpy()
+    fut_arr = Y_denorm[:, i].cpu().numpy()
+    conf_arr = confidence_denorm[:, i].cpu().numpy()
 
-smoothed_dat = torch.tensor(np.array(smoothed_data_list)).T
-smoothed_confidence = torch.tensor(np.array(smoothed_conf_list)).T
-smoothed_hist = smoothed_dat[:-horizon, :]
-smoothed_fut = smoothed_dat[-horizon:, :]
-smoothed_conf_fut = smoothed_confidence[-horizon:, :]
+    hist_plot_list.append(smooth_series(hist_arr, args.hist_alpha))
+    fut_plot_list.append(smooth_series(fut_arr, args.future_alpha))
+    conf_plot_list.append(smooth_series(conf_arr, min(args.future_alpha, 0.5)))
+
+hist_plot = torch.tensor(np.array(hist_plot_list)).T
+fut_plot = torch.tensor(np.array(fut_plot_list)).T
+conf_plot_fut = torch.tensor(np.array(conf_plot_list)).T
 
 # 날짜 설정
 HIST_END = pd.Timestamp("2025-07-01")
@@ -384,10 +456,25 @@ dates_future = pd.date_range(start=FORECAST_START, periods=horizon, freq="MS").t
 
 print(f"Forecast range: {dates_future[0].strftime('%Y-%m')} ~ {dates_future[-1].strftime('%Y-%m')}")
 
-# 플롯 대상 선택 (US Trade Weighted Dollar Index + 4개 환율)
-target_keywords = ['us_trade', 'weighted', 'kr_fx', 'cn_fx', 'jp_fx', 'uk_fx']
-target_indices = sorted(list(set([i for k in target_keywords for i, n in enumerate(col) if k.lower() in n.lower()])))
-if not target_indices: 
+# 플롯 대상 선택 (US Trade Weighted Dollar Index + 주요 FX)
+preferred_names = [
+    'us_Trade Weighted Dollar Index',
+    'kr_fx',
+    'jp_fx',
+    'cn_fx',
+    'uk_fx',
+]
+target_indices = [i for i, name in enumerate(col) if name in preferred_names]
+
+# 대소문자/표기 차이 대비 fallback
+if not target_indices:
+    fallback_tokens = ['trade weighted dollar index', 'kr_fx', 'jp_fx', 'cn_fx', 'uk_fx']
+    target_indices = sorted(list(set([
+        i for token in fallback_tokens for i, n in enumerate(col)
+        if token in n.lower() and 'trade_balance' not in n.lower() and 'balanced_of_trade' not in n.lower()
+    ])))
+
+if not target_indices:
     target_indices = list(range(m))
 
 plot_colours = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
@@ -395,10 +482,10 @@ plot_colours = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"
 # 개별 플롯 생성
 print("Generating individual plots...")
 for idx, i in enumerate(target_indices):
-    plot_forecast(smoothed_hist[:, i], smoothed_fut[:, i], smoothed_conf_fut[:, i], col[i], 
+    plot_forecast(hist_plot[:, i], fut_plot[:, i], conf_plot_fut[:, i], col[i], 
                   dates_hist, dates_future, pt_plots_dir, 
                   color=plot_colours[idx % len(plot_colours)], 
-                  linestyle='-',
+                  linestyle='--',
                   is_index=False)
 
 # Multi-Node Plot - FULL
@@ -406,9 +493,9 @@ print("Generating multi-node plots...")
 plot_multi_node(
     dates_hist=dates_hist,
     dates_future=dates_future,
-    smoothed_hist=smoothed_hist,
-    smoothed_fut=smoothed_fut,
-    smoothed_conf_fut=smoothed_conf_fut,
+    smoothed_hist=hist_plot,
+    smoothed_fut=fut_plot,
+    smoothed_conf_fut=conf_plot_fut,
     target_indices=target_indices,
     col=col,
     index_idx=index_idx,
@@ -422,9 +509,9 @@ plot_multi_node(
 plot_multi_node(
     dates_hist=dates_hist,
     dates_future=dates_future,
-    smoothed_hist=smoothed_hist,
-    smoothed_fut=smoothed_fut,
-    smoothed_conf_fut=smoothed_conf_fut,
+    smoothed_hist=hist_plot,
+    smoothed_fut=fut_plot,
+    smoothed_conf_fut=conf_plot_fut,
     target_indices=target_indices,
     col=col,
     index_idx=index_idx,

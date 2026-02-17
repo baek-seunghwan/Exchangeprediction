@@ -1,0 +1,1552 @@
+CUDA not available, using CPU
+Loading data from /Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv...
+Data loaded and converted to numeric successfully.
+Graph loaded with 1 attacks...
+33 columns loaded
+Adjacency created...
+train X: torch.Size([131, 24, 33])
+train Y: torch.Size([131, 1, 33])
+valid X: torch.Size([11, 24, 33])
+valid Y: torch.Size([11, 1, 33])
+test X: torch.Size([11, 24, 33])
+test Y: torch.Size([11, 1, 33])
+test window: torch.Size([36, 33])
+length of training set= 131
+length of validation set= 11
+length of testing set= 11
+valid= 168
+Auto-detected num_nodes: 33
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260217_120514/checkpoints/model_006.pt', optim='adam', L1Loss=True, loss_mode='mse', normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=0, gcn_depth=1, num_nodes=33, dropout=0.0, subgraph_size=40, node_dim=30, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=24, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.0003, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=30, num_split=1, step_size=100, ss_prob=0.0, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx', focus_weight=0.7, focus_target_gain=12.0, rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', rse_report_mode='targets', plot_focus_only=0, debug_eval=0, rollout_mode='teacher_forced', seed=2026, plot=0, clean_cache=0, autotune_mode=1)
+The recpetive field size is 19
+Number of model parameters is 611649
+begin training
+Experiment: 1
+Iter: 0
+epoch: 1
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best sum= 10000000
+best rrse= 10000000
+best rrae= 10000000
+best corr= -10000000
+best smape= 10000000
+best objective= 10000000
+best hps= []
+best test rse= 10000000
+best test corr= -10000000
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.026
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.017
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.020
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.016
+iter: 10 | loss: 0.016
+iter: 11 | loss: 0.030
+iter: 12 | loss: 0.016
+iter: 13 | loss: 0.027
+iter: 14 | loss: 0.017
+iter: 15 | loss: 0.024
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.019
+iter: 23 | loss: 0.015
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.015
+iter: 26 | loss: 0.014
+iter: 27 | loss: 0.019
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.017
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.015
+iter: 32 | loss: 0.025
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch   1 | time:  2.22s | train_loss 0.0163 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+testing r= 5
+rrse(target)=148.7138217559148 / 87.05324564957357 | rrse(all)=17721859477977.445 / 13118447315149.623 | report_mode=targets
+********************************************************************************************************
+test rse 1.7083 | test rae 1.9096 | test corr 0.3050| test smape 0.2452 | test focus_rrse 1.3825
+********************************************************************************************************
+Experiment: 1
+Iter: 0
+epoch: 2
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 2]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.018
+iter:  1 | loss: 0.017
+iter:  2 | loss: 0.023
+iter:  3 | loss: 0.016
+iter:  4 | loss: 0.016
+iter:  5 | loss: 0.017
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.018
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.018
+iter: 12 | loss: 0.021
+iter: 13 | loss: 0.018
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.015
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.017
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.017
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.015
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.015
+iter: 27 | loss: 0.025
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.025
+iter: 30 | loss: 0.017
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.029
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch   2 | time:  1.97s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 3
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 3]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.015
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.026
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.014
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.018
+iter: 11 | loss: 0.015
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.023
+iter: 15 | loss: 0.016
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.027
+iter: 21 | loss: 0.021
+iter: 22 | loss: 0.017
+iter: 23 | loss: 0.010
+iter: 24 | loss: 0.018
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.016
+iter: 27 | loss: 0.023
+iter: 28 | loss: 0.022
+iter: 29 | loss: 0.019
+iter: 30 | loss: 0.018
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.020
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch   3 | time:  2.29s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 4
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 4]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.016
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.020
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.017
+iter: 11 | loss: 0.019
+iter: 12 | loss: 0.016
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.024
+iter: 15 | loss: 0.021
+iter: 16 | loss: 0.017
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.015
+iter: 20 | loss: 0.019
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.015
+iter: 24 | loss: 0.021
+iter: 25 | loss: 0.016
+iter: 26 | loss: 0.018
+iter: 27 | loss: 0.027
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.025
+iter: 31 | loss: 0.015
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch   4 | time:  2.20s | train_loss 0.0159 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 5
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 5]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.021
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.019
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.020
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.025
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.015
+iter: 12 | loss: 0.019
+iter: 13 | loss: 0.015
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.015
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.025
+iter: 20 | loss: 0.021
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.009
+iter: 25 | loss: 0.024
+iter: 26 | loss: 0.022
+iter: 27 | loss: 0.016
+iter: 28 | loss: 0.020
+iter: 29 | loss: 0.016
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.020
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch   5 | time:  2.34s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 6
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 6]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.023
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.014
+iter:  5 | loss: 0.016
+iter:  6 | loss: 0.018
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.018
+iter: 10 | loss: 0.015
+iter: 11 | loss: 0.017
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.022
+iter: 14 | loss: 0.016
+iter: 15 | loss: 0.018
+iter: 16 | loss: 0.022
+iter: 17 | loss: 0.017
+iter: 18 | loss: 0.016
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.013
+iter: 21 | loss: 0.018
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.019
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.019
+iter: 30 | loss: 0.016
+iter: 31 | loss: 0.027
+iter: 32 | loss: 0.021
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch   6 | time:  2.27s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 7
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 7]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.024
+iter:  1 | loss: 0.022
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.016
+iter:  5 | loss: 0.019
+iter:  6 | loss: 0.020
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.018
+iter:  9 | loss: 0.018
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.016
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.029
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.020
+iter: 18 | loss: 0.016
+iter: 19 | loss: 0.018
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.015
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.015
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.019
+iter: 30 | loss: 0.021
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.028
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch   7 | time:  1.94s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 8
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 8]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.018
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.019
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.015
+iter:  7 | loss: 0.015
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.026
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.016
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.013
+iter: 15 | loss: 0.019
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.017
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.015
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.015
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.016
+iter: 24 | loss: 0.022
+iter: 25 | loss: 0.025
+iter: 26 | loss: 0.017
+iter: 27 | loss: 0.015
+iter: 28 | loss: 0.016
+iter: 29 | loss: 0.015
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.025
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch   8 | time:  2.18s | train_loss 0.0159 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 9
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 9]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.017
+iter:  1 | loss: 0.024
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.018
+iter:  7 | loss: 0.020
+iter:  8 | loss: 0.016
+iter:  9 | loss: 0.017
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.019
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.018
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.011
+iter: 21 | loss: 0.026
+iter: 22 | loss: 0.015
+iter: 23 | loss: 0.022
+iter: 24 | loss: 0.016
+iter: 25 | loss: 0.021
+iter: 26 | loss: 0.015
+iter: 27 | loss: 0.020
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.028
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch   9 | time:  1.90s | train_loss 0.0159 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 10
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 10]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.017
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.024
+iter:  4 | loss: 0.014
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.018
+iter:  7 | loss: 0.017
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.017
+iter: 11 | loss: 0.014
+iter: 12 | loss: 0.017
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.025
+iter: 15 | loss: 0.024
+iter: 16 | loss: 0.016
+iter: 17 | loss: 0.017
+iter: 18 | loss: 0.020
+iter: 19 | loss: 0.023
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.016
+iter: 22 | loss: 0.017
+iter: 23 | loss: 0.015
+iter: 24 | loss: 0.011
+iter: 25 | loss: 0.019
+iter: 26 | loss: 0.010
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.019
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.012
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.023
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  10 | time:  2.21s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 11
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 11]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.016
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.025
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.015
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.016
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.016
+iter: 13 | loss: 0.026
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.016
+iter: 18 | loss: 0.015
+iter: 19 | loss: 0.015
+iter: 20 | loss: 0.016
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.017
+iter: 23 | loss: 0.023
+iter: 24 | loss: 0.016
+iter: 25 | loss: 0.028
+iter: 26 | loss: 0.011
+iter: 27 | loss: 0.017
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.015
+iter: 31 | loss: 0.016
+iter: 32 | loss: 0.035
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  11 | time:  2.14s | train_loss 0.0161 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 12
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 12]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.015
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.020
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.015
+iter:  7 | loss: 0.018
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.020
+iter: 10 | loss: 0.021
+iter: 11 | loss: 0.025
+iter: 12 | loss: 0.016
+iter: 13 | loss: 0.021
+iter: 14 | loss: 0.016
+iter: 15 | loss: 0.015
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.015
+iter: 18 | loss: 0.024
+iter: 19 | loss: 0.016
+iter: 20 | loss: 0.022
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.015
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.016
+iter: 31 | loss: 0.015
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  12 | time:  2.30s | train_loss 0.0159 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 13
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 13]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.017
+iter:  2 | loss: 0.022
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.017
+iter:  5 | loss: 0.018
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.016
+iter:  9 | loss: 0.019
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.020
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.018
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.018
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.017
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.017
+iter: 20 | loss: 0.013
+iter: 21 | loss: 0.019
+iter: 22 | loss: 0.022
+iter: 23 | loss: 0.018
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.010
+iter: 26 | loss: 0.020
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.016
+iter: 29 | loss: 0.020
+iter: 30 | loss: 0.017
+iter: 31 | loss: 0.016
+iter: 32 | loss: 0.016
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  13 | time:  2.23s | train_loss 0.0159 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 14
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 14]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.027
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.015
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.023
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.023
+iter: 10 | loss: 0.018
+iter: 11 | loss: 0.024
+iter: 12 | loss: 0.021
+iter: 13 | loss: 0.017
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.022
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.016
+iter: 22 | loss: 0.017
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.015
+iter: 26 | loss: 0.015
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.016
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.027
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  14 | time:  2.06s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 15
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 15]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.012
+iter:  2 | loss: 0.017
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.015
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.017
+iter: 10 | loss: 0.025
+iter: 11 | loss: 0.037
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.015
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.016
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.017
+iter: 19 | loss: 0.018
+iter: 20 | loss: 0.018
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.015
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.015
+iter: 27 | loss: 0.020
+iter: 28 | loss: 0.014
+iter: 29 | loss: 0.015
+iter: 30 | loss: 0.020
+iter: 31 | loss: 0.021
+iter: 32 | loss: 0.021
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  15 | time:  2.43s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 16
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 16]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.028
+iter:  1 | loss: 0.021
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.016
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.016
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.014
+iter: 13 | loss: 0.017
+iter: 14 | loss: 0.019
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.018
+iter: 18 | loss: 0.021
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.025
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.013
+iter: 24 | loss: 0.013
+iter: 25 | loss: 0.011
+iter: 26 | loss: 0.022
+iter: 27 | loss: 0.025
+iter: 28 | loss: 0.016
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.017
+iter: 32 | loss: 0.029
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  16 | time:  2.15s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 17
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 17]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.016
+iter:  1 | loss: 0.020
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.018
+iter:  4 | loss: 0.018
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.021
+iter:  7 | loss: 0.015
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.014
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.024
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.016
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.025
+iter: 23 | loss: 0.035
+iter: 24 | loss: 0.019
+iter: 25 | loss: 0.015
+iter: 26 | loss: 0.014
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.015
+iter: 29 | loss: 0.016
+iter: 30 | loss: 0.016
+iter: 31 | loss: 0.015
+iter: 32 | loss: 0.028
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  17 | time:  2.21s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 18
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 18]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.026
+iter:  5 | loss: 0.016
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.016
+iter:  8 | loss: 0.016
+iter:  9 | loss: 0.016
+iter: 10 | loss: 0.016
+iter: 11 | loss: 0.018
+iter: 12 | loss: 0.014
+iter: 13 | loss: 0.025
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.016
+iter: 16 | loss: 0.022
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.019
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.016
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.021
+iter: 26 | loss: 0.012
+iter: 27 | loss: 0.015
+iter: 28 | loss: 0.024
+iter: 29 | loss: 0.020
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.018
+iter: 32 | loss: 0.015
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  18 | time:  2.10s | train_loss 0.0159 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 19
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 19]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.011
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.019
+iter:  3 | loss: 0.021
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.021
+iter:  6 | loss: 0.018
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.016
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.023
+iter: 13 | loss: 0.016
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.020
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.015
+iter: 18 | loss: 0.016
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.021
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.020
+iter: 24 | loss: 0.015
+iter: 25 | loss: 0.017
+iter: 26 | loss: 0.014
+iter: 27 | loss: 0.015
+iter: 28 | loss: 0.016
+iter: 29 | loss: 0.033
+iter: 30 | loss: 0.014
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.020
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  19 | time:  2.48s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 20
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 20]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.018
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.019
+iter:  4 | loss: 0.016
+iter:  5 | loss: 0.018
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.016
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.020
+iter: 14 | loss: 0.014
+iter: 15 | loss: 0.016
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.015
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.022
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.025
+iter: 23 | loss: 0.018
+iter: 24 | loss: 0.017
+iter: 25 | loss: 0.016
+iter: 26 | loss: 0.021
+iter: 27 | loss: 0.013
+iter: 28 | loss: 0.017
+iter: 29 | loss: 0.013
+iter: 30 | loss: 0.018
+iter: 31 | loss: 0.021
+iter: 32 | loss: 0.021
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  20 | time:  2.20s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 21
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 21]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.019
+iter:  3 | loss: 0.024
+iter:  4 | loss: 0.016
+iter:  5 | loss: 0.018
+iter:  6 | loss: 0.017
+iter:  7 | loss: 0.019
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.022
+iter: 10 | loss: 0.017
+iter: 11 | loss: 0.015
+iter: 12 | loss: 0.014
+iter: 13 | loss: 0.025
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.017
+iter: 18 | loss: 0.017
+iter: 19 | loss: 0.016
+iter: 20 | loss: 0.018
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.017
+iter: 23 | loss: 0.009
+iter: 24 | loss: 0.007
+iter: 25 | loss: 0.018
+iter: 26 | loss: 0.015
+iter: 27 | loss: 0.020
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.012
+iter: 30 | loss: 0.015
+iter: 31 | loss: 0.008
+iter: 32 | loss: 0.032
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  21 | time:  2.18s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 22
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 22]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.019
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.019
+iter:  3 | loss: 0.016
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.033
+iter:  6 | loss: 0.019
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.016
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.017
+iter: 15 | loss: 0.019
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.015
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.016
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.018
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.018
+iter: 24 | loss: 0.019
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.016
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.013
+iter: 29 | loss: 0.015
+iter: 30 | loss: 0.011
+iter: 31 | loss: 0.018
+iter: 32 | loss: 0.041
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  22 | time:  2.46s | train_loss 0.0161 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 23
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 23]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.016
+iter:  1 | loss: 0.027
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.020
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.017
+iter:  6 | loss: 0.018
+iter:  7 | loss: 0.017
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.026
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.016
+iter: 12 | loss: 0.017
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.014
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.016
+iter: 18 | loss: 0.016
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.030
+iter: 21 | loss: 0.017
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.018
+iter: 24 | loss: 0.016
+iter: 25 | loss: 0.009
+iter: 26 | loss: 0.014
+iter: 27 | loss: 0.013
+iter: 28 | loss: 0.015
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.017
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.019
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  23 | time:  2.32s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 24
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 24]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.017
+iter:  4 | loss: 0.018
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.018
+iter:  9 | loss: 0.015
+iter: 10 | loss: 0.023
+iter: 11 | loss: 0.014
+iter: 12 | loss: 0.017
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.015
+iter: 16 | loss: 0.017
+iter: 17 | loss: 0.024
+iter: 18 | loss: 0.012
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.027
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.023
+iter: 23 | loss: 0.011
+iter: 24 | loss: 0.021
+iter: 25 | loss: 0.018
+iter: 26 | loss: 0.018
+iter: 27 | loss: 0.024
+iter: 28 | loss: 0.011
+iter: 29 | loss: 0.015
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  24 | time:  2.36s | train_loss 0.0159 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 25
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 25]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.023
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.025
+iter:  6 | loss: 0.018
+iter:  7 | loss: 0.011
+iter:  8 | loss: 0.017
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.014
+iter: 11 | loss: 0.028
+iter: 12 | loss: 0.020
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.015
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.019
+iter: 18 | loss: 0.018
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.017
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.017
+iter: 23 | loss: 0.017
+iter: 24 | loss: 0.024
+iter: 25 | loss: 0.013
+iter: 26 | loss: 0.013
+iter: 27 | loss: 0.016
+iter: 28 | loss: 0.015
+iter: 29 | loss: 0.014
+iter: 30 | loss: 0.016
+iter: 31 | loss: 0.011
+iter: 32 | loss: 0.020
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  25 | time:  2.34s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 26
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 26]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.017
+iter:  2 | loss: 0.027
+iter:  3 | loss: 0.018
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.013
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.020
+iter:  9 | loss: 0.015
+iter: 10 | loss: 0.018
+iter: 11 | loss: 0.016
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.016
+iter: 16 | loss: 0.011
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.019
+iter: 20 | loss: 0.016
+iter: 21 | loss: 0.015
+iter: 22 | loss: 0.028
+iter: 23 | loss: 0.019
+iter: 24 | loss: 0.014
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.016
+iter: 27 | loss: 0.023
+iter: 28 | loss: 0.012
+iter: 29 | loss: 0.016
+iter: 30 | loss: 0.010
+iter: 31 | loss: 0.024
+iter: 32 | loss: 0.018
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  26 | time:  2.41s | train_loss 0.0160 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 27
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 27]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.015
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.024
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.016
+iter:  5 | loss: 0.015
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.016
+iter:  8 | loss: 0.023
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.017
+iter: 11 | loss: 0.016
+iter: 12 | loss: 0.014
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.016
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.016
+iter: 17 | loss: 0.016
+iter: 18 | loss: 0.016
+iter: 19 | loss: 0.018
+iter: 20 | loss: 0.020
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.015
+iter: 24 | loss: 0.015
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.021
+iter: 27 | loss: 0.010
+iter: 28 | loss: 0.015
+iter: 29 | loss: 0.016
+iter: 30 | loss: 0.016
+iter: 31 | loss: 0.012
+iter: 32 | loss: 0.044
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  27 | time:  2.47s | train_loss 0.0161 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 28
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 28]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.023
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.019
+iter:  7 | loss: 0.016
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.015
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.017
+iter: 15 | loss: 0.018
+iter: 16 | loss: 0.014
+iter: 17 | loss: 0.026
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.016
+iter: 20 | loss: 0.018
+iter: 21 | loss: 0.016
+iter: 22 | loss: 0.019
+iter: 23 | loss: 0.017
+iter: 24 | loss: 0.015
+iter: 25 | loss: 0.014
+iter: 26 | loss: 0.030
+iter: 27 | loss: 0.014
+iter: 28 | loss: 0.016
+iter: 29 | loss: 0.011
+iter: 30 | loss: 0.019
+iter: 31 | loss: 0.013
+iter: 32 | loss: 0.013
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  28 | time:  2.31s | train_loss 0.0159 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 29
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 29]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.016
+iter:  1 | loss: 0.016
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.023
+iter:  8 | loss: 0.022
+iter:  9 | loss: 0.018
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.025
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.016
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.016
+iter: 17 | loss: 0.028
+iter: 18 | loss: 0.014
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.009
+iter: 22 | loss: 0.016
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.017
+iter: 25 | loss: 0.015
+iter: 26 | loss: 0.018
+iter: 27 | loss: 0.015
+iter: 28 | loss: 0.016
+iter: 29 | loss: 0.030
+iter: 30 | loss: 0.013
+iter: 31 | loss: 0.014
+iter: 32 | loss: 0.009
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  29 | time:  2.27s | train_loss 0.0159 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+Experiment: 1
+Iter: 0
+epoch: 30
+hp= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 30]
+best sum= 7.127142952580558
+best rrse= 3.4337501807592394
+best rrae= 3.9381670388987646
+best corr= 0.24477427
+best smape= 0.2977323744901261
+best objective= 3.1023952807063484
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+best test rse= 1.7083087557074133
+best test corr= 0.30496967
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 12.0, 'kr_fx': 12.0, 'jp_fx': 12.0}
+iter:  0 | loss: 0.015
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.022
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.029
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.016
+iter:  7 | loss: 0.012
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.018
+iter: 10 | loss: 0.016
+iter: 11 | loss: 0.014
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.017
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.015
+iter: 16 | loss: 0.012
+iter: 17 | loss: 0.018
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.017
+iter: 21 | loss: 0.017
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.014
+iter: 24 | loss: 0.029
+iter: 25 | loss: 0.012
+iter: 26 | loss: 0.018
+iter: 27 | loss: 0.012
+iter: 28 | loss: 0.015
+iter: 29 | loss: 0.023
+iter: 30 | loss: 0.023
+iter: 31 | loss: 0.010
+iter: 32 | loss: 0.014
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+| end of epoch  30 | time:  2.00s | train_loss 0.0159 | valid rse 3.4338 | valid rae 3.9382 | valid corr  0.2448 | valid smape  0.2977 | focus_rrse 2.9604 | obj 3.1024
+best val loss= 7.127142952580558
+best hps= [1, 0.0003, 16, 128, 256, 1024, 40, 0.0, 2, 30, 0.6, 0.1, 2, 1]
+testing r= 5
+rrse(target)=119.75530063947065 / 34.875950297872706 | rrse(all)=86175367773957.9 / 34622965068576.312 | report_mode=targets
+testing r= 5
+rrse(target)=148.7138217559148 / 87.05324564957357 | rrse(all)=17721859477977.445 / 13118447315149.623 | report_mode=targets
+********************************************************************************************************
+final test rse 1.7083 | test rae 1.9096 | test corr 0.3050 | test smape 0.2452
+********************************************************************************************************
+
+
+
+1 run average
+
+
+
+valid	rse	rae
+mean	3.4338	3.9382
+std	0.0000	0.0000
+
+
+
+test	rse	rae
+mean	1.7083	1.9096
+std	0.0000	0.0000
