@@ -823,9 +823,12 @@ parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to s
 parser.add_argument('--clean_cache', type=int, default=0, choices=[0, 1], help='1 to delete cached *.pt in data dir before training')
 parser.add_argument('--autotune_mode', type=int, default=0, choices=[0, 1], help='1 to optimize for repeated auto-tuning runs')
 parser.add_argument('--apply_best_tuning', type=int, default=0, choices=[0, 1], help='1 to override args with best tuning run values')
+parser.add_argument('--eval_best_tuning', type=int, default=0, choices=[0, 1], help='1 to skip training and evaluate best tuned checkpoint with plotting')
+parser.add_argument('--target_profile', type=str, default='none', choices=['none', 'triple_050'], help='preset for target-focused optimization setup')
 
 
 args = parser.parse_args()
+args.best_tuning_checkpoint = ''
 if args.autotune_mode == 1:
     args.plot = 0
     args.clean_cache = 0
@@ -857,6 +860,7 @@ if args.apply_best_tuning == 1:
                 if best is not None:
                     run_id = best.get('run_id')
                     log_path = latest / f"run_{int(run_id):03d}.log"
+                    ckpt_path = latest / 'checkpoints' / f"model_{int(run_id):03d}.pt"
                     if log_path.exists():
                         # extract Namespace(...) line from log and convert to dict
                         import re
@@ -889,6 +893,9 @@ if args.apply_best_tuning == 1:
                                                 pass
                                     # ensure autotune mode off when applying tuned HPs
                                     args.autotune_mode = 0
+                                    if ckpt_path.exists():
+                                        args.best_tuning_checkpoint = str(ckpt_path)
+                                        args.save = str(ckpt_path)
                                     print(f"[apply_best_tuning] Applied params from {log_path} (preserved epochs/plot)")
                                 else:
                                     print(f"[apply_best_tuning] failed to parse Namespace in {log_path}")
@@ -902,6 +909,21 @@ if args.apply_best_tuning == 1:
             print("[apply_best_tuning] no tuning_runs directories found")
     except Exception as e:
         print(f"[apply_best_tuning] error while loading tuning run: {e}")
+
+# Optional target optimization profile
+if args.target_profile == 'triple_050':
+    args.focus_targets = 1
+    args.focus_nodes = 'us_Trade Weighted Dollar Index,jp_fx,kr_fx'
+    args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt'
+    args.rse_report_mode = 'targets'
+    args.loss_mode = 'mse'
+    args.focus_weight = 1.0
+    args.focus_target_gain = 35.0
+    args.focus_only_loss = 1
+    args.anchor_focus_to_last = 0.7
+    args.rollout_mode = 'teacher_forced'
+    args.use_graph = 0
+    print('[target_profile] applied: triple_050')
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 if device.type == 'cuda':
@@ -1028,8 +1050,20 @@ def main(experiment):
 
         es_counter = 0
         try:
-            print('begin training')
+            if args.eval_best_tuning == 1:
+                ckpt_to_load = args.best_tuning_checkpoint if args.best_tuning_checkpoint else args.save
+                if ckpt_to_load and os.path.exists(ckpt_to_load):
+                    with open(ckpt_to_load, 'rb') as f:
+                        model = torch.load(f, weights_only=False)
+                    model = model.to(device)
+                    print(f"[eval_best_tuning] loaded checkpoint: {ckpt_to_load}")
+                else:
+                    raise FileNotFoundError(f"[eval_best_tuning] checkpoint not found: {ckpt_to_load}")
+            else:
+                print('begin training')
             for epoch in range(1, args.epochs + 1):
+                if args.eval_best_tuning == 1:
+                    break
                 print('Experiment:', (experiment + 1))
                 print('Iter:', q)
                 print('epoch:', epoch)

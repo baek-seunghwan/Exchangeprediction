@@ -9,6 +9,10 @@ from pathlib import Path
 
 def build_trials():
     return [
+        {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.2},
+        {"lr": 3e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.2},
+        {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.2},
+        {"lr": 3e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.1},
         {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
         {"lr": 3e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.3},
         {"lr": 5e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
