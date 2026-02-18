@@ -1,4 +1,5 @@
 import argparse
+import json
 import math
 import time
 import torch
@@ -189,6 +190,23 @@ def compute_focus_rrse(predict_np, ytest_np, data):
     if not values:
         return None
     return float(np.mean(values))
+
+
+def compute_target_rrse_dict(predict_t, test_t, data):
+    selected_cols = get_rse_target_columns(data)
+    rrse_by_target = {}
+    eps = 1e-12
+    for col in selected_cols:
+        pred = predict_t[:, col]
+        true = test_t[:, col]
+        numerator = torch.sum((true - pred) ** 2)
+        denominator = torch.sum((true - torch.mean(true)) ** 2)
+        if denominator <= eps:
+            rrse = 0.0 if numerator <= eps else 1e6
+        else:
+            rrse = torch.sqrt(numerator / denominator).item()
+        rrse_by_target[data.col[col]] = float(rrse)
+    return rrse_by_target
 
 
 def estimate_bias_offset_from_arrays(data, predict_t, test_t):
@@ -500,6 +518,8 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     smape /= Ytest.shape[1]
 
     focus_rrse = compute_focus_rrse(predict, Ytest, data)
+    rrse_by_target = compute_target_rrse_dict(predict_t, test_t, data)
+    print(f"[{split_type}] per_target_rrse_json={json.dumps(rrse_by_target, ensure_ascii=False)}")
 
     # --- Plotting (기존 코드 유지) ---
     counter = 0

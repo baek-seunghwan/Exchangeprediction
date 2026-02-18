@@ -37,6 +37,7 @@ def parse_metrics(output_text: str):
     final_rse = None
     final_rae = None
     best_test_rse = None
+    per_target_rrse = None
 
     m_final = re.findall(r"final test rse\s+([0-9.]+)\s*\|\s*test rae\s+([0-9.]+)", output_text)
     if m_final:
@@ -47,7 +48,16 @@ def parse_metrics(output_text: str):
     if m_best:
         best_test_rse = float(m_best[-1])
 
-    return final_rse, final_rae, best_test_rse
+    m_targets = re.findall(r"\[Testing\]\s+per_target_rrse_json=(\{.*?\})", output_text)
+    if m_targets:
+        try:
+            per_target_rrse = json.loads(m_targets[-1])
+            if not isinstance(per_target_rrse, dict):
+                per_target_rrse = None
+        except Exception:
+            per_target_rrse = None
+
+    return final_rse, final_rae, best_test_rse, per_target_rrse
 
 
 def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, data_path):
@@ -110,7 +120,12 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
     log_path = run_dir / f"run_{run_id:03d}.log"
     log_path.write_text(output, encoding="utf-8")
 
-    final_rse, final_rae, best_test_rse = parse_metrics(output)
+    final_rse, final_rae, best_test_rse, per_target_rrse = parse_metrics(output)
+    max_target_rse = None
+    if isinstance(per_target_rrse, dict) and len(per_target_rrse) > 0:
+        vals = [float(v) for v in per_target_rrse.values() if v is not None]
+        if vals:
+            max_target_rse = max(vals)
 
     return {
         "run_id": run_id,
@@ -122,6 +137,8 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
         "final_test_rse": final_rse,
         "final_test_rae": final_rae,
         "best_test_rse": best_test_rse,
+        "per_target_rrse": per_target_rrse,
+        "max_target_rse": max_target_rse,
         "log_file": str(log_path),
     }
 
@@ -133,9 +150,12 @@ def write_results_json_csv(out_dir: Path, results):
     csv_path = out_dir / "results.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["run_id", "seed", "data", "use_graph", "final_test_rse", "final_test_rae", "best_test_rse", "objective_rse", "return_code", "trial_json", "log_file"])
+        w.writerow(["run_id", "seed", "data", "use_graph", "final_test_rse", "final_test_rae", "best_test_rse", "max_target_rse", "objective_rse", "return_code", "trial_json", "per_target_rrse_json", "log_file"])
         for r in results:
-            obj = r["best_test_rse"] if r["best_test_rse"] is not None else r["final_test_rse"]
+            if r.get("max_target_rse") is not None:
+                obj = r["max_target_rse"]
+            else:
+                obj = r["best_test_rse"] if r["best_test_rse"] is not None else r["final_test_rse"]
             w.writerow([
                 r["run_id"],
                 r["seed"],
@@ -144,9 +164,11 @@ def write_results_json_csv(out_dir: Path, results):
                 r["final_test_rse"],
                 r["final_test_rae"],
                 r["best_test_rse"],
+                r.get("max_target_rse"),
                 obj,
                 r["return_code"],
                 json.dumps(r["trial"], ensure_ascii=False),
+                json.dumps(r.get("per_target_rrse"), ensure_ascii=False),
                 r["log_file"],
             ])
 
@@ -162,12 +184,12 @@ def main():
     parser.add_argument("--valid_year", type=int, default=2024)
     parser.add_argument("--test_year", type=int, default=2025)
     parser.add_argument("--focus_targets", type=int, default=1)
-    parser.add_argument("--focus_nodes", type=str, default="us_Trade Weighted Dollar Index")
+    parser.add_argument("--focus_nodes", type=str, default="us_Trade Weighted Dollar Index,jp_fx,kr_fx")
     parser.add_argument("--focus_weight", type=float, default=1.0)
     parser.add_argument("--focus_target_gain", type=float, default=40.0)
     parser.add_argument("--focus_only_loss", type=int, default=1, choices=[0, 1])
     parser.add_argument("--anchor_focus_to_last", type=float, default=0.1)
-    parser.add_argument("--rse_targets", type=str, default="Us_Trade Weighted Dollar Index_Testing.txt")
+    parser.add_argument("--rse_targets", type=str, default="Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt")
     parser.add_argument("--rse_report_mode", type=str, default="targets", choices=["targets", "all"])
     parser.add_argument("--loss_mode", type=str, default="mse", choices=["l1", "mse"])
     parser.add_argument("--target_profile", type=str, default="none", choices=["none", "triple_050", "run001_us"])
@@ -177,7 +199,7 @@ def main():
     parser.add_argument("--trend_penalty_scope", type=str, default="focus", choices=["focus", "all"])
     parser.add_argument("--early_stop_patience", type=int, default=20)
     parser.add_argument("--early_stop_min_epochs", type=int, default=30)
-    parser.add_argument("--goal_rse", type=float, default=0.5, help="stop sweep early when objective_rse <= goal")
+    parser.add_argument("--goal_rse", type=float, default=0.5, help="stop sweep early when max target RSE (US/JP/KR) <= goal")
     parser.add_argument("--rollout_mode", type=str, default="recursive", choices=["teacher_forced", "recursive"])
     parser.add_argument("--force_recursive_eval", type=int, default=1, choices=[0, 1])
     parser.add_argument("--seeds", type=str, default="123,777,2026")
@@ -259,9 +281,11 @@ def main():
         results.append(res)
         done_keys.add(key)
         write_results_json_csv(out_dir, results)
-        print(f"[{idx}/{total}] done final_test_rse={res['final_test_rse']} best_test_rse={res['best_test_rse']}")
+        print(f"[{idx}/{total}] done final_test_rse={res['final_test_rse']} best_test_rse={res['best_test_rse']} max_target_rse={res.get('max_target_rse')}")
 
-        obj = res["best_test_rse"] if res["best_test_rse"] is not None else res["final_test_rse"]
+        obj = res.get("max_target_rse")
+        if obj is None:
+            obj = res["best_test_rse"] if res["best_test_rse"] is not None else res["final_test_rse"]
         if obj is not None and obj <= args.goal_rse:
             print(f"goal reached: objective_rse={obj} <= goal_rse={args.goal_rse}. stopping early.")
             break
@@ -270,6 +294,8 @@ def main():
 
     valid = [r for r in results if (r["best_test_rse"] is not None or r["final_test_rse"] is not None)]
     def objective(row):
+        if row.get("max_target_rse") is not None:
+            return row["max_target_rse"]
         return row["best_test_rse"] if row["best_test_rse"] is not None else row["final_test_rse"]
     valid_sorted = sorted(valid, key=objective) if valid else []
 
