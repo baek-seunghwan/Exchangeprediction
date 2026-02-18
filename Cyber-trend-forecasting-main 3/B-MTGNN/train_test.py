@@ -191,6 +191,26 @@ def compute_focus_rrse(predict_np, ytest_np, data):
     return float(np.mean(values))
 
 
+def estimate_bias_offset_from_arrays(data, predict_t, test_t):
+    if predict_t.dim() == 3:
+        pred2 = predict_t.reshape(-1, predict_t.size(-1))
+        true2 = test_t.reshape(-1, test_t.size(-1))
+    else:
+        pred2 = predict_t
+        true2 = test_t
+
+    err = pred2 - true2
+    col_mean_err = torch.mean(err, dim=0)
+
+    if args.debias_apply_to == 'all':
+        return col_mean_err
+
+    offset = torch.zeros_like(col_mean_err)
+    for col in get_focus_columns(data):
+        offset[col] = col_mean_err[col]
+    return offset
+
+
 def save_metrics_1d(predict, test, title, type):
     sum_squared_diff = torch.sum(torch.pow(test - predict, 2))
     root_sum_squared = math.sqrt(sum_squared_diff)
@@ -214,6 +234,15 @@ def save_metrics_1d(predict, test, title, type):
     else:
         rae = sum_absolute_diff / sum_absolute_r
 
+    err = predict - test
+    me = torch.mean(err).item()
+    mae = torch.mean(torch.abs(err)).item()
+    valid_mask = torch.abs(test) > eps
+    if torch.any(valid_mask):
+        mpe = torch.mean((err[valid_mask] / test[valid_mask]) * 100.0).item()
+    else:
+        mpe = float('nan')
+
     title = title.replace('/', '_')
 
     save_dir = MODEL_BASE_DIR / type
@@ -224,6 +253,9 @@ def save_metrics_1d(predict, test, title, type):
     with open(file_path, "w") as f:
         f.write('rse:' + str(rrse) + '\n')
         f.write('rae:' + str(rae) + '\n')
+        f.write('me:' + str(me) + '\n')
+        f.write('mae:' + str(mae) + '\n')
+        f.write('mpe:' + str(mpe) + '\n')
 
 
 def plot_predicted_actual(predicted, actual, title, type, variance, confidence_95):
@@ -306,7 +338,7 @@ def s_mape(yTrue, yPred):
     return mape
 
 
-def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_input, is_plot, split_type='Testing'):
+def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_input, is_plot, split_type='Testing', bias_offset=None, return_arrays=False):
     total_loss = 0
     total_loss_l1 = 0
     n_samples = 0
@@ -415,6 +447,12 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     variance *= scale
     confidence_95 *= scale
 
+    if bias_offset is not None:
+        b = bias_offset.to(predict.device)
+        if b.dim() == 1:
+            b = b.unsqueeze(0)
+        predict = predict - b
+
     # --- Metrics 계산: target/all 동시 계산 후 report mode 선택 ---
     selected_cols = get_rse_target_columns(data)
     rrse_target, rae_target, root_sum_squared_target, root_sum_squared_r_target = compute_rrse_rae_subset(predict, test, selected_cols)
@@ -434,6 +472,9 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         f"rrse(all)={root_sum_squared_all} / {root_sum_squared_r_all} | "
         f"report_mode={args.rse_report_mode}"
     )
+
+    predict_t = predict.clone()
+    test_t = test.clone()
 
     predict = predict.data.cpu().numpy()
     Ytest = test.data.cpu().numpy()
@@ -485,6 +526,8 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         if skipped_nodes:
             print(f"[{split_type}] skipped near-constant nodes for per-node metrics: {skipped_nodes}")
 
+    if return_arrays:
+        return rrse, rae, correlation, smape, focus_rrse, predict_t.detach().cpu(), test_t.detach().cpu()
     return rrse, rae, correlation, smape, focus_rrse
 
 
@@ -690,6 +733,15 @@ def train(data, X, Y, model, criterion, optim, batch_size):
             print(f"[Target-Only Loss] enabled for columns: {[data.col[i] for i in focus_cols]}")
     else:
         print("[Target-Weighted Loss] disabled (uniform weight for overall RSE optimization)")
+    if args.bias_penalty > 0:
+        if args.bias_penalty_scope == 'focus':
+            scope_cols = get_focus_columns(data)
+            scope_names = [data.col[i] for i in scope_cols] if scope_cols else []
+            print(f"[Bias Penalty] enabled lambda={args.bias_penalty} scope=focus cols={scope_names}")
+        else:
+            print(f"[Bias Penalty] enabled lambda={args.bias_penalty} scope=all")
+    else:
+        print("[Bias Penalty] disabled")
     # ==================================
 
     for X, Y in data.get_batches(X, Y, batch_size, True):
@@ -752,6 +804,16 @@ def train(data, X, Y, model, criterion, optim, batch_size):
                     loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
             else:
                 loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
+
+            if args.bias_penalty > 0:
+                err_signed = output - ty
+                if args.bias_penalty_scope == 'focus':
+                    focus_cols = get_focus_columns(data)
+                    if focus_cols:
+                        focus_idx = torch.tensor(focus_cols, device=device)
+                        err_signed = torch.index_select(err_signed, dim=2, index=focus_idx)
+                bias_term = torch.mean(torch.mean(err_signed, dim=(0, 1)) ** 2)
+                loss = loss + args.bias_penalty * bias_term
             # ==================================
             loss.backward()
             total_loss += loss.item()
@@ -774,7 +836,7 @@ parser.add_argument('--log_interval', type=int, default=2000, metavar='N', help=
 parser.add_argument('--save', type=str, default=str(DEFAULT_MODEL_SAVE), help='path to save the final model')
 parser.add_argument('--optim', type=str, default='adam')
 parser.add_argument('--L1Loss', type=bool, default=True)
-parser.add_argument('--loss_mode', type=str, default='mse', choices=['l1', 'mse'], help='training loss type; mse generally aligns better with RSE minimization')
+parser.add_argument('--loss_mode', type=str, default='l1', choices=['l1', 'mse'], help='training loss type; mse generally aligns better with RSE minimization')
 parser.add_argument('--normalize', type=int, default=2)
 parser.add_argument('--device', type=str, default='cuda:1', help='')
 parser.add_argument('--gcn_true', type=bool, default=False, help='whether to add graph convolution layer')
@@ -796,35 +858,39 @@ parser.add_argument('--seq_out_len', type=int, default=1, help='output sequence 
 parser.add_argument('--horizon', type=int, default=1, help='forecast start offset (1=predict immediately after input)')
 parser.add_argument('--layers', type=int, default=2, help='number of layers')
 parser.add_argument('--batch_size', type=int, default=4, help='batch size')
-parser.add_argument('--lr', type=float, default=0.0002, help='learning rate')
+parser.add_argument('--lr', type=float, default=0.0005, help='learning rate')
 parser.add_argument('--weight_decay', type=float, default=0.00001, help='weight decay rate')
 parser.add_argument('--clip', type=int, default=10, help='clip')
 parser.add_argument('--propalpha', type=float, default=0.6, help='prop alpha')
 parser.add_argument('--tanhalpha', type=float, default=0.1, help='tanh alpha')
-parser.add_argument('--epochs', type=int, default=120, help='')
+parser.add_argument('--epochs', type=int, default=320, help='')
 parser.add_argument('--num_split', type=int, default=1, help='number of splits for graphs')
 parser.add_argument('--step_size', type=int, default=100, help='step_size')
 parser.add_argument('--ss_prob', type=float, default=0.2, help='scheduled sampling probability')
 parser.add_argument('--train_ratio', type=float, default=0.8666666667, help='train split ratio')
 parser.add_argument('--valid_ratio', type=float, default=0.0666666667, help='validation split ratio')
-parser.add_argument('--focus_targets', type=int, default=1, help='1 to upweight us/kr/jp target nodes')
-parser.add_argument('--focus_nodes', type=str, default='us_Trade Weighted Dollar Index', help='priority nodes (comma separated)')
-parser.add_argument('--focus_weight', type=float, default=1.0, help='priority weight for focus-node RRSE in model selection (0~1)')
-parser.add_argument('--focus_target_gain', type=float, default=40.0, help='loss weight applied to focus target columns when focus_targets=1')
-parser.add_argument('--focus_only_loss', type=int, default=1, choices=[0, 1], help='1 to optimize loss only on focus/rse target columns')
-parser.add_argument('--anchor_focus_to_last', type=float, default=0.8, help='0~1 level anchoring strength for focus columns during evaluation/forecast')
-parser.add_argument('--rse_targets', type=str, default='Us_Trade Weighted Dollar Index_Testing.txt', help='comma-separated target series/file names used for terminal RSE/RAE aggregation')
+parser.add_argument('--focus_targets', type=int, default=0, help='1 to upweight us/kr/jp target nodes')
+parser.add_argument('--focus_nodes', type=str, default='us_Trade Weighted Dollar Index,jp_fx,kr_fx', help='priority nodes (comma separated)')
+parser.add_argument('--focus_weight', type=float, default=0.7, help='priority weight for focus-node RRSE in model selection (0~1)')
+parser.add_argument('--focus_target_gain', type=float, default=12.0, help='loss weight applied to focus target columns when focus_targets=1')
+parser.add_argument('--focus_only_loss', type=int, default=0, choices=[0, 1], help='1 to optimize loss only on focus/rse target columns')
+parser.add_argument('--anchor_focus_to_last', type=float, default=0.0, help='0~1 level anchoring strength for focus columns during evaluation/forecast')
+parser.add_argument('--rse_targets', type=str, default='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', help='comma-separated target series/file names used for terminal RSE/RAE aggregation')
 parser.add_argument('--rse_report_mode', type=str, default='targets', choices=['targets', 'all'], help='which RSE/RAE to report in terminal and final summary')
+parser.add_argument('--debias_mode', type=str, default='none', choices=['none', 'val_mean_error'], help='bias correction mode for final evaluation/reporting')
+parser.add_argument('--debias_apply_to', type=str, default='focus', choices=['focus', 'all'], help='apply debias offset to focus targets only or all series')
+parser.add_argument('--bias_penalty', type=float, default=0.0, help='lambda for training-time signed-bias penalty (0 disables)')
+parser.add_argument('--bias_penalty_scope', type=str, default='focus', choices=['focus', 'all'], help='scope for training-time bias penalty')
 parser.add_argument('--plot_focus_only', type=int, default=0, help='1 to plot/save only focus nodes')
 parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
 parser.add_argument('--rollout_mode', type=str, default='teacher_forced', choices=['teacher_forced', 'recursive'], help='test rollout mode')
-parser.add_argument('--seed', type=int, default=2026, help='random seed')
+parser.add_argument('--seed', type=int, default=777, help='random seed')
 parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to skip plotting')
 parser.add_argument('--clean_cache', type=int, default=0, choices=[0, 1], help='1 to delete cached *.pt in data dir before training')
 parser.add_argument('--autotune_mode', type=int, default=0, choices=[0, 1], help='1 to optimize for repeated auto-tuning runs')
 parser.add_argument('--apply_best_tuning', type=int, default=0, choices=[0, 1], help='1 to override args with best tuning run values')
 parser.add_argument('--eval_best_tuning', type=int, default=0, choices=[0, 1], help='1 to skip training and evaluate best tuned checkpoint with plotting')
-parser.add_argument('--target_profile', type=str, default='run001_us', choices=['none', 'triple_050', 'run001_us'], help='preset for target-focused optimization setup')
+parser.add_argument('--target_profile', type=str, default='triple_050', choices=['none', 'triple_050', 'run001_us'], help='preset for target-focused optimization setup')
 
 
 args = parser.parse_args()
@@ -917,11 +983,20 @@ if args.target_profile == 'triple_050':
     args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt'
     args.rse_report_mode = 'targets'
     args.loss_mode = 'mse'
+    args.lr = 0.0007
+    args.dropout = 0.05
+    args.seq_in_len = 24
+    args.ss_prob = 0.1
+    args.seed = 2026
     args.focus_weight = 1.0
     args.focus_target_gain = 35.0
     args.focus_only_loss = 1
     args.anchor_focus_to_last = 0.7
     args.rollout_mode = 'teacher_forced'
+    args.debias_mode = 'none'
+    args.debias_apply_to = 'focus'
+    args.bias_penalty = 0.0
+    args.bias_penalty_scope = 'focus'
     args.use_graph = 0
     print('[target_profile] applied: triple_050')
 
@@ -944,6 +1019,8 @@ if args.target_profile == 'run001_us':
     args.anchor_focus_to_last = 0.8
     args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt'
     args.rse_report_mode = 'targets'
+    args.debias_mode = 'none'
+    args.debias_apply_to = 'focus'
     args.rollout_mode = 'teacher_forced'
     print('[target_profile] applied: run001_us')
 
@@ -1172,12 +1249,23 @@ def main(experiment):
         clear_split_outputs('Validation')
         clear_split_outputs('Testing')
 
+    bias_offset = None
+    if args.debias_mode == 'val_mean_error':
+        _, _, _, _, _, v_pred_t, v_true_t = evaluate_sliding_window(
+            Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Validation', return_arrays=True
+        )
+        bias_offset = estimate_bias_offset_from_arrays(Data, v_pred_t, v_true_t)
+        focus_cols = get_focus_columns(Data)
+        if focus_cols:
+            summary = {Data.col[c]: float(bias_offset[c].item()) for c in focus_cols}
+            print(f"[debias] mode={args.debias_mode} apply_to={args.debias_apply_to} offset={summary}")
+
     vtest_acc, vtest_rae, vtest_corr, vtest_smape, _ = evaluate_sliding_window(
-        Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Validation'
+        Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Validation', bias_offset=bias_offset
     )
 
     test_acc, test_rae, test_corr, test_smape, _ = evaluate_sliding_window(
-        Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Testing'
+        Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Testing', bias_offset=bias_offset
     )
     print('********************************************************************************************************')
     print("final test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f} | test smape {:5.4f}".format(test_acc, test_rae, test_corr, test_smape))

@@ -13,6 +13,10 @@ def build_trials():
         {"lr": 3e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.2},
         {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.2},
         {"lr": 3e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.1},
+        {"lr": 1.5e-4, "dropout": 0.10, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.2},
+        {"lr": 1.5e-4, "dropout": 0.05, "layers": 3, "conv_channels": 32, "residual_channels": 256, "skip_channels": 512, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.1},
+        {"lr": 1e-4, "dropout": 0.10, "layers": 3, "conv_channels": 32, "residual_channels": 256, "skip_channels": 512, "end_channels": 2048, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.2},
+        {"lr": 1e-4, "dropout": 0.05, "layers": 3, "conv_channels": 32, "residual_channels": 256, "skip_channels": 512, "end_channels": 2048, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.1},
         {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
         {"lr": 3e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.3},
         {"lr": 5e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
@@ -70,6 +74,9 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
         "--rse_targets", common_args.rse_targets,
         "--rse_report_mode", common_args.rse_report_mode,
         "--loss_mode", common_args.loss_mode,
+        "--target_profile", common_args.target_profile,
+        "--bias_penalty", str(common_args.bias_penalty),
+        "--bias_penalty_scope", common_args.bias_penalty_scope,
         "--debug_eval", "0",
         "--rollout_mode", common_args.rollout_mode,
         "--plot", "0",
@@ -152,6 +159,9 @@ def main():
     parser.add_argument("--rse_targets", type=str, default="Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt")
     parser.add_argument("--rse_report_mode", type=str, default="targets", choices=["targets", "all"])
     parser.add_argument("--loss_mode", type=str, default="mse", choices=["l1", "mse"])
+    parser.add_argument("--target_profile", type=str, default="none", choices=["none", "triple_050", "run001_us"])
+    parser.add_argument("--bias_penalty", type=float, default=0.0)
+    parser.add_argument("--bias_penalty_scope", type=str, default="focus", choices=["focus", "all"])
     parser.add_argument("--goal_rse", type=float, default=0.5, help="stop sweep early when objective_rse <= goal")
     parser.add_argument("--rollout_mode", type=str, default="teacher_forced", choices=["teacher_forced", "recursive"])
     parser.add_argument("--seeds", type=str, default="123,777,2026")
