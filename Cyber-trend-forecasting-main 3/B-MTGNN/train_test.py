@@ -99,6 +99,35 @@ def consistent_name(name):
     return result
 
 
+def print_model_weights_summary(model, title="Model Weights Summary"):
+    """
+    Print summary statistics of model weights
+    """
+    print(f"\n{'='*80}")
+    print(f"{title}")
+    print(f"{'='*80}")
+    
+    total_params = 0
+    for name, param in model.named_parameters():
+        if param.requires_grad:
+            num_params = param.numel()
+            total_params += num_params
+            mean_val = param.data.mean().item()
+            std_val = param.data.std().item()
+            min_val = param.data.min().item()
+            max_val = param.data.max().item()
+            
+            print(f"{name:50s} | Shape: {str(list(param.shape)):25s} | "
+                  f"Mean: {mean_val:8.4f} | Std: {std_val:8.4f} | "
+                  f"Min: {min_val:8.4f} | Max: {max_val:8.4f}")
+    
+    print(f"{'='*80}")
+    print(f"Total trainable parameters: {total_params:,}")
+    print(f"{'='*80}\n")
+    
+    return total_params
+
+
 def get_focus_nodes():
     return [x.strip() for x in args.focus_nodes.split(',') if x.strip()]
 
@@ -825,6 +854,7 @@ parser.add_argument('--autotune_mode', type=int, default=0, choices=[0, 1], help
 parser.add_argument('--apply_best_tuning', type=int, default=0, choices=[0, 1], help='1 to override args with best tuning run values')
 parser.add_argument('--eval_best_tuning', type=int, default=0, choices=[0, 1], help='1 to skip training and evaluate best tuned checkpoint with plotting')
 parser.add_argument('--target_profile', type=str, default='run001_us', choices=['none', 'triple_050', 'run001_us'], help='preset for target-focused optimization setup')
+parser.add_argument('--log_weights', type=int, default=1, choices=[0, 1], help='1 to log detailed weight statistics at key points, 0 to disable (improves performance for large models)')
 
 
 args = parser.parse_args()
@@ -1054,6 +1084,10 @@ def main(experiment):
         print('The recpetive field size is', model.receptive_field)
         nParams = sum([p.nelement() for p in model.parameters()])
         print('Number of model parameters is', nParams, flush=True)
+        
+        # Display detailed weight statistics after initialization
+        if args.log_weights == 1:
+            print_model_weights_summary(model, "Initial Model Weights After Initialization")
 
         if args.loss_mode == 'l1':
             criterion = nn.L1Loss(reduction='sum').to(device)
@@ -1079,6 +1113,9 @@ def main(experiment):
                         model = torch.load(f, weights_only=False)
                     model = model.to(device)
                     print(f"[eval_best_tuning] loaded checkpoint: {ckpt_to_load}")
+                    # Display weights loaded from checkpoint
+                    if args.log_weights == 1:
+                        print_model_weights_summary(model, f"Loaded Model Weights from Checkpoint: {ckpt_to_load}")
                 else:
                     raise FileNotFoundError(f"[eval_best_tuning] checkpoint not found: {ckpt_to_load}")
             else:
@@ -1127,6 +1164,11 @@ def main(experiment):
                     
                     with open(save_path, 'wb') as f:
                         torch.save(model, f)
+                    print(f"\n*** New best model saved to: {save_path} ***")
+                    # Display current best model weights
+                    if args.log_weights == 1:
+                        print_model_weights_summary(model, f"Best Model Weights (Epoch {epoch})")
+                    
                     best_val = sum_loss
                     best_rse = val_loss
                     best_rae = val_rae
@@ -1163,6 +1205,10 @@ def main(experiment):
     if os.path.exists(args.save):
         with open(args.save, 'rb') as f:
             model = torch.load(f, weights_only=False)
+        print(f"Loaded best model checkpoint from: {args.save}")
+        # Display weights loaded from best checkpoint
+        if args.log_weights == 1:
+            print_model_weights_summary(model, f"Best Model Weights from Checkpoint: {args.save}")
     else:
         print(f"Warning: checkpoint not found at {args.save}. Using current in-memory model.")
     # 로드한 모델도 학습 시와 같은 device로 이동
