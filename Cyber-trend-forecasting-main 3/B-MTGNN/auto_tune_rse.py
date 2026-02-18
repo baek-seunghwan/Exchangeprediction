@@ -3,34 +3,34 @@ import csv
 import json
 import re
 import subprocess
+import time
 from datetime import datetime
 from pathlib import Path
 
 
 def build_trials():
     return [
-        {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 3e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 3e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.1},
-        {"lr": 1.5e-4, "dropout": 0.10, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 1.5e-4, "dropout": 0.05, "layers": 3, "conv_channels": 32, "residual_channels": 256, "skip_channels": 512, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.1},
-        {"lr": 1e-4, "dropout": 0.10, "layers": 3, "conv_channels": 32, "residual_channels": 256, "skip_channels": 512, "end_channels": 2048, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 1e-4, "dropout": 0.05, "layers": 3, "conv_channels": 32, "residual_channels": 256, "skip_channels": 512, "end_channels": 2048, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.1},
-        {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 3e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.3},
-        {"lr": 5e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 5e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.1},
-        {"lr": 7e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.1},
-        {"lr": 3e-4, "dropout": 0.00, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.0},
-        {"lr": 5e-4, "dropout": 0.00, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.0},
-        {"lr": 3e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 2e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 12, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 3e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 12, "seq_out_len": 1, "ss_prob": 0.3},
-        {"lr": 2e-4, "dropout": 0.10, "layers": 1, "conv_channels": 8, "residual_channels": 64, "skip_channels": 128, "end_channels": 512, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2},
-        {"lr": 3e-4, "dropout": 0.10, "layers": 1, "conv_channels": 8, "residual_channels": 64, "skip_channels": 128, "end_channels": 512, "seq_in_len": 12, "seq_out_len": 1, "ss_prob": 0.2},
+        {"lr": 1.5e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.1, "focus_target_gain": 30.0, "trend_penalty": 0.1, "anchor_focus_to_last": 0.05},
+        {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2, "focus_target_gain": 40.0, "trend_penalty": 0.2, "anchor_focus_to_last": 0.10},
+        {"lr": 2.5e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2, "focus_target_gain": 50.0, "trend_penalty": 0.25, "anchor_focus_to_last": 0.10},
+        {"lr": 3e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2, "focus_target_gain": 60.0, "trend_penalty": 0.3, "anchor_focus_to_last": 0.12},
+        {"lr": 2e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.1, "focus_target_gain": 50.0, "trend_penalty": 0.2, "anchor_focus_to_last": 0.05},
+        {"lr": 3e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.1, "focus_target_gain": 60.0, "trend_penalty": 0.25, "anchor_focus_to_last": 0.08},
+        {"lr": 1.5e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.2, "focus_target_gain": 30.0, "trend_penalty": 0.15, "anchor_focus_to_last": 0.05},
+        {"lr": 2e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.2, "focus_target_gain": 40.0, "trend_penalty": 0.2, "anchor_focus_to_last": 0.08},
+        {"lr": 2.5e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.2, "focus_target_gain": 50.0, "trend_penalty": 0.25, "anchor_focus_to_last": 0.10},
+        {"lr": 2e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.1, "focus_target_gain": 50.0, "trend_penalty": 0.2, "anchor_focus_to_last": 0.05},
+        {"lr": 1.5e-4, "dropout": 0.10, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2, "focus_target_gain": 30.0, "trend_penalty": 0.2, "anchor_focus_to_last": 0.05},
+        {"lr": 2e-4, "dropout": 0.10, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.2, "focus_target_gain": 40.0, "trend_penalty": 0.25, "anchor_focus_to_last": 0.08},
+        {"lr": 1.5e-4, "dropout": 0.05, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.1, "focus_target_gain": 30.0, "trend_penalty": 0.2, "anchor_focus_to_last": 0.05},
+        {"lr": 2e-4, "dropout": 0.05, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.1, "focus_target_gain": 40.0, "trend_penalty": 0.25, "anchor_focus_to_last": 0.08},
+        {"lr": 1e-4, "dropout": 0.10, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.1, "focus_target_gain": 20.0, "trend_penalty": 0.15, "anchor_focus_to_last": 0.05},
+        {"lr": 1.5e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.1, "focus_target_gain": 30.0, "trend_penalty": 0.2, "anchor_focus_to_last": 0.05},
     ]
+
+
+def value_for_trial(trial, key, default):
+    return trial[key] if key in trial else default
 
 
 def parse_metrics(output_text: str):
@@ -65,20 +65,28 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
         "--batch_size", str(common_args.batch_size),
         "--train_ratio", str(common_args.train_ratio),
         "--valid_ratio", str(common_args.valid_ratio),
+        "--fixed_eval_periods", str(common_args.fixed_eval_periods),
+        "--valid_year", str(common_args.valid_year),
+        "--test_year", str(common_args.test_year),
         "--focus_targets", str(common_args.focus_targets),
         "--focus_nodes", common_args.focus_nodes,
         "--focus_weight", str(common_args.focus_weight),
-        "--focus_target_gain", str(common_args.focus_target_gain),
+        "--focus_target_gain", str(value_for_trial(trial, "focus_target_gain", common_args.focus_target_gain)),
         "--focus_only_loss", str(common_args.focus_only_loss),
-        "--anchor_focus_to_last", str(common_args.anchor_focus_to_last),
+        "--anchor_focus_to_last", str(value_for_trial(trial, "anchor_focus_to_last", common_args.anchor_focus_to_last)),
         "--rse_targets", common_args.rse_targets,
         "--rse_report_mode", common_args.rse_report_mode,
         "--loss_mode", common_args.loss_mode,
         "--target_profile", common_args.target_profile,
         "--bias_penalty", str(common_args.bias_penalty),
         "--bias_penalty_scope", common_args.bias_penalty_scope,
+        "--trend_penalty", str(value_for_trial(trial, "trend_penalty", common_args.trend_penalty)),
+        "--trend_penalty_scope", common_args.trend_penalty_scope,
+        "--early_stop_patience", str(common_args.early_stop_patience),
+        "--early_stop_min_epochs", str(common_args.early_stop_min_epochs),
         "--debug_eval", "0",
         "--rollout_mode", common_args.rollout_mode,
+        "--force_recursive_eval", str(common_args.force_recursive_eval),
         "--plot", "0",
         "--use_graph", "0",
         "--autotune_mode", "1",
@@ -150,22 +158,31 @@ def main():
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--train_ratio", type=float, default=0.8666666667)
     parser.add_argument("--valid_ratio", type=float, default=0.0666666667)
+    parser.add_argument("--fixed_eval_periods", type=int, default=1, choices=[0, 1])
+    parser.add_argument("--valid_year", type=int, default=2024)
+    parser.add_argument("--test_year", type=int, default=2025)
     parser.add_argument("--focus_targets", type=int, default=1)
-    parser.add_argument("--focus_nodes", type=str, default="us_Trade Weighted Dollar Index,jp_fx,kr_fx")
-    parser.add_argument("--focus_weight", type=float, default=0.7)
-    parser.add_argument("--focus_target_gain", type=float, default=12.0)
-    parser.add_argument("--focus_only_loss", type=int, default=0, choices=[0, 1])
-    parser.add_argument("--anchor_focus_to_last", type=float, default=0.0)
-    parser.add_argument("--rse_targets", type=str, default="Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt")
+    parser.add_argument("--focus_nodes", type=str, default="us_Trade Weighted Dollar Index")
+    parser.add_argument("--focus_weight", type=float, default=1.0)
+    parser.add_argument("--focus_target_gain", type=float, default=40.0)
+    parser.add_argument("--focus_only_loss", type=int, default=1, choices=[0, 1])
+    parser.add_argument("--anchor_focus_to_last", type=float, default=0.1)
+    parser.add_argument("--rse_targets", type=str, default="Us_Trade Weighted Dollar Index_Testing.txt")
     parser.add_argument("--rse_report_mode", type=str, default="targets", choices=["targets", "all"])
     parser.add_argument("--loss_mode", type=str, default="mse", choices=["l1", "mse"])
     parser.add_argument("--target_profile", type=str, default="none", choices=["none", "triple_050", "run001_us"])
     parser.add_argument("--bias_penalty", type=float, default=0.0)
     parser.add_argument("--bias_penalty_scope", type=str, default="focus", choices=["focus", "all"])
+    parser.add_argument("--trend_penalty", type=float, default=0.2)
+    parser.add_argument("--trend_penalty_scope", type=str, default="focus", choices=["focus", "all"])
+    parser.add_argument("--early_stop_patience", type=int, default=20)
+    parser.add_argument("--early_stop_min_epochs", type=int, default=30)
     parser.add_argument("--goal_rse", type=float, default=0.5, help="stop sweep early when objective_rse <= goal")
-    parser.add_argument("--rollout_mode", type=str, default="teacher_forced", choices=["teacher_forced", "recursive"])
+    parser.add_argument("--rollout_mode", type=str, default="recursive", choices=["teacher_forced", "recursive"])
+    parser.add_argument("--force_recursive_eval", type=int, default=1, choices=[0, 1])
     parser.add_argument("--seeds", type=str, default="123,777,2026")
-    parser.add_argument("--max_trials", type=int, default=8)
+    parser.add_argument("--max_trials", type=int, default=16)
+    parser.add_argument("--max_runtime_minutes", type=int, default=300, help="wall-clock cap for sweep; <=0 disables")
     parser.add_argument("--datasets", type=str, default="sm_data.csv")
     parser.add_argument("--resume_dir", type=str, default="", help="existing tuning_runs/<timestamp> directory to resume from")
     args = parser.parse_args()
@@ -216,7 +233,14 @@ def main():
         print(f"resume_dir: {out_dir}")
         print(f"already completed: {done_count}/{total}")
 
+    sweep_start = time.time()
     for idx, (dataset, trial, seed) in enumerate(combos, 1):
+        if args.max_runtime_minutes > 0:
+            elapsed_min = (time.time() - sweep_start) / 60.0
+            if elapsed_min >= args.max_runtime_minutes:
+                print(f"time budget reached: elapsed={elapsed_min:.1f} min >= max_runtime_minutes={args.max_runtime_minutes}. stopping.")
+                break
+
         key = (str(root / "data" / dataset), int(seed), json.dumps(trial, sort_keys=True))
         if key in done_keys:
             print(f"[{idx}/{total}] skip (already done) data={dataset} seed={seed}")

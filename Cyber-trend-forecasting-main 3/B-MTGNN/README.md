@@ -7,6 +7,12 @@ In our extension for the model, we employ the Bayesian approach to capture epist
 ## Requirements
 The model is implemented using Python3 with dependencies specified in requirements.txt
 
+## Exchange-Rate Rulebook (US/JP/KR)
+For the exchange-rate setting with fixed yearly evaluation windows and recursive-only validation/testing rollout, see:
+
+- **RULES_US_JP_KR_2024_2025.md**
+- **PRESENTATION_GUIDE_KR.md** (Korean 발표용 요약)
+
 ## Data Smoothing
 All data files used by the model including the graph adjacency file can be found in the directory called **data**.
 

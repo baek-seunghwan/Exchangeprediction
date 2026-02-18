@@ -420,7 +420,8 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
 
         # 다음 스텝을 위한 입력 업데이트
-        if args.rollout_mode == 'recursive':
+        eval_recursive = (args.force_recursive_eval == 1 and split_type in ('Validation', 'Testing'))
+        if eval_recursive or args.rollout_mode == 'recursive':
             next_chunk = y_pred
         else:
             # teacher-forced 1-step: 다음 시점 실제값을 사용해 윈도우 갱신
@@ -742,6 +743,15 @@ def train(data, X, Y, model, criterion, optim, batch_size):
             print(f"[Bias Penalty] enabled lambda={args.bias_penalty} scope=all")
     else:
         print("[Bias Penalty] disabled")
+    if args.trend_penalty > 0:
+        if args.trend_penalty_scope == 'focus':
+            scope_cols = get_focus_columns(data)
+            scope_names = [data.col[i] for i in scope_cols] if scope_cols else []
+            print(f"[Trend Penalty] enabled lambda={args.trend_penalty} scope=focus cols={scope_names}")
+        else:
+            print(f"[Trend Penalty] enabled lambda={args.trend_penalty} scope=all")
+    else:
+        print("[Trend Penalty] disabled")
     # ==================================
 
     for X, Y in data.get_batches(X, Y, batch_size, True):
@@ -814,6 +824,19 @@ def train(data, X, Y, model, criterion, optim, batch_size):
                         err_signed = torch.index_select(err_signed, dim=2, index=focus_idx)
                 bias_term = torch.mean(torch.mean(err_signed, dim=(0, 1)) ** 2)
                 loss = loss + args.bias_penalty * bias_term
+
+            if args.trend_penalty > 0:
+                last_obs = tx[:, 0, :, -1].unsqueeze(1)
+                pred_delta = output - last_obs
+                true_delta = ty - last_obs
+                trend_err = pred_delta - true_delta
+                if args.trend_penalty_scope == 'focus':
+                    focus_cols = get_focus_columns(data)
+                    if focus_cols:
+                        focus_idx = torch.tensor(focus_cols, device=device)
+                        trend_err = torch.index_select(trend_err, dim=2, index=focus_idx)
+                trend_term = torch.mean(trend_err ** 2)
+                loss = loss + args.trend_penalty * trend_term
             # ==================================
             loss.backward()
             total_loss += loss.item()
@@ -864,11 +887,16 @@ parser.add_argument('--clip', type=int, default=10, help='clip')
 parser.add_argument('--propalpha', type=float, default=0.6, help='prop alpha')
 parser.add_argument('--tanhalpha', type=float, default=0.1, help='tanh alpha')
 parser.add_argument('--epochs', type=int, default=320, help='')
+parser.add_argument('--early_stop_patience', type=int, default=0, help='stop if no best-objective improvement for N epochs (0 disables)')
+parser.add_argument('--early_stop_min_epochs', type=int, default=0, help='minimum epochs before early stopping is allowed')
 parser.add_argument('--num_split', type=int, default=1, help='number of splits for graphs')
 parser.add_argument('--step_size', type=int, default=100, help='step_size')
 parser.add_argument('--ss_prob', type=float, default=0.2, help='scheduled sampling probability')
 parser.add_argument('--train_ratio', type=float, default=0.8666666667, help='train split ratio')
 parser.add_argument('--valid_ratio', type=float, default=0.0666666667, help='validation split ratio')
+parser.add_argument('--fixed_eval_periods', type=int, default=1, choices=[0, 1], help='1 to force Validation/Test split by calendar years (valid_year/test_year)')
+parser.add_argument('--valid_year', type=int, default=2024, help='validation target year when fixed_eval_periods=1')
+parser.add_argument('--test_year', type=int, default=2025, help='testing target year when fixed_eval_periods=1')
 parser.add_argument('--focus_targets', type=int, default=0, help='1 to upweight us/kr/jp target nodes')
 parser.add_argument('--focus_nodes', type=str, default='us_Trade Weighted Dollar Index,jp_fx,kr_fx', help='priority nodes (comma separated)')
 parser.add_argument('--focus_weight', type=float, default=0.7, help='priority weight for focus-node RRSE in model selection (0~1)')
@@ -881,9 +909,12 @@ parser.add_argument('--debias_mode', type=str, default='none', choices=['none', 
 parser.add_argument('--debias_apply_to', type=str, default='focus', choices=['focus', 'all'], help='apply debias offset to focus targets only or all series')
 parser.add_argument('--bias_penalty', type=float, default=0.0, help='lambda for training-time signed-bias penalty (0 disables)')
 parser.add_argument('--bias_penalty_scope', type=str, default='focus', choices=['focus', 'all'], help='scope for training-time bias penalty')
+parser.add_argument('--trend_penalty', type=float, default=0.0, help='lambda for training-time delta/trend penalty (0 disables)')
+parser.add_argument('--trend_penalty_scope', type=str, default='focus', choices=['focus', 'all'], help='scope for trend penalty')
 parser.add_argument('--plot_focus_only', type=int, default=0, help='1 to plot/save only focus nodes')
 parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
 parser.add_argument('--rollout_mode', type=str, default='teacher_forced', choices=['teacher_forced', 'recursive'], help='test rollout mode')
+parser.add_argument('--force_recursive_eval', type=int, default=1, choices=[0, 1], help='1 to always use recursive rollout for Validation/Testing plots and metrics')
 parser.add_argument('--seed', type=int, default=777, help='random seed')
 parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to skip plotting')
 parser.add_argument('--clean_cache', type=int, default=0, choices=[0, 1], help='1 to delete cached *.pt in data dir before training')
@@ -992,7 +1023,7 @@ if args.target_profile == 'triple_050':
     args.focus_target_gain = 40.0
     args.focus_only_loss = 1
     args.anchor_focus_to_last = 0.75
-    args.rollout_mode = 'teacher_forced'
+    args.rollout_mode = 'recursive'
     args.debias_mode = 'none'
     args.debias_apply_to = 'focus'
     args.bias_penalty = 0.0
@@ -1016,12 +1047,14 @@ if args.target_profile == 'run001_us':
     args.focus_weight = 1.0
     args.focus_target_gain = 40.0
     args.focus_only_loss = 1
-    args.anchor_focus_to_last = 0.8
+    args.anchor_focus_to_last = 0.15
     args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt'
     args.rse_report_mode = 'targets'
     args.debias_mode = 'none'
     args.debias_apply_to = 'focus'
-    args.rollout_mode = 'teacher_forced'
+    args.rollout_mode = 'recursive'
+    args.trend_penalty = 0.2
+    args.trend_penalty_scope = 'focus'
     print('[target_profile] applied: run001_us')
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -1095,7 +1128,19 @@ def main(experiment):
         if args.train_ratio <= 0 or args.valid_ratio <= 0 or (args.train_ratio + args.valid_ratio) >= 1:
             raise ValueError("train_ratio + valid_ratio must be < 1 and both must be > 0")
 
-        Data = DataLoaderS(args.data, args.train_ratio, args.valid_ratio, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
+        Data = DataLoaderS(
+            args.data,
+            args.train_ratio,
+            args.valid_ratio,
+            device,
+            args.horizon,
+            args.seq_in_len,
+            args.normalize,
+            args.seq_out_len,
+            fixed_eval_periods=args.fixed_eval_periods,
+            valid_year=args.valid_year,
+            test_year=args.test_year,
+        )
 
         print('train X:', Data.train[0].shape)
         print('train Y:', Data.train[1].shape)
@@ -1193,7 +1238,7 @@ def main(experiment):
                         epoch, (time.time() - epoch_start_time), train_loss, val_loss, val_rae, val_corr, val_smape, val_focus_rrse, objective_score), flush=True)
                 
                 scheduler.step(objective_score)
-                
+
                 # ===== Best 모델 선택 기준: 전체 RSE + 우선노드 RSE 가중 합 =====
                 safe_corr = val_corr if not math.isnan(val_corr) else 0.0
                 sum_loss = val_loss + val_rae - safe_corr
@@ -1224,6 +1269,10 @@ def main(experiment):
                     print('********************************************************************************************************')
                     best_test_rse = test_acc
                     best_test_corr = test_corr
+
+                if args.early_stop_patience > 0 and epoch >= args.early_stop_min_epochs and es_counter >= args.early_stop_patience:
+                    print(f"[early_stop] no improvement for {es_counter} epochs (patience={args.early_stop_patience}).")
+                    break
 
         except KeyboardInterrupt:
             print('-' * 89)

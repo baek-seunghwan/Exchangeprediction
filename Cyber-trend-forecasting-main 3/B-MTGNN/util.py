@@ -8,6 +8,21 @@ import csv
 from collections import defaultdict
 import pandas as pd 
 
+
+def _normalize_node_name(name: str):
+    return ''.join(ch.lower() for ch in str(name) if ch.isalnum())
+
+
+def is_excluded_fx_node(name: str):
+    key = _normalize_node_name(name)
+    excluded_exact = {
+        'cnfx',
+        'ukfx',
+        'cntradeweighteddollarindex',
+        'uktradeweighteddollarindex',
+    }
+    return key in excluded_exact
+
 def create_columns(file_path):
     if not os.path.exists(file_path):
         return []
@@ -55,9 +70,13 @@ def build_predefined_adj(columns, graph_file='data/graph.csv'):
     col_indices = []
 
     for node_name, neighbors in graph.items():
+        if is_excluded_fx_node(node_name):
+            continue
         if node_name in col_to_idx:
             i = col_to_idx[node_name]
             for neighbor_name in neighbors:
+                if is_excluded_fx_node(neighbor_name):
+                    continue
                 if neighbor_name in col_to_idx:
                     j = col_to_idx[neighbor_name]
                     # Undirected graph (Symmetric)
@@ -87,20 +106,31 @@ def normal_std(x):
 
 class DataLoaderS(object):
     # train and valid is the ratio of training set and validation set. test = 1 - train - valid
-    def __init__(self, file_name, train, valid, device, horizon, window, normalize=2, out=1, col_file=None):
+    def __init__(self, file_name, train, valid, device, horizon, window, normalize=2, out=1, col_file=None, fixed_eval_periods=1, valid_year=2024, test_year=2025):
         self.P = window
         self.h = horizon
         self.out_len = out
         self.device = device
+        self.fixed_eval_periods = int(fixed_eval_periods)
+        self.valid_year = int(valid_year)
+        self.test_year = int(test_year)
+        self.date_index = None
 
         try:
             print(f"Loading data from {file_name}...")
             df = pd.read_csv(file_name)
-            
+
+            date_col = None
             if 'Date' in df.columns:
-                df = df.drop(columns=['Date'])
-            elif df.columns[0].lower() == 'date':
-                df = df.iloc[:, 1:]
+                date_col = 'Date'
+            elif len(df.columns) > 0 and str(df.columns[0]).lower() == 'date':
+                date_col = df.columns[0]
+
+            if date_col is not None:
+                parsed_dates = pd.to_datetime(df[date_col], errors='coerce')
+                if parsed_dates.notna().sum() > 0:
+                    self.date_index = pd.DatetimeIndex(parsed_dates)
+                df = df.drop(columns=[date_col])
 
             df = df.apply(pd.to_numeric, errors='coerce')
             df = df.fillna(0)
@@ -126,13 +156,13 @@ class DataLoaderS(object):
 
         self.dat = torch.zeros_like(self.rawdat)
         self.n, self.m = self.dat.shape
-        self.normalize = 2
+        self.normalize = normalize
         
-        self.scale = torch.ones(self.m)
+        self.train_end, self.valid_end = self._resolve_split_points(train, valid)
+        self._normalized(normalize)
         self.scale = self.scale.to(device)
 
-        self._normalized(normalize)
-        self._split(int(train * self.n), int((train + valid) * self.n), self.n)
+        self._split(self.train_end, self.valid_end, self.n)
 
         target_col_file = col_file if col_file else file_name
         try:
@@ -151,24 +181,60 @@ class DataLoaderS(object):
         self.rse = normal_std(tmp)
         self.rae = torch.mean(torch.abs(tmp - torch.mean(tmp)))
 
+    def _resolve_split_points(self, train_ratio, valid_ratio):
+        ratio_train_end = int(train_ratio * self.n)
+        ratio_valid_end = int((train_ratio + valid_ratio) * self.n)
+
+        min_train_end = self.P + self.h + self.out_len
+        if self.fixed_eval_periods == 1:
+            if self.date_index is not None and len(self.date_index) == self.n:
+                years = self.date_index.year
+                valid_idx = np.where(years == self.valid_year)[0]
+                test_idx = np.where(years == self.test_year)[0]
+                if len(valid_idx) > 0 and len(test_idx) > 0:
+                    train_end = int(valid_idx[0])
+                    valid_end = int(test_idx[0])
+                    if train_end >= min_train_end and valid_end > train_end:
+                        print(f"[split] fixed periods applied from date column: valid={self.valid_year}, test={self.test_year}")
+                        return train_end, valid_end
+
+            if self.n >= (min_train_end + 24):
+                train_end = self.n - 24
+                valid_end = self.n - 12
+                if valid_end > train_end:
+                    print("[split] fallback fixed periods without date column: valid=last 24~13, test=last 12")
+                    return train_end, valid_end
+
+        train_end = max(ratio_train_end, min_train_end)
+        valid_end = max(ratio_valid_end, train_end + self.out_len + 1)
+        valid_end = min(valid_end, self.n - 1)
+        if valid_end <= train_end:
+            valid_end = min(self.n, train_end + self.out_len + 1)
+        print(f"[split] ratio-based split applied: train_end={train_end}, valid_end={valid_end}")
+        return train_end, valid_end
+
 
     def _normalized(self, normalize):
         if (normalize == 0):
             self.dat = self.rawdat
 
         if (normalize == 1):
-            self.dat = self.rawdat / torch.max(self.rawdat)
+            train_max = torch.max(self.rawdat[:self.train_end, :])
+            self.dat = self.rawdat / train_max
 
         # normalized by the maximum value of each row(sensor).
         if (normalize == 2):
             # Optimized: Vectorized operation using torch
-            max_abs_val = torch.max(torch.abs(self.rawdat), dim=0).values
-            self.scale = max_abs_val
+            train_data = self.rawdat[:self.train_end, :]
+            max_abs_val = torch.max(torch.abs(train_data), dim=0).values
 
-            mask = max_abs_val > 0
+            max_abs_val[max_abs_val == 0] = 1.0
+            
+            # [수정] 학습 데이터 기준의 scale을 저장 (나중에 복원할 때 사용)
+            self.scale = max_abs_val.to(self.device)
             self.dat = self.rawdat.clone()
             # Avoid division by zero
-            self.dat[:, mask] = self.rawdat[:, mask] / max_abs_val[mask]  
+            self.dat = self.rawdat / max_abs_val.cpu()
 
     def _split(self, train, valid, test):
         # util.py Logic: Strictly separates Train / Valid / Test ranges
@@ -188,6 +254,8 @@ class DataLoaderS(object):
 
     def _batchify(self, idx_set, horizon):
         n = len(idx_set) 
+        if n <= self.out_len:
+            return [torch.zeros((0, self.P, self.m)), torch.zeros((0, self.out_len, self.m))]
         X = torch.zeros((n - self.out_len, self.P, self.m)) 
         Y = torch.zeros((n - self.out_len, self.out_len, self.m)) 
 
