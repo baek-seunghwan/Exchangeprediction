@@ -854,6 +854,7 @@ parser.add_argument('--autotune_mode', type=int, default=0, choices=[0, 1], help
 parser.add_argument('--apply_best_tuning', type=int, default=0, choices=[0, 1], help='1 to override args with best tuning run values')
 parser.add_argument('--eval_best_tuning', type=int, default=0, choices=[0, 1], help='1 to skip training and evaluate best tuned checkpoint with plotting')
 parser.add_argument('--target_profile', type=str, default='run001_us', choices=['none', 'triple_050', 'run001_us'], help='preset for target-focused optimization setup')
+parser.add_argument('--log_weights', type=int, default=1, choices=[0, 1], help='1 to log detailed weight statistics at key points, 0 to disable (improves performance for large models)')
 
 
 args = parser.parse_args()
@@ -1085,7 +1086,8 @@ def main(experiment):
         print('Number of model parameters is', nParams, flush=True)
         
         # Display detailed weight statistics after initialization
-        print_model_weights_summary(model, "Initial Model Weights After Initialization")
+        if args.log_weights == 1:
+            print_model_weights_summary(model, "Initial Model Weights After Initialization")
 
         if args.loss_mode == 'l1':
             criterion = nn.L1Loss(reduction='sum').to(device)
@@ -1112,7 +1114,8 @@ def main(experiment):
                     model = model.to(device)
                     print(f"[eval_best_tuning] loaded checkpoint: {ckpt_to_load}")
                     # Display weights loaded from checkpoint
-                    print_model_weights_summary(model, f"Loaded Model Weights from Checkpoint: {ckpt_to_load}")
+                    if args.log_weights == 1:
+                        print_model_weights_summary(model, f"Loaded Model Weights from Checkpoint: {ckpt_to_load}")
                 else:
                     raise FileNotFoundError(f"[eval_best_tuning] checkpoint not found: {ckpt_to_load}")
             else:
@@ -1163,7 +1166,8 @@ def main(experiment):
                         torch.save(model, f)
                     print(f"\n*** New best model saved to: {save_path} ***")
                     # Display current best model weights
-                    print_model_weights_summary(model, f"Best Model Weights (Epoch {epoch})")
+                    if args.log_weights == 1:
+                        print_model_weights_summary(model, f"Best Model Weights (Epoch {epoch})")
                     
                     best_val = sum_loss
                     best_rse = val_loss
@@ -1203,7 +1207,8 @@ def main(experiment):
             model = torch.load(f, weights_only=False)
         print(f"Loaded best model checkpoint from: {args.save}")
         # Display weights loaded from best checkpoint
-        print_model_weights_summary(model, f"Best Model Weights from Checkpoint: {args.save}")
+        if args.log_weights == 1:
+            print_model_weights_summary(model, f"Best Model Weights from Checkpoint: {args.save}")
     else:
         print(f"Warning: checkpoint not found at {args.save}. Using current in-memory model.")
     # 로드한 모델도 학습 시와 같은 device로 이동
