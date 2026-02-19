@@ -252,8 +252,6 @@ parser.add_argument('--mc_runs', type=int, default=20)
 parser.add_argument('--horizon', type=int, default=36)
 parser.add_argument('--hist_alpha', type=float, default=0.3, help='history smoothing alpha')
 parser.add_argument('--future_alpha', type=float, default=1.0, help='future smoothing alpha (1.0 means no smoothing)')
-parser.add_argument('--path_mode', type=str, default='representative', choices=['mean', 'median', 'representative'], help='how to pick central forecast path from MC runs')
-parser.add_argument('--momentum_blend', type=float, default=0.25, help='0~1 blend of last observed delta to reduce flat-line collapse')
 args = parser.parse_args()
 
 # 경로 설정
@@ -405,19 +403,6 @@ for r in range(num_runs):
             take = min(pred_level.size(0), need)
             take_block = pred_level[:take, :].cpu().numpy()
 
-            blend = min(max(args.momentum_blend, 0.0), 1.0)
-            if blend > 0 and curr_X.size(0) >= 2:
-                curr_np = curr_X.cpu().numpy()
-                last_obs = curr_np[-1, :]
-                last_delta = curr_np[-1, :] - curr_np[-2, :]
-                mixed = []
-                for step in range(take_block.shape[0]):
-                    base = last_obs if step == 0 else mixed[-1]
-                    pred_delta = take_block[step, :] - base
-                    mixed_step = base + (1.0 - blend) * pred_delta + blend * last_delta
-                    mixed.append(mixed_step)
-                take_block = np.asarray(mixed, dtype=np.float32)
-
             preds.append(take_block)
             len_preds += take
 
@@ -430,15 +415,7 @@ print(f"✅ Forecast generation complete")
 
 # 통계 계산
 outputs = torch.stack(outputs)
-if args.path_mode == 'mean':
-    Y = torch.mean(outputs, dim=0)
-elif args.path_mode == 'median':
-    Y = torch.median(outputs, dim=0).values
-else:
-    mean_path = torch.mean(outputs, dim=0, keepdim=True)
-    dist = torch.mean((outputs - mean_path) ** 2, dim=(1, 2))
-    rep_idx = int(torch.argmin(dist).item())
-    Y = outputs[rep_idx]
+Y = torch.mean(outputs, dim=0)
 std_dev = torch.std(outputs, dim=0)
 confidence = 1.96 * std_dev / torch.sqrt(torch.tensor(num_runs))
 variance = torch.var(outputs, dim=0)
