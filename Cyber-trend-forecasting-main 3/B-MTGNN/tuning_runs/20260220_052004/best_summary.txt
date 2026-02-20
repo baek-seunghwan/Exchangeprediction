@@ -1,0 +1,8 @@
+best_objective_rse=0.5235544650811427
+best_final_test_rse=0.5236
+best_best_test_rse=0.5235544650811427
+best_seed=777
+best_data=/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv
+best_use_graph=0
+best_trial={"lr": 0.00015, "dropout": 0.0, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 20, "node_dim": 50, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.1, "focus_target_gain": 85.0, "anchor_focus_to_last": 0.95}
+log_file=/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260220_052004/run_010.log

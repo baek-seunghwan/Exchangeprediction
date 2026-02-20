@@ -12,6 +12,7 @@ import sys
 import pandas as pd
 from matplotlib import pyplot
 import matplotlib.dates as mdates
+from matplotlib import colors as mcolors
 import csv
 from collections import defaultdict
 
@@ -63,6 +64,15 @@ def zero_negative_curves(data, forecast):
     forecast = torch.clamp(forecast, min=0)
     return data, forecast
 
+
+def lighten_color(color, amount=0.45):
+    r, g, b = mcolors.to_rgb(color)
+    return (
+        r + (1.0 - r) * amount,
+        g + (1.0 - g) * amount,
+        b + (1.0 - b) * amount,
+    )
+
 def save_data(data, forecast, confidence, variance, col, output_dir):
     """예측 데이터 저장"""
     if not os.path.exists(output_dir):
@@ -82,12 +92,68 @@ def save_data(data, forecast, confidence, variance, col, output_dir):
             ff.write('95% Confidence: ' + str(c.tolist()) + '\n')
             ff.write('Variance: ' + str(v.tolist()) + '\n')
 
+
+def save_plot_values(dates_hist, dates_future, smoothed_hist, smoothed_fut, smoothed_conf_fut,
+                     target_indices, col, output_dir):
+    """플롯에 사용된 값(정규화 과거/예측/신뢰구간)을 노드별 CSV로 저장"""
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+
+    hist_dates = [pd.Timestamp(d).strftime('%Y-%m-%d') for d in dates_hist]
+    fut_dates = [pd.Timestamp(d).strftime('%Y-%m-%d') for d in dates_future]
+
+    for i in target_indices:
+        name = col[i]
+        safe_name = consistent_name(name).replace('/', '_')
+
+        hist_values = smoothed_hist[:, i].cpu().numpy()
+        fut_values = smoothed_fut[:, i].cpu().numpy()
+        conf_values = smoothed_conf_fut[:, i].cpu().numpy()
+
+        # 다중 노드 플롯과 동일: 첫 과거값 기준 1.0 정규화
+        base_value = float(hist_values[0]) if len(hist_values) > 0 else 1.0
+        if base_value == 0:
+            base_value = 1.0
+
+        hist_values = hist_values / base_value
+        fut_values = fut_values / base_value
+        conf_values = conf_values / base_value
+
+        rows = []
+        for idx, dt in enumerate(hist_dates):
+            rows.append({
+                'date': dt,
+                'series': 'historical',
+                'value': float(hist_values[idx]),
+                'confidence_95': 0.0,
+                'lower_95': float(hist_values[idx]),
+                'upper_95': float(hist_values[idx]),
+            })
+
+        for idx, dt in enumerate(fut_dates):
+            v = float(fut_values[idx])
+            c = float(conf_values[idx])
+            rows.append({
+                'date': dt,
+                'series': 'forecast',
+                'value': v,
+                'confidence_95': c,
+                'lower_95': v - c,
+                'upper_95': v + c,
+            })
+
+        out_csv = os.path.join(output_dir, f"{safe_name}.csv")
+        pd.DataFrame(rows).to_csv(out_csv, index=False, encoding='utf-8')
+
 # ==========================================
 # Plotting Functions
 # ==========================================
-def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, output_dir, color="#1f77b4", linestyle='-', is_index=False):
+def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, output_dir,
+                  color="#1f77b4", linestyle='-', is_index=False,
+                  clamp_nonnegative=True, y_label_suffix=''):
     """개별 노드 플롯"""
-    data, forecast = zero_negative_curves(data, forecast)
+    if clamp_nonnegative:
+        data, forecast = zero_negative_curves(data, forecast)
     if torch.is_tensor(data): 
         data = data.cpu()
     if torch.is_tensor(forecast): 
@@ -104,14 +170,15 @@ def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, ou
     c = confidence.numpy()
     clean_name = consistent_name(name)
     all_dates = dates_hist + dates_future
+    forecast_color = lighten_color(color, amount=0.45)
 
-    ax.plot(range(len(d)), d, '-', color=color, label=clean_name, linewidth=2)
-    ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f, linestyle=linestyle, color=color, linewidth=2)
+    ax.plot(range(len(d)), d, '-', color=color, label=clean_name, linewidth=2.4)
+    ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f, linestyle=linestyle, color=forecast_color, linewidth=2.2)
     
     # 모든 데이터에 신뢰도 영역 표시
-    ax.fill_between(range(len(d) - 1, (len(d) + len(f)) - 1), f - c, f + c, color=color, alpha=0.3)
-    ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f - c, color=color, linewidth=0.8, alpha=0.6)
-    ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f + c, color=color, linewidth=0.8, alpha=0.6)
+    ax.fill_between(range(len(d) - 1, (len(d) + len(f)) - 1), f - c, f + c, color=forecast_color, alpha=0.25)
+    ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f - c, color=forecast_color, linewidth=0.8, alpha=0.7)
+    ax.plot(range(len(d) - 1, (len(d) + len(f)) - 1), f + c, color=forecast_color, linewidth=0.8, alpha=0.7)
 
     x_ticks_pos = [i for i, date in enumerate(all_dates) if date.month == 1]
     last_pos = len(all_dates) - 1
@@ -123,7 +190,7 @@ def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, ou
         [all_dates[i].strftime('%Y') if all_dates[i].month == 1 else all_dates[i].strftime('%b-%y') for i in x_ticks_pos],
         rotation=90, fontsize=13
     )
-    ax.set_ylabel(f"{consistent_name(name)}", fontsize=15)
+    ax.set_ylabel(f"{consistent_name(name)}{y_label_suffix}", fontsize=15)
     pyplot.yticks(fontsize=13)
     ax.legend(loc="upper left", prop={'size': 10}, bbox_to_anchor=(1, 1.03))
     ax.axis('tight')
@@ -158,16 +225,17 @@ def plot_multi_node(dates_hist, dates_future, smoothed_hist, smoothed_fut, smoot
         c_fut = smoothed_conf_fut[:, i].numpy() / base_value
 
         color = plot_colours[idx % len(plot_colours)]
+        forecast_color = lighten_color(color, amount=0.45)
         is_index = 'weighted' in col[i].lower() or 'trade' in col[i].lower()
         
         # 보라색은 무조건 점선, 그 외는 is_index에 따라 결정
         linestyle = '--' if color == '#9467bd' else ('-' if is_index else '--')
 
-        ax.plot(x_past, y_past, '-', label=consistent_name(col[i]), color=color, linewidth=1.5)
-        ax.plot(dates_future, y_fut, linestyle=linestyle, color=color, linewidth=2)
+        ax.plot(x_past, y_past, '-', label=consistent_name(col[i]), color=color, linewidth=2.0)
+        ax.plot(dates_future, y_fut, linestyle=linestyle, color=forecast_color, linewidth=2.2)
 
         # 신뢰도 영역 표시
-        ax.fill_between(dates_future, y_fut - c_fut, y_fut + c_fut, color=color, alpha=0.25)
+        ax.fill_between(dates_future, y_fut - c_fut, y_fut + c_fut, color=forecast_color, alpha=0.22)
 
     # 예측 시작점에 세로선 추가
     ax.axvline(x=dates_future[0], color='black', linestyle='--', linewidth=1.5, alpha=0.7)
@@ -213,23 +281,49 @@ def plot_multi_node(dates_hist, dates_future, smoothed_hist, smoothed_fut, smoot
 # Main Execution Block
 # ==========================================
 
+def first_existing_path(candidates):
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return candidates[0]
+
 # 경로 설정 (train.py와 동일: 스크립트 위치 = 프로젝트 루트)
 script_dir = os.path.dirname(os.path.abspath(__file__))
-# train_test/train과 동일: data/data.csv 우선
-data_file = os.path.join(script_dir, 'data', 'data.csv')
-if not os.path.exists(data_file):
-    data_file = os.path.join(script_dir, 'ExchangeRate_dataset.csv')
-# 원본 README: 운용 모델 o_model.pt로 미래 예측. 없으면 model.pt 사용
-model_file = os.path.join(script_dir, 'model', 'Bayesian', 'o_model.pt')
-if not os.path.exists(model_file):
-    model_file = os.path.join(script_dir, 'model', 'Bayesian', 'model.pt')
+project_root = os.path.dirname(script_dir)
+
+# 데이터 파일 자동 탐색
+data_file_candidates = [
+    os.path.join(script_dir, 'data', 'data.csv'),
+    os.path.join(script_dir, 'data', 'sm_data.csv'),
+    os.path.join(script_dir, 'ExchangeRate_dataset.csv'),
+    os.path.join(project_root, 'B-MTGNN', 'data', 'data.csv'),
+]
+data_file = first_existing_path(data_file_candidates)
+
+# 모델 파일 자동 탐색
+model_file_candidates = [
+    os.path.join(script_dir, 'model', 'Bayesian', 'o_model.pt'),
+    os.path.join(script_dir, 'model', 'Bayesian', 'model.pt'),
+    os.path.join(script_dir, 'model', 'model.pt'),
+    os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'o_model.pt'),
+    os.path.join(project_root, 'AXIS', 'model', 'Bayesian', 'model.pt'),
+]
+model_file = first_existing_path(model_file_candidates)
 
 # 출력 디렉토리
-plot_dir = os.path.join(script_dir, 'model', 'Bayesian', 'forecast', 'plots')
-pt_plots_dir = os.path.join(script_dir, 'model', 'Bayesian', 'forecast', 'pt_plots')
-data_out_dir = os.path.join(script_dir, 'model', 'Bayesian', 'forecast', 'data')
+output_base_candidates = [
+    os.path.join(project_root, 'AXIS', 'model', 'Bayesian'),
+    os.path.join(script_dir, 'model', 'Bayesian'),
+]
+output_base = first_existing_path(output_base_candidates)
+plot_dir = os.path.join(output_base, 'forecast', 'plots')
+pt_plots_dir = os.path.join(output_base, 'forecast', 'pt_plots')
+pt_plots_std_dir = os.path.join(output_base, 'forecast', 'pt_plots_standardized')
+data_out_dir = os.path.join(output_base, 'forecast', 'data')
+plot_values_dir = os.path.join(output_base, 'forecast', 'plot_values')
+print(f"Output base directory: {output_base}")
 
-for d in [plot_dir, pt_plots_dir, data_out_dir]:
+for d in [plot_dir, pt_plots_dir, pt_plots_std_dir, data_out_dir, plot_values_dir]:
     if not os.path.exists(d): 
         os.makedirs(d, exist_ok=True)
 
@@ -411,20 +505,10 @@ variance_denorm = variance * (std_torch ** 2)
 
 save_data(dat_denorm, Y_denorm, confidence_denorm, variance_denorm, col, data_out_dir)
 
-# Smoothing
-all_data = torch.cat((dat_denorm, Y_denorm), dim=0)
-all_conf = torch.cat((torch.zeros_like(dat_denorm), confidence_denorm), dim=0)
-
-smoothed_data_list, smoothed_conf_list = [], []
-for i in range(m):
-    smoothed_data_list.append(exponential_smoothing(all_data[:, i].cpu().numpy(), 0.3))
-    smoothed_conf_list.append(exponential_smoothing(all_conf[:, i].cpu().numpy(), 0.1))
-
-smoothed_dat = torch.tensor(np.array(smoothed_data_list)).T
-smoothed_confidence = torch.tensor(np.array(smoothed_conf_list)).T
-smoothed_hist = smoothed_dat[:-horizon, :]
-smoothed_fut = smoothed_dat[-horizon:, :]
-smoothed_conf_fut = smoothed_confidence[-horizon:, :]
+# 표준화(Z-score) 값 기반 히스토리/예측
+std_hist = torch.from_numpy(dat).float()
+std_fut = Y
+std_conf_fut = confidence
 
 # 날짜 설정
 # 규칙 4: forecast 예측기간은 26년 1월~12월 (1년 = 12개월)
@@ -459,49 +543,16 @@ if not target_indices:
 
 plot_colours = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
-# 개별 플롯 생성
-print("Generating individual plots...")
+# 표준화 개별 플롯 생성
+print("Generating standardized individual plots...")
 for idx, i in enumerate(target_indices):
-    plot_forecast(smoothed_hist[:, i], smoothed_fut[:, i], smoothed_conf_fut[:, i], col[i], 
-                  dates_hist, dates_future, pt_plots_dir, 
+    plot_forecast(std_hist[:, i], std_fut[:, i], std_conf_fut[:, i], col[i],
+                  dates_hist, dates_future, pt_plots_std_dir,
                   color=plot_colours[idx % len(plot_colours)], 
-                  linestyle='-',
-                  is_index=False)
-
-# Multi-Node Plot - FULL
-print("Generating multi-node plots...")
-# 마지막 예측 날짜(2026-12-01)가 그래프 맨 끝에 오도록 x_end 설정
-forecast_end = dates_future[-1] + pd.Timedelta(days=15)  # 약간의 여유만 둠
-plot_multi_node(
-    dates_hist=dates_hist,
-    dates_future=dates_future,
-    smoothed_hist=smoothed_hist,
-    smoothed_fut=smoothed_fut,
-    smoothed_conf_fut=smoothed_conf_fut,
-    target_indices=target_indices,
-    col=col,
-    index_idx=index_idx,
-    plot_colours=plot_colours,
-    out_path=os.path.join(plot_dir, "Multi_Node_Index_FULL.png"),
-    x_start=dates_hist[0],
-    x_end=forecast_end,
-)
-
-# Multi-Node Plot - ZOOM
-plot_multi_node(
-    dates_hist=dates_hist,
-    dates_future=dates_future,
-    smoothed_hist=smoothed_hist,
-    smoothed_fut=smoothed_fut,
-    smoothed_conf_fut=smoothed_conf_fut,
-    target_indices=target_indices,
-    col=col,
-    index_idx=index_idx,
-    plot_colours=plot_colours,
-    out_path=os.path.join(plot_dir, "Multi_Node_Index_ZOOM.png"),
-    x_start=pd.Timestamp("2022-08-01"),
-    x_end=forecast_end,
-)
+                  linestyle='--',
+                  is_index=False,
+                  clamp_nonnegative=False,
+                  y_label_suffix=' (z-score)')
 
 print("=== 최종 완료 ===")
-print(f"All outputs saved to: {plot_dir}")
+print(f"Standardized individual plots saved to: {pt_plots_std_dir}")
