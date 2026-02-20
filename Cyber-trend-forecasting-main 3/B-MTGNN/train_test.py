@@ -1,4 +1,5 @@
 import argparse
+import json
 import math
 import time
 from statistics import NormalDist
@@ -557,6 +558,19 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     smape /= Ytest.shape[1]
 
     focus_rrse = compute_focus_rrse(predict, Ytest, data)
+
+    per_target_rrse = {}
+    target_cols = get_rse_target_columns(data)
+    for col in target_cols:
+        series_true = Ytest[:, col]
+        series_pred = predict[:, col]
+        num = np.sum((series_true - series_pred) ** 2)
+        den = np.sum((series_true - np.mean(series_true)) ** 2)
+        if den > 1e-12:
+            per_target_rrse[data.col[col]] = float(np.sqrt(num / den))
+
+    if per_target_rrse:
+        print(f"[{split_type}] per_target_rrse_json={json.dumps(per_target_rrse, ensure_ascii=False)}")
 
     # --- Plotting (기존 코드 유지) ---
     counter = 0

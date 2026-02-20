@@ -10,18 +10,18 @@ from pathlib import Path
 
 def build_trials(expand_factor=20):
     base_trials = [
-        {"lr": 2.0e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.15, "focus_target_gain": 45.0, "anchor_focus_to_last": 0.70},
-        {"lr": 1.5e-4, "dropout": 0.02, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.10, "focus_target_gain": 60.0, "anchor_focus_to_last": 0.80},
-        {"lr": 1.0e-4, "dropout": 0.02, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 60, "seq_out_len": 1, "ss_prob": 0.05, "focus_target_gain": 80.0, "anchor_focus_to_last": 0.85},
-        {"lr": 1.5e-4, "dropout": 0.00, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 30, "node_dim": 40, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.10, "focus_target_gain": 80.0, "anchor_focus_to_last": 0.85},
-        {"lr": 1.0e-4, "dropout": 0.00, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 30, "node_dim": 40, "seq_in_len": 60, "seq_out_len": 1, "ss_prob": 0.05, "focus_target_gain": 90.0, "anchor_focus_to_last": 0.90},
-        {"lr": 2.5e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.20, "focus_target_gain": 50.0, "anchor_focus_to_last": 0.70},
-        {"lr": 2.0e-4, "dropout": 0.02, "layers": 2, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 30, "node_dim": 40, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.10, "focus_target_gain": 70.0, "anchor_focus_to_last": 0.85},
-        {"lr": 1.2e-4, "dropout": 0.02, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 20, "node_dim": 50, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.05, "focus_target_gain": 70.0, "anchor_focus_to_last": 0.90},
-        {"lr": 1.0e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 20, "node_dim": 50, "seq_in_len": 60, "seq_out_len": 1, "ss_prob": 0.05, "focus_target_gain": 60.0, "anchor_focus_to_last": 0.90},
-        {"lr": 1.5e-4, "dropout": 0.00, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 20, "node_dim": 50, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.10, "focus_target_gain": 85.0, "anchor_focus_to_last": 0.95},
-        {"lr": 8.0e-5, "dropout": 0.00, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 20, "node_dim": 50, "seq_in_len": 60, "seq_out_len": 1, "ss_prob": 0.05, "focus_target_gain": 100.0, "anchor_focus_to_last": 0.95},
-        {"lr": 2.0e-4, "dropout": 0.02, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.10, "focus_target_gain": 55.0, "anchor_focus_to_last": 0.80},
+        {"lr": 2.0e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.15, "focus_target_gain": 45.0, "anchor_focus_to_last": 0.70, "bias_penalty": 0.30},
+        {"lr": 1.5e-4, "dropout": 0.02, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.10, "focus_target_gain": 60.0, "anchor_focus_to_last": 0.80, "bias_penalty": 0.25},
+        {"lr": 1.0e-4, "dropout": 0.02, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 60, "seq_out_len": 1, "ss_prob": 0.05, "focus_target_gain": 80.0, "anchor_focus_to_last": 0.85, "bias_penalty": 0.35},
+        {"lr": 1.5e-4, "dropout": 0.00, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 30, "node_dim": 40, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.10, "focus_target_gain": 80.0, "anchor_focus_to_last": 0.85, "bias_penalty": 0.40},
+        {"lr": 1.0e-4, "dropout": 0.00, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 30, "node_dim": 40, "seq_in_len": 60, "seq_out_len": 1, "ss_prob": 0.05, "focus_target_gain": 90.0, "anchor_focus_to_last": 0.90, "bias_penalty": 0.45},
+        {"lr": 2.5e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 24, "seq_out_len": 1, "ss_prob": 0.20, "focus_target_gain": 50.0, "anchor_focus_to_last": 0.70, "bias_penalty": 0.20},
+        {"lr": 2.0e-4, "dropout": 0.02, "layers": 2, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 30, "node_dim": 40, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.10, "focus_target_gain": 70.0, "anchor_focus_to_last": 0.85, "bias_penalty": 0.35},
+        {"lr": 1.2e-4, "dropout": 0.02, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 20, "node_dim": 50, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.05, "focus_target_gain": 70.0, "anchor_focus_to_last": 0.90, "bias_penalty": 0.40},
+        {"lr": 1.0e-4, "dropout": 0.05, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 20, "node_dim": 50, "seq_in_len": 60, "seq_out_len": 1, "ss_prob": 0.05, "focus_target_gain": 60.0, "anchor_focus_to_last": 0.90, "bias_penalty": 0.30},
+        {"lr": 1.5e-4, "dropout": 0.00, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 20, "node_dim": 50, "seq_in_len": 36, "seq_out_len": 1, "ss_prob": 0.10, "focus_target_gain": 85.0, "anchor_focus_to_last": 0.95, "bias_penalty": 0.50},
+        {"lr": 8.0e-5, "dropout": 0.00, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 20, "node_dim": 50, "seq_in_len": 60, "seq_out_len": 1, "ss_prob": 0.05, "focus_target_gain": 100.0, "anchor_focus_to_last": 0.95, "bias_penalty": 0.55},
+        {"lr": 2.0e-4, "dropout": 0.02, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 48, "seq_out_len": 1, "ss_prob": 0.10, "focus_target_gain": 55.0, "anchor_focus_to_last": 0.80, "bias_penalty": 0.28},
     ]
 
     if expand_factor <= 1:
@@ -32,6 +32,7 @@ def build_trials(expand_factor=20):
     ss_shifts = [0.00, -0.03, 0.03, -0.05, 0.05]
     anchor_shifts = [0.00, -0.03, 0.03, -0.05, 0.05]
     gain_mults = [1.00, 0.90, 1.10, 0.80, 1.20]
+    bias_mults = [1.00, 0.80, 1.20, 0.60, 1.40]
     seq_choices = [24, 36, 48, 60]
 
     expanded = []
@@ -44,6 +45,7 @@ def build_trials(expand_factor=20):
             trial["ss_prob"] = max(0.0, min(0.3, base["ss_prob"] + ss_shifts[k]))
             trial["anchor_focus_to_last"] = max(0.0, min(0.99, base["anchor_focus_to_last"] + anchor_shifts[k]))
             trial["focus_target_gain"] = max(20.0, min(140.0, base["focus_target_gain"] * gain_mults[k]))
+            trial["bias_penalty"] = max(0.0, min(1.2, base.get("bias_penalty", 0.3) * bias_mults[k]))
             trial["seq_in_len"] = seq_choices[(idx + (base["seq_in_len"] // 12)) % len(seq_choices)]
             expanded.append(trial)
 
@@ -112,8 +114,10 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
         "--rse_report_mode", common_args.rse_report_mode,
         "--loss_mode", common_args.loss_mode,
         "--target_profile", common_args.target_profile,
-        "--bias_penalty", str(common_args.bias_penalty),
+        "--bias_penalty", str(value_for_trial(trial, "bias_penalty", common_args.bias_penalty)),
         "--bias_penalty_scope", common_args.bias_penalty_scope,
+        "--debias_mode", common_args.debias_mode,
+        "--debias_apply_to", common_args.debias_apply_to,
         "--debug_eval", "0",
         "--rollout_mode", common_args.rollout_mode,
         "--plot", "0",
@@ -221,6 +225,8 @@ def main():
     parser.add_argument("--target_profile", type=str, default="none", choices=["none", "triple_050", "run001_us"])
     parser.add_argument("--bias_penalty", type=float, default=0.3)
     parser.add_argument("--bias_penalty_scope", type=str, default="focus", choices=["focus", "all"])
+    parser.add_argument("--debias_mode", type=str, default="val_mean_error", choices=["none", "val_mean_error", "val_affine"])
+    parser.add_argument("--debias_apply_to", type=str, default="focus", choices=["focus", "all"])
     parser.add_argument("--goal_rse", type=float, default=0.95, help="stop sweep early when max target RSE (US/JP/KR) <= goal")
     parser.add_argument("--rollout_mode", type=str, default="recursive", choices=["recursive"])
     parser.add_argument("--seeds", type=str, default="777")
@@ -328,10 +334,11 @@ def main():
     with summary_path.open("w", encoding="utf-8") as f:
         if valid_sorted:
             best = valid_sorted[0]
-            best_obj = best["best_test_rse"] if best["best_test_rse"] is not None else best["final_test_rse"]
+            best_obj = objective(best)
             f.write(f"best_objective_rse={best_obj}\n")
             f.write(f"best_final_test_rse={best['final_test_rse']}\n")
             f.write(f"best_best_test_rse={best['best_test_rse']}\n")
+            f.write(f"best_max_target_rse={best.get('max_target_rse')}\n")
             f.write(f"best_seed={best['seed']}\n")
             f.write(f"best_data={best['data']}\n")
             f.write(f"best_use_graph={best['use_graph']}\n")
@@ -343,10 +350,11 @@ def main():
     print("output_dir:", out_dir)
     if valid_sorted:
         best = valid_sorted[0]
-        best_obj = best["best_test_rse"] if best["best_test_rse"] is not None else best["final_test_rse"]
+        best_obj = objective(best)
         print("best_objective_rse:", best_obj)
         print("best_final_test_rse:", best["final_test_rse"])
         print("best_best_test_rse:", best["best_test_rse"])
+        print("best_max_target_rse:", best.get("max_target_rse"))
         print("best_seed:", best["seed"])
         print("best_data:", best["data"])
         print("best_use_graph:", best["use_graph"])
