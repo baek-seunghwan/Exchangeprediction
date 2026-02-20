@@ -1,0 +1,149 @@
+[
+  {
+    "run_id": 1,
+    "seed": 777,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 0.00012749999999999998,
+      "dropout": 0.0,
+      "layers": 3,
+      "conv_channels": 32,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "subgraph_size": 20,
+      "node_dim": 50,
+      "seq_in_len": 60,
+      "seq_out_len": 1,
+      "ss_prob": 0.1,
+      "focus_target_gain": 100.0,
+      "anchor_focus_to_last": 0.0,
+      "bias_penalty": 0.6
+    },
+    "return_code": 0,
+    "policy_ok": true,
+    "final_test_rse": 3.0566,
+    "final_test_rae": 3.7446,
+    "best_test_rse": 5.654607871773958,
+    "per_target_rrse": {
+      "us_Trade Weighted Dollar Index": 3.542759418487549,
+      "jp_fx": 4.973491668701172,
+      "kr_fx": 3.026975631713867
+    },
+    "max_target_rse": 4.973491668701172,
+    "per_target_lag_mae": {
+      "us_Trade Weighted Dollar Index": 0.5717301964759827,
+      "jp_fx": 0.8306108117103577,
+      "kr_fx": 7.338589668273926
+    },
+    "max_target_lag_mae": 7.338589668273926,
+    "per_target_dir_mismatch": {
+      "us_Trade Weighted Dollar Index": 0.45454545454545453,
+      "jp_fx": 0.6363636363636364,
+      "kr_fx": 0.45454545454545453
+    },
+    "max_target_dir_mismatch": 0.6363636363636364,
+    "objective_rse": 4.973491668701172,
+    "objective_total": 126.94454170903879,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260220_183544/run_001.log"
+  },
+  {
+    "run_id": 2,
+    "seed": 777,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 0.000102,
+      "dropout": 0.0,
+      "layers": 3,
+      "conv_channels": 32,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "subgraph_size": 20,
+      "node_dim": 50,
+      "seq_in_len": 24,
+      "seq_out_len": 1,
+      "ss_prob": 0.08,
+      "focus_target_gain": 110.0,
+      "anchor_focus_to_last": 0.0,
+      "bias_penalty": 0.65
+    },
+    "return_code": 0,
+    "policy_ok": true,
+    "final_test_rse": 4.4624,
+    "final_test_rae": 5.1992,
+    "best_test_rse": 3.338492209315815,
+    "per_target_rrse": {
+      "us_Trade Weighted Dollar Index": 5.23496675491333,
+      "jp_fx": 3.788210391998291,
+      "kr_fx": 4.467897415161133
+    },
+    "max_target_rse": 5.23496675491333,
+    "per_target_lag_mae": {
+      "us_Trade Weighted Dollar Index": 0.5409427881240845,
+      "jp_fx": 0.8455283641815186,
+      "kr_fx": 9.781017303466797
+    },
+    "max_target_lag_mae": 9.781017303466797,
+    "per_target_dir_mismatch": {
+      "us_Trade Weighted Dollar Index": 0.36363636363636365,
+      "jp_fx": 0.8181818181818182,
+      "kr_fx": 1.0
+    },
+    "max_target_dir_mismatch": 1.0,
+    "objective_rse": 5.23496675491333,
+    "objective_total": 142.29968210158685,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260220_183544/run_002.log"
+  },
+  {
+    "run_id": 3,
+    "seed": 777,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 8.5e-05,
+      "dropout": 0.0,
+      "layers": 3,
+      "conv_channels": 32,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "subgraph_size": 20,
+      "node_dim": 50,
+      "seq_in_len": 36,
+      "seq_out_len": 1,
+      "ss_prob": 0.05,
+      "focus_target_gain": 120.0,
+      "anchor_focus_to_last": 0.05,
+      "bias_penalty": 0.7
+    },
+    "return_code": 0,
+    "policy_ok": true,
+    "final_test_rse": 1.2056,
+    "final_test_rae": 1.724,
+    "best_test_rse": 3.1688122749249628,
+    "per_target_rrse": {
+      "us_Trade Weighted Dollar Index": 1.0980819463729858,
+      "jp_fx": 6.75788688659668,
+      "kr_fx": 0.9759068489074707
+    },
+    "max_target_rse": 6.75788688659668,
+    "per_target_lag_mae": {
+      "us_Trade Weighted Dollar Index": 0.44277331233024597,
+      "jp_fx": 1.1867398023605347,
+      "kr_fx": 5.247636318206787
+    },
+    "max_target_lag_mae": 5.247636318206787,
+    "per_target_dir_mismatch": {
+      "us_Trade Weighted Dollar Index": 0.45454545454545453,
+      "jp_fx": 0.8181818181818182,
+      "kr_fx": 0.18181818181818182
+    },
+    "max_target_dir_mismatch": 0.8181818181818182,
+    "objective_rse": 6.75788688659668,
+    "objective_total": 243.11850386059868,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260220_183544/run_003.log"
+  }
+]

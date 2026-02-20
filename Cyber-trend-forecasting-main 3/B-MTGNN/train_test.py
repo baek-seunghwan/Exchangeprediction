@@ -119,6 +119,102 @@ def get_focus_columns(data):
 def _normalize_metric_name(name: str):
     return re.sub(r'[^a-z0-9]+', '', name.lower())
 
+
+def _parse_yy_mon_token(token: str):
+    parts = token.strip().split('.')
+    if len(parts) != 2:
+        return None
+    yy_raw, mon_raw = parts[0].strip(), parts[1].strip().lower()
+    if not yy_raw.isdigit() or len(yy_raw) != 2:
+        return None
+    month_map = {
+        'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
+        'may': 5, 'jun': 6, 'jul': 7, 'aug': 8,
+        'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
+    }
+    mon = month_map.get(mon_raw[:3])
+    if mon is None:
+        return None
+    yy = int(yy_raw)
+    year = 2000 + yy
+    return year, mon
+
+
+def resolve_split_ratios_with_cutoff(data_path: str, train_ratio: float, valid_ratio: float, seq_in_len: int, cutoff_yy: int, min_valid_months: int):
+    cutoff_year = 2000 + int(cutoff_yy)
+    path = Path(data_path)
+    if not path.exists():
+        return train_ratio, valid_ratio, None
+
+    try:
+        with open(path, 'r', encoding='utf-8-sig') as f:
+            lines = f.read().splitlines()
+    except Exception:
+        return train_ratio, valid_ratio, None
+
+    if len(lines) <= 1:
+        return train_ratio, valid_ratio, None
+
+    header = [x.strip() for x in lines[0].split(',')]
+    if not header or header[0].lower() != 'date':
+        return train_ratio, valid_ratio, None
+
+    dates = []
+    for row in lines[1:]:
+        cols = row.split(',')
+        if not cols:
+            continue
+        dates.append(cols[0].strip())
+
+    n = len(dates)
+    if n == 0:
+        return train_ratio, valid_ratio, None
+
+    cutoff_idx = None
+    for i, token in enumerate(dates):
+        parsed = _parse_yy_mon_token(token)
+        if parsed is None:
+            continue
+        year, _ = parsed
+        if year >= cutoff_year:
+            cutoff_idx = i
+            break
+
+    if cutoff_idx is None:
+        return train_ratio, valid_ratio, {
+            'n': n,
+            'cutoff_idx': None,
+            'cutoff_label': f'{cutoff_year}-01',
+            'message': 'cutoff_not_found_keep_ratio',
+        }
+
+    valid_end = cutoff_idx
+    min_train_end = max(seq_in_len + 1, 2)
+    valid_start = max(min_train_end, valid_end - max(int(min_valid_months), 1))
+
+    if valid_start >= valid_end:
+        valid_start = max(min_train_end, valid_end - 1)
+
+    if valid_start >= valid_end:
+        return train_ratio, valid_ratio, {
+            'n': n,
+            'cutoff_idx': cutoff_idx,
+            'cutoff_label': dates[cutoff_idx],
+            'message': 'insufficient_history_keep_ratio',
+        }
+
+    new_train_ratio = valid_start / n
+    new_valid_ratio = (valid_end - valid_start) / n
+
+    return new_train_ratio, new_valid_ratio, {
+        'n': n,
+        'cutoff_idx': cutoff_idx,
+        'cutoff_label': dates[cutoff_idx],
+        'valid_start_idx': valid_start,
+        'valid_end_idx': valid_end,
+        'valid_months': valid_end - valid_start,
+    }
+
 def get_rse_target_columns(data):
     tokens = [x.strip() for x in args.rse_targets.split(',') if x.strip()]
     if not tokens:
@@ -560,6 +656,8 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     focus_rrse = compute_focus_rrse(predict, Ytest, data)
 
     per_target_rrse = {}
+    per_target_lag_mae = {}
+    per_target_dir_mismatch = {}
     target_cols = get_rse_target_columns(data)
     for col in target_cols:
         series_true = Ytest[:, col]
@@ -569,8 +667,19 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         if den > 1e-12:
             per_target_rrse[data.col[col]] = float(np.sqrt(num / den))
 
+        if len(series_true) > 1:
+            grad_true = np.diff(series_true)
+            grad_pred = np.diff(series_pred)
+            per_target_lag_mae[data.col[col]] = float(np.mean(np.abs(grad_true - grad_pred)))
+            dir_mismatch = np.mean(np.sign(grad_true) != np.sign(grad_pred))
+            per_target_dir_mismatch[data.col[col]] = float(dir_mismatch)
+
     if per_target_rrse:
         print(f"[{split_type}] per_target_rrse_json={json.dumps(per_target_rrse, ensure_ascii=False)}")
+    if per_target_lag_mae:
+        print(f"[{split_type}] per_target_lag_mae_json={json.dumps(per_target_lag_mae, ensure_ascii=False)}")
+    if per_target_dir_mismatch:
+        print(f"[{split_type}] per_target_dir_mismatch_json={json.dumps(per_target_dir_mismatch, ensure_ascii=False)}")
 
     # --- Plotting (기존 코드 유지) ---
     counter = 0
@@ -890,6 +999,23 @@ def train(data, X, Y, model, criterion, optim, batch_size):
             else:
                 grad_loss = None
 
+            lag_delta_loss = None
+            lag_sign_loss = None
+            if output.size(1) == 1 and tx.size(3) >= 2 and (args.lag_penalty_1step > 0 or args.lag_sign_penalty > 0):
+                last_in = tx[:, 0, :, -1]
+                prev_in = tx[:, 0, :, -2]
+                true_next = ty[:, 0, :]
+                pred_next = output[:, 0, :]
+
+                true_delta = true_next - last_in
+                pred_delta = pred_next - last_in
+
+                lag_delta_loss = torch.abs(pred_delta - true_delta)
+
+                eps = 1e-12
+                sign_conflict = torch.relu(-(pred_delta * true_delta))
+                lag_sign_loss = sign_conflict / (torch.abs(true_delta) + eps)
+
             w = target_weight.unsqueeze(0).unsqueeze(0)  # [1, 1, N]
             
             if args.focus_targets == 1 and args.focus_only_loss == 1:
@@ -908,10 +1034,24 @@ def train(data, X, Y, model, criterion, optim, batch_size):
                     if grad_loss is not None:
                         grad_focus = torch.index_select(grad_loss, dim=2, index=focus_idx)
                         loss += 0.5 * grad_focus.mean() # 트렌드 가중치 0.5
+
+                    if lag_delta_loss is not None and args.lag_penalty_1step > 0:
+                        lag_delta_focus = torch.index_select(lag_delta_loss, dim=1, index=focus_idx)
+                        loss += args.lag_penalty_1step * lag_delta_focus.mean()
+
+                    if lag_sign_loss is not None and args.lag_sign_penalty > 0:
+                        lag_sign_focus = torch.index_select(lag_sign_loss, dim=1, index=focus_idx)
+                        loss += args.lag_sign_penalty * lag_sign_focus.mean()
                 else:
                     loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
             else:
                 loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
+
+                if lag_delta_loss is not None and args.lag_penalty_1step > 0:
+                    loss += args.lag_penalty_1step * lag_delta_loss.mean()
+
+                if lag_sign_loss is not None and args.lag_sign_penalty > 0:
+                    loss += args.lag_sign_penalty * lag_sign_loss.mean()
 
             if args.bias_penalty > 0:
                 err_signed = output - ty
@@ -1000,9 +1140,14 @@ parser.add_argument('--debias_mode', type=str, default='none', choices=['none', 
 parser.add_argument('--debias_apply_to', type=str, default='focus', choices=['focus', 'all'], help='apply debias offset to focus targets only or all series')
 parser.add_argument('--bias_penalty', type=float, default=0.0, help='lambda for training-time signed-bias penalty (0 disables)')
 parser.add_argument('--bias_penalty_scope', type=str, default='focus', choices=['focus', 'all'], help='scope for training-time bias penalty')
+parser.add_argument('--lag_penalty_1step', type=float, default=0.0, help='lambda for 1-step delta matching penalty (anti-lag)')
+parser.add_argument('--lag_sign_penalty', type=float, default=0.0, help='lambda for 1-step direction mismatch penalty (anti-lag)')
 parser.add_argument('--plot_focus_only', type=int, default=0, help='1 to plot/save only focus nodes')
 parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
 parser.add_argument('--rollout_mode', type=str, default='recursive', choices=['recursive'], help='test rollout mode (recursive only)')
+parser.add_argument('--enforce_cutoff_split', type=int, default=1, choices=[0, 1], help='1 to force train/valid to end before cutoff year (no 2025+ actuals in learning stage)')
+parser.add_argument('--cutoff_year_yy', type=int, default=25, help='two-digit year where test period starts; learning stage uses data before this year')
+parser.add_argument('--min_valid_months', type=int, default=12, help='minimum validation months when enforcing date cutoff split')
 parser.add_argument('--confidence_level', type=float, default=0.95, help='confidence level for interval band (e.g., 0.95, 0.99)')
 parser.add_argument('--confidence_scale', type=float, default=3.0, help='extra widening multiplier for confidence band (>=1.0 widens)')
 parser.add_argument('--confidence_mode', type=str, default='predictive', choices=['predictive', 'mean'], help='predictive: z*std (wider), mean: z*std/sqrt(n) (narrower)')
@@ -1113,12 +1258,14 @@ if args.target_profile == 'triple_050':
     args.focus_weight = 1.0
     args.focus_target_gain = 45.0
     args.focus_only_loss = 1
-    args.anchor_focus_to_last = 0.75
+    args.anchor_focus_to_last = 0.0
     args.rollout_mode = 'recursive'
     args.debias_mode = 'none'
     args.debias_apply_to = 'focus'
     args.bias_penalty = 0.3
     args.bias_penalty_scope = 'focus'
+    args.lag_penalty_1step = 0.8
+    args.lag_sign_penalty = 0.3
     args.use_graph = 0
     print('[target_profile] applied: triple_050')
 
@@ -1138,12 +1285,14 @@ if args.target_profile == 'run001_us':
     args.focus_weight = 1.0
     args.focus_target_gain = 40.0
     args.focus_only_loss = 1
-    args.anchor_focus_to_last = 0.8
+    args.anchor_focus_to_last = 0.0
     args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt'
     args.rse_report_mode = 'targets'
     args.debias_mode = 'none'
     args.debias_apply_to = 'focus'
     args.rollout_mode = 'recursive'
+    args.lag_penalty_1step = 0.6
+    args.lag_sign_penalty = 0.2
     print('[target_profile] applied: run001_us')
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -1214,10 +1363,24 @@ def main(experiment):
             print("!!! Cache Clean Complete !!!")
         # ============================================================
 
-        if args.train_ratio <= 0 or args.valid_ratio <= 0 or (args.train_ratio + args.valid_ratio) >= 1:
+        local_train_ratio = args.train_ratio
+        local_valid_ratio = args.valid_ratio
+        if args.enforce_cutoff_split == 1:
+            local_train_ratio, local_valid_ratio, split_info = resolve_split_ratios_with_cutoff(
+                args.data,
+                args.train_ratio,
+                args.valid_ratio,
+                args.seq_in_len,
+                args.cutoff_year_yy,
+                args.min_valid_months,
+            )
+            if split_info is not None:
+                print(f"[split_guard] {split_info}")
+
+        if local_train_ratio <= 0 or local_valid_ratio <= 0 or (local_train_ratio + local_valid_ratio) >= 1:
             raise ValueError("train_ratio + valid_ratio must be < 1 and both must be > 0")
 
-        Data = DataLoaderS(args.data, args.train_ratio, args.valid_ratio, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
+        Data = DataLoaderS(args.data, local_train_ratio, local_valid_ratio, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
 
         print('train X:', Data.train[0].shape)
         print('train Y:', Data.train[1].shape)
@@ -1230,7 +1393,7 @@ def main(experiment):
         print('length of training set=', Data.train[0].shape[0])
         print('length of validation set=', Data.valid[0].shape[0])
         print('length of testing set=', Data.test[0].shape[0])
-        print('valid=', int((args.train_ratio + args.valid_ratio) * Data.n))
+        print('valid=', int((local_train_ratio + local_valid_ratio) * Data.n))
 
         if len(Data.train[0].shape) == 4: 
              args.num_nodes = Data.train[0].shape[2]

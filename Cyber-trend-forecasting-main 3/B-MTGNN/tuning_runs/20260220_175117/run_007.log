@@ -1,0 +1,1908 @@
+CUDA not available, using CPU
+[split_guard] {'n': 180, 'cutoff_idx': 168, 'cutoff_label': '25.Jan', 'valid_start_idx': 156, 'valid_end_idx': 168, 'valid_months': 12}
+Loading data from /Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv...
+Data loaded and converted to numeric successfully.
+Graph loaded with 1 attacks...
+33 columns loaded
+Adjacency created...
+train X: torch.Size([95, 60, 33])
+train Y: torch.Size([95, 1, 33])
+valid X: torch.Size([11, 60, 33])
+valid Y: torch.Size([11, 1, 33])
+test X: torch.Size([11, 60, 33])
+test Y: torch.Size([11, 1, 33])
+test window: torch.Size([72, 33])
+length of training set= 95
+length of validation set= 11
+length of testing set= 11
+valid= 168
+Auto-detected num_nodes: 33
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260220_175117/checkpoints/model_007.pt', optim='adam', L1Loss=True, loss_mode='mse', normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=0, gcn_depth=1, num_nodes=33, dropout=0.02, subgraph_size=30, node_dim=40, dilation_exponential=2, conv_channels=32, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=60, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.00017, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=40, num_split=1, step_size=100, ss_prob=0.1, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx', focus_weight=1.0, focus_target_gain=50.0, focus_only_loss=1, anchor_focus_to_last=0.1, rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', rse_report_mode='targets', debias_mode='val_mean_error', debias_apply_to='focus', bias_penalty=0.35, bias_penalty_scope='focus', plot_focus_only=0, debug_eval=0, rollout_mode='recursive', enforce_cutoff_split=1, cutoff_year_yy=25, min_valid_months=12, confidence_level=0.95, confidence_scale=3.0, confidence_mode='predictive', seed=777, plot=0, clean_cache=0, autotune_mode=1, apply_best_tuning=0, eval_best_tuning=0, target_profile='none', best_tuning_checkpoint='')
+The recpetive field size is 19
+Number of model parameters is 2531745
+begin training
+Experiment: 1
+Iter: 0
+epoch: 1
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best sum= 10000000
+best rrse= 10000000
+best rrae= 10000000
+best corr= -10000000
+best smape= 10000000
+best objective= 10000000
+best hps= []
+best test rse= 10000000
+best test corr= -10000000
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.036
+iter:  1 | loss: 0.013
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.005
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.018
+iter:  9 | loss: 0.003
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.011
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.022
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.005
+iter: 22 | loss: 0.005
+iter: 23 | loss: 0.025
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch   1 | time:  4.78s | train_loss 0.0109 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+testing r= 5
+rrse(target)=385.7695636646313 / 87.05327089004898 | rrse(all)=48954469070902.26 / 13118448721317.795 | report_mode=targets
+[Testing] per_target_rrse_json={"us_Trade Weighted Dollar Index": 3.789107322692871, "jp_fx": 4.3357086181640625, "kr_fx": 4.433574199676514}
+[Testing] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.7373456358909607, "jp_fx": 1.5104023218154907, "kr_fx": 7.565596103668213}
+[Testing] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.6363636363636364, "jp_fx": 0.7272727272727273, "kr_fx": 0.09090909090909091}
+********************************************************************************************************
+test rse 4.4314 | test rae 5.2531 | test corr 0.1834| test smape 0.2973 | test focus_rrse 4.1861
+********************************************************************************************************
+Experiment: 1
+Iter: 0
+epoch: 2
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 2]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.006
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.005
+iter:  7 | loss: 0.004
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.016
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.006
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.028
+iter: 17 | loss: 0.006
+iter: 18 | loss: 0.017
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.023
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.012
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch   2 | time:  4.70s | train_loss 0.0108 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 3
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 3]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.008
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.004
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.007
+iter:  6 | loss: 0.006
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.015
+iter: 11 | loss: 0.004
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.016
+iter: 15 | loss: 0.008
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.017
+iter: 18 | loss: 0.025
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.017
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.004
+iter: 23 | loss: 0.006
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch   3 | time:  4.81s | train_loss 0.0102 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 4
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 4]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.005
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.007
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.014
+iter:  8 | loss: 0.005
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.004
+iter: 12 | loss: 0.005
+iter: 13 | loss: 0.023
+iter: 14 | loss: 0.024
+iter: 15 | loss: 0.010
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.006
+iter: 18 | loss: 0.006
+iter: 19 | loss: 0.005
+iter: 20 | loss: 0.019
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.025
+iter: 23 | loss: 0.011
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch   4 | time:  4.76s | train_loss 0.0105 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 5
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 5]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.005
+iter:  1 | loss: 0.004
+iter:  2 | loss: 0.005
+iter:  3 | loss: 0.005
+iter:  4 | loss: 0.007
+iter:  5 | loss: 0.020
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.006
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.006
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.015
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.024
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.015
+iter: 19 | loss: 0.017
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.018
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.010
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch   5 | time:  4.63s | train_loss 0.0103 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 6
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 6]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.006
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.007
+iter:  6 | loss: 0.006
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.005
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.025
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.012
+iter: 15 | loss: 0.006
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.005
+iter: 18 | loss: 0.025
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.013
+iter: 22 | loss: 0.014
+iter: 23 | loss: 0.007
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch   6 | time:  4.78s | train_loss 0.0102 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 7
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 7]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.006
+iter:  4 | loss: 0.021
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.005
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.010
+iter: 17 | loss: 0.005
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.018
+iter: 22 | loss: 0.005
+iter: 23 | loss: 0.013
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch   7 | time:  4.73s | train_loss 0.0099 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 8
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 8]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.005
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.017
+iter: 10 | loss: 0.022
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.021
+iter: 14 | loss: 0.005
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.005
+iter: 17 | loss: 0.040
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.005
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.006
+iter: 22 | loss: 0.008
+iter: 23 | loss: 0.009
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch   8 | time:  4.75s | train_loss 0.0110 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 9
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 9]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.005
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.027
+iter:  5 | loss: 0.005
+iter:  6 | loss: 0.005
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.005
+iter:  9 | loss: 0.006
+iter: 10 | loss: 0.016
+iter: 11 | loss: 0.012
+iter: 12 | loss: 0.006
+iter: 13 | loss: 0.005
+iter: 14 | loss: 0.005
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.024
+iter: 18 | loss: 0.022
+iter: 19 | loss: 0.014
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.007
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.019
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch   9 | time:  4.68s | train_loss 0.0105 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 10
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 10]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.008
+iter:  2 | loss: 0.005
+iter:  3 | loss: 0.017
+iter:  4 | loss: 0.005
+iter:  5 | loss: 0.010
+iter:  6 | loss: 0.006
+iter:  7 | loss: 0.006
+iter:  8 | loss: 0.009
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.006
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.006
+iter: 14 | loss: 0.013
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.022
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.016
+iter: 19 | loss: 0.004
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.007
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.008
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  10 | time:  4.70s | train_loss 0.0100 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 11
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 11]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.017
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.005
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.004
+iter:  5 | loss: 0.009
+iter:  6 | loss: 0.031
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.025
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.005
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.018
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.006
+iter: 17 | loss: 0.019
+iter: 18 | loss: 0.004
+iter: 19 | loss: 0.005
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.016
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.011
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  11 | time:  4.66s | train_loss 0.0109 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 12
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 12]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.004
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.014
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.015
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.014
+iter: 13 | loss: 0.015
+iter: 14 | loss: 0.005
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.024
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.013
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.005
+iter: 22 | loss: 0.008
+iter: 23 | loss: 0.024
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  12 | time:  4.90s | train_loss 0.0105 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 13
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 13]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.033
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.010
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.017
+iter: 10 | loss: 0.005
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.010
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.006
+iter: 16 | loss: 0.028
+iter: 17 | loss: 0.008
+iter: 18 | loss: 0.005
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.017
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.006
+iter: 23 | loss: 0.008
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  13 | time:  4.92s | train_loss 0.0108 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 14
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 14]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.005
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.005
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.018
+iter: 13 | loss: 0.015
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.004
+iter: 19 | loss: 0.009
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.014
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  14 | time:  4.82s | train_loss 0.0101 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 15
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 15]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.008
+iter:  2 | loss: 0.007
+iter:  3 | loss: 0.014
+iter:  4 | loss: 0.011
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.011
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.004
+iter:  9 | loss: 0.012
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.017
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.008
+iter: 15 | loss: 0.006
+iter: 16 | loss: 0.032
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.016
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.015
+iter: 22 | loss: 0.015
+iter: 23 | loss: 0.009
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  15 | time:  4.69s | train_loss 0.0106 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 16
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 16]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.005
+iter:  1 | loss: 0.004
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.007
+iter:  5 | loss: 0.006
+iter:  6 | loss: 0.018
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.011
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.006
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.006
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.033
+iter: 16 | loss: 0.017
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.004
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.037
+iter: 22 | loss: 0.006
+iter: 23 | loss: 0.025
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  16 | time:  4.94s | train_loss 0.0113 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 17
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 17]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.005
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.007
+iter:  5 | loss: 0.006
+iter:  6 | loss: 0.018
+iter:  7 | loss: 0.005
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.009
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.014
+iter: 14 | loss: 0.016
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.008
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.025
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  17 | time:  4.99s | train_loss 0.0101 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 18
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 18]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.005
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.020
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.005
+iter:  6 | loss: 0.009
+iter:  7 | loss: 0.005
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.019
+iter: 13 | loss: 0.005
+iter: 14 | loss: 0.017
+iter: 15 | loss: 0.013
+iter: 16 | loss: 0.005
+iter: 17 | loss: 0.021
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.030
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.004
+iter: 22 | loss: 0.005
+iter: 23 | loss: 0.010
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  18 | time:  4.96s | train_loss 0.0108 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 19
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 19]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.005
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.012
+iter:  3 | loss: 0.008
+iter:  4 | loss: 0.005
+iter:  5 | loss: 0.006
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.015
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.006
+iter: 10 | loss: 0.008
+iter: 11 | loss: 0.004
+iter: 12 | loss: 0.020
+iter: 13 | loss: 0.007
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.024
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.019
+iter: 19 | loss: 0.010
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.005
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.021
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  19 | time:  5.12s | train_loss 0.0101 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 20
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 20]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.005
+iter:  4 | loss: 0.005
+iter:  5 | loss: 0.015
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.010
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.005
+iter: 10 | loss: 0.012
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.007
+iter: 14 | loss: 0.004
+iter: 15 | loss: 0.014
+iter: 16 | loss: 0.027
+iter: 17 | loss: 0.010
+iter: 18 | loss: 0.015
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.020
+iter: 22 | loss: 0.008
+iter: 23 | loss: 0.008
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  20 | time:  4.62s | train_loss 0.0101 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 21
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 21]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.039
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.006
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.013
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.006
+iter: 14 | loss: 0.005
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.005
+iter: 17 | loss: 0.019
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.010
+iter: 21 | loss: 0.012
+iter: 22 | loss: 0.015
+iter: 23 | loss: 0.009
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  21 | time:  4.72s | train_loss 0.0107 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 22
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 22]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.006
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.026
+iter:  6 | loss: 0.006
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.017
+iter: 10 | loss: 0.006
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.006
+iter: 13 | loss: 0.005
+iter: 14 | loss: 0.019
+iter: 15 | loss: 0.020
+iter: 16 | loss: 0.018
+iter: 17 | loss: 0.005
+iter: 18 | loss: 0.005
+iter: 19 | loss: 0.004
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.008
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  22 | time:  4.58s | train_loss 0.0102 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 23
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 23]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.024
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.005
+iter:  3 | loss: 0.019
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.007
+iter:  6 | loss: 0.008
+iter:  7 | loss: 0.009
+iter:  8 | loss: 0.012
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.013
+iter: 11 | loss: 0.019
+iter: 12 | loss: 0.013
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.006
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.006
+iter: 18 | loss: 0.009
+iter: 19 | loss: 0.007
+iter: 20 | loss: 0.005
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.017
+iter: 23 | loss: 0.008
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  23 | time:  4.85s | train_loss 0.0106 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 24
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 24]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.008
+iter:  2 | loss: 0.021
+iter:  3 | loss: 0.013
+iter:  4 | loss: 0.008
+iter:  5 | loss: 0.016
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.005
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.009
+iter: 11 | loss: 0.005
+iter: 12 | loss: 0.006
+iter: 13 | loss: 0.007
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.008
+iter: 17 | loss: 0.013
+iter: 18 | loss: 0.020
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.016
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.007
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  24 | time:  4.90s | train_loss 0.0102 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 25
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 25]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.014
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.031
+iter:  3 | loss: 0.021
+iter:  4 | loss: 0.007
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.014
+iter:  7 | loss: 0.006
+iter:  8 | loss: 0.005
+iter:  9 | loss: 0.005
+iter: 10 | loss: 0.006
+iter: 11 | loss: 0.010
+iter: 12 | loss: 0.011
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.022
+iter: 16 | loss: 0.006
+iter: 17 | loss: 0.005
+iter: 18 | loss: 0.011
+iter: 19 | loss: 0.005
+iter: 20 | loss: 0.015
+iter: 21 | loss: 0.006
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.013
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  25 | time:  4.76s | train_loss 0.0104 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 26
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 26]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.006
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.004
+iter:  7 | loss: 0.015
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.005
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.005
+iter: 13 | loss: 0.023
+iter: 14 | loss: 0.008
+iter: 15 | loss: 0.006
+iter: 16 | loss: 0.016
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.015
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.017
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.006
+iter: 23 | loss: 0.009
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  26 | time:  4.80s | train_loss 0.0102 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 27
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 27]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.004
+iter:  1 | loss: 0.010
+iter:  2 | loss: 0.010
+iter:  3 | loss: 0.006
+iter:  4 | loss: 0.007
+iter:  5 | loss: 0.025
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.008
+iter:  8 | loss: 0.006
+iter:  9 | loss: 0.011
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.016
+iter: 12 | loss: 0.012
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.007
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.017
+iter: 18 | loss: 0.005
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.018
+iter: 21 | loss: 0.014
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.011
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  27 | time:  4.68s | train_loss 0.0104 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 28
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 28]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.028
+iter:  1 | loss: 0.005
+iter:  2 | loss: 0.006
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.006
+iter:  9 | loss: 0.005
+iter: 10 | loss: 0.015
+iter: 11 | loss: 0.005
+iter: 12 | loss: 0.005
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.005
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.024
+iter: 19 | loss: 0.011
+iter: 20 | loss: 0.012
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.010
+iter: 23 | loss: 0.013
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  28 | time:  5.07s | train_loss 0.0105 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 29
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 29]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.012
+iter:  1 | loss: 0.014
+iter:  2 | loss: 0.013
+iter:  3 | loss: 0.006
+iter:  4 | loss: 0.020
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.015
+iter:  7 | loss: 0.015
+iter:  8 | loss: 0.010
+iter:  9 | loss: 0.013
+iter: 10 | loss: 0.004
+iter: 11 | loss: 0.009
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.010
+iter: 14 | loss: 0.008
+iter: 15 | loss: 0.006
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.006
+iter: 18 | loss: 0.005
+iter: 19 | loss: 0.008
+iter: 20 | loss: 0.020
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.008
+iter: 23 | loss: 0.010
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  29 | time:  4.74s | train_loss 0.0103 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 30
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 30]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.008
+iter:  1 | loss: 0.008
+iter:  2 | loss: 0.008
+iter:  3 | loss: 0.006
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.012
+iter:  6 | loss: 0.006
+iter:  7 | loss: 0.025
+iter:  8 | loss: 0.005
+iter:  9 | loss: 0.025
+iter: 10 | loss: 0.022
+iter: 11 | loss: 0.020
+iter: 12 | loss: 0.005
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.006
+iter: 18 | loss: 0.005
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.010
+iter: 22 | loss: 0.006
+iter: 23 | loss: 0.010
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  30 | time:  5.34s | train_loss 0.0104 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 31
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 31]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.005
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.007
+iter:  3 | loss: 0.010
+iter:  4 | loss: 0.013
+iter:  5 | loss: 0.011
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.026
+iter:  8 | loss: 0.013
+iter:  9 | loss: 0.010
+iter: 10 | loss: 0.023
+iter: 11 | loss: 0.015
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.012
+iter: 14 | loss: 0.005
+iter: 15 | loss: 0.005
+iter: 16 | loss: 0.006
+iter: 17 | loss: 0.007
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.004
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.029
+iter: 22 | loss: 0.004
+iter: 23 | loss: 0.018
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  31 | time:  5.00s | train_loss 0.0108 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 32
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 32]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.007
+iter:  1 | loss: 0.020
+iter:  2 | loss: 0.016
+iter:  3 | loss: 0.015
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.004
+iter:  6 | loss: 0.006
+iter:  7 | loss: 0.005
+iter:  8 | loss: 0.006
+iter:  9 | loss: 0.008
+iter: 10 | loss: 0.005
+iter: 11 | loss: 0.006
+iter: 12 | loss: 0.021
+iter: 13 | loss: 0.006
+iter: 14 | loss: 0.005
+iter: 15 | loss: 0.009
+iter: 16 | loss: 0.007
+iter: 17 | loss: 0.014
+iter: 18 | loss: 0.005
+iter: 19 | loss: 0.031
+iter: 20 | loss: 0.029
+iter: 21 | loss: 0.018
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.009
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  32 | time:  4.91s | train_loss 0.0112 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 33
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 33]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.013
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.005
+iter:  3 | loss: 0.012
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.012
+iter:  7 | loss: 0.006
+iter:  8 | loss: 0.008
+iter:  9 | loss: 0.014
+iter: 10 | loss: 0.006
+iter: 11 | loss: 0.005
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.021
+iter: 14 | loss: 0.005
+iter: 15 | loss: 0.006
+iter: 16 | loss: 0.016
+iter: 17 | loss: 0.009
+iter: 18 | loss: 0.006
+iter: 19 | loss: 0.020
+iter: 20 | loss: 0.013
+iter: 21 | loss: 0.019
+iter: 22 | loss: 0.009
+iter: 23 | loss: 0.009
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  33 | time:  4.76s | train_loss 0.0104 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 34
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 34]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.010
+iter:  1 | loss: 0.009
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.006
+iter:  4 | loss: 0.009
+iter:  5 | loss: 0.013
+iter:  6 | loss: 0.008
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.006
+iter:  9 | loss: 0.007
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.009
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.015
+iter: 15 | loss: 0.003
+iter: 16 | loss: 0.013
+iter: 17 | loss: 0.012
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.027
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.013
+iter: 23 | loss: 0.009
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  34 | time:  4.71s | train_loss 0.0103 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 35
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 35]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.005
+iter:  1 | loss: 0.007
+iter:  2 | loss: 0.016
+iter:  3 | loss: 0.021
+iter:  4 | loss: 0.017
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.005
+iter:  8 | loss: 0.006
+iter:  9 | loss: 0.005
+iter: 10 | loss: 0.006
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.007
+iter: 13 | loss: 0.022
+iter: 14 | loss: 0.018
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.008
+iter: 18 | loss: 0.005
+iter: 19 | loss: 0.007
+iter: 20 | loss: 0.009
+iter: 21 | loss: 0.011
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.008
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  35 | time:  4.60s | train_loss 0.0104 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 36
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 36]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.006
+iter:  1 | loss: 0.006
+iter:  2 | loss: 0.009
+iter:  3 | loss: 0.009
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.008
+iter:  6 | loss: 0.005
+iter:  7 | loss: 0.006
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.005
+iter: 10 | loss: 0.027
+iter: 11 | loss: 0.013
+iter: 12 | loss: 0.025
+iter: 13 | loss: 0.008
+iter: 14 | loss: 0.006
+iter: 15 | loss: 0.006
+iter: 16 | loss: 0.026
+iter: 17 | loss: 0.017
+iter: 18 | loss: 0.006
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.017
+iter: 21 | loss: 0.008
+iter: 22 | loss: 0.007
+iter: 23 | loss: 0.022
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  36 | time:  4.78s | train_loss 0.0110 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 37
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 37]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.016
+iter:  1 | loss: 0.005
+iter:  2 | loss: 0.014
+iter:  3 | loss: 0.005
+iter:  4 | loss: 0.012
+iter:  5 | loss: 0.007
+iter:  6 | loss: 0.007
+iter:  7 | loss: 0.005
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.005
+iter: 10 | loss: 0.010
+iter: 11 | loss: 0.011
+iter: 12 | loss: 0.008
+iter: 13 | loss: 0.024
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.005
+iter: 16 | loss: 0.015
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.007
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.014
+iter: 21 | loss: 0.016
+iter: 22 | loss: 0.012
+iter: 23 | loss: 0.009
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  37 | time:  4.80s | train_loss 0.0101 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 38
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 38]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.017
+iter:  1 | loss: 0.011
+iter:  2 | loss: 0.011
+iter:  3 | loss: 0.006
+iter:  4 | loss: 0.005
+iter:  5 | loss: 0.007
+iter:  6 | loss: 0.006
+iter:  7 | loss: 0.006
+iter:  8 | loss: 0.014
+iter:  9 | loss: 0.018
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.004
+iter: 12 | loss: 0.014
+iter: 13 | loss: 0.009
+iter: 14 | loss: 0.007
+iter: 15 | loss: 0.025
+iter: 16 | loss: 0.009
+iter: 17 | loss: 0.008
+iter: 18 | loss: 0.006
+iter: 19 | loss: 0.017
+iter: 20 | loss: 0.005
+iter: 21 | loss: 0.006
+iter: 22 | loss: 0.008
+iter: 23 | loss: 0.025
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  38 | time:  5.21s | train_loss 0.0104 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 39
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 39]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.009
+iter:  1 | loss: 0.020
+iter:  2 | loss: 0.006
+iter:  3 | loss: 0.011
+iter:  4 | loss: 0.018
+iter:  5 | loss: 0.017
+iter:  6 | loss: 0.023
+iter:  7 | loss: 0.006
+iter:  8 | loss: 0.007
+iter:  9 | loss: 0.005
+iter: 10 | loss: 0.005
+iter: 11 | loss: 0.008
+iter: 12 | loss: 0.006
+iter: 13 | loss: 0.007
+iter: 14 | loss: 0.010
+iter: 15 | loss: 0.004
+iter: 16 | loss: 0.028
+iter: 17 | loss: 0.011
+iter: 18 | loss: 0.008
+iter: 19 | loss: 0.006
+iter: 20 | loss: 0.018
+iter: 21 | loss: 0.007
+iter: 22 | loss: 0.006
+iter: 23 | loss: 0.008
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  39 | time:  5.01s | train_loss 0.0106 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+Experiment: 1
+Iter: 0
+epoch: 40
+hp= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 40]
+best sum= 19.54284657829198
+best rrse= 8.737515234988539
+best rrae= 11.171614372621296
+best corr= 0.36628303
+best smape= 0.3363344349879633
+best objective= 9.397700309753418
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+best test rse= 4.431419517273169
+best test corr= 0.18340495
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 50.0, 'kr_fx': 50.0, 'jp_fx': 50.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.35 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.019
+iter:  1 | loss: 0.015
+iter:  2 | loss: 0.006
+iter:  3 | loss: 0.007
+iter:  4 | loss: 0.006
+iter:  5 | loss: 0.006
+iter:  6 | loss: 0.006
+iter:  7 | loss: 0.007
+iter:  8 | loss: 0.017
+iter:  9 | loss: 0.004
+iter: 10 | loss: 0.007
+iter: 11 | loss: 0.007
+iter: 12 | loss: 0.017
+iter: 13 | loss: 0.013
+iter: 14 | loss: 0.009
+iter: 15 | loss: 0.011
+iter: 16 | loss: 0.006
+iter: 17 | loss: 0.018
+iter: 18 | loss: 0.013
+iter: 19 | loss: 0.012
+iter: 20 | loss: 0.006
+iter: 21 | loss: 0.007
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.006
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+| end of epoch  40 | time:  5.65s | train_loss 0.0098 | valid rse 8.7375 | valid rae 11.1716 | valid corr  0.3663 | valid smape  0.3363 | focus_rrse 9.3977 | obj 9.3977
+best val loss= 19.54284657829198
+best hps= [1, 0.00017, 32, 128, 256, 1024, 30, 0.02, 2, 40, 0.6, 0.1, 2, 1]
+testing r= 5
+rrse(target)=304.7291317711518 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7188711166381836, "jp_fx": 17.069366455078125, "kr_fx": 8.404860496520996}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901775121688843, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+[debias] mode=val_mean_error apply_to=focus offset={'us_Trade Weighted Dollar Index': -1.390310287475586, 'jp_fx': -28.170129776000977, 'kr_fx': -79.40218353271484}
+testing r= 5
+rrse(target)=87.50714256562146 / 34.87594854780834 | rrse(all)=56673250772751.09 / 34622966134154.824 | report_mode=targets
+[Validation] per_target_rrse_json={"us_Trade Weighted Dollar Index": 1.9728493690490723, "jp_fx": 2.366699457168579, "kr_fx": 2.5157058238983154}
+[Validation] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.4600871801376343, "jp_fx": 1.4901789426803589, "kr_fx": 6.268754482269287}
+[Validation] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.5454545454545454, "jp_fx": 0.7272727272727273, "kr_fx": 0.36363636363636365}
+testing r= 5
+rrse(target)=134.86945366260665 / 87.05327089004898 | rrse(all)=48954469070902.26 / 13118448721317.795 | report_mode=targets
+[Testing] per_target_rrse_json={"us_Trade Weighted Dollar Index": 2.7803943157196045, "jp_fx": 7.089130878448486, "kr_fx": 1.3592978715896606}
+[Testing] per_target_lag_mae_json={"us_Trade Weighted Dollar Index": 0.7373456358909607, "jp_fx": 1.5104023218154907, "kr_fx": 7.565596103668213}
+[Testing] per_target_dir_mismatch_json={"us_Trade Weighted Dollar Index": 0.6363636363636364, "jp_fx": 0.7272727272727273, "kr_fx": 0.09090909090909091}
+********************************************************************************************************
+final test rse 1.5493 | test rae 2.1677 | test corr 0.1834 | test smape 0.2970
+********************************************************************************************************
+
+
+
+1 run average
+
+
+
+valid	rse	rae
+mean	2.5091	2.8455
+std	0.0000	0.0000
+
+
+
+test	rse	rae
+mean	1.5493	2.1677
+std	0.0000	0.0000
