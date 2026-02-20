@@ -1,9 +1,0 @@
-CUDA not available, using CPU
-Traceback (most recent call last):
-  File "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/train_test.py", line 1335, in <module>
-    val_acc, val_rae, val_corr, val_smape, test_acc, test_rae, test_corr, test_smape = main(i)
-                                                                                       ^^^^^^^
-  File "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/train_test.py", line 1131, in main
-    Data = DataLoaderS(
-           ^^^^^^^^^^^^
-TypeError: DataLoaderS.__init__() got an unexpected keyword argument 'fixed_eval_periods'
