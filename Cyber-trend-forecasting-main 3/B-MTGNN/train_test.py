@@ -1,6 +1,8 @@
 import argparse
+import json
 import math
 import time
+from statistics import NormalDist
 import torch
 import torch.nn as nn
 from net import gtnet
@@ -117,6 +119,102 @@ def get_focus_columns(data):
 def _normalize_metric_name(name: str):
     return re.sub(r'[^a-z0-9]+', '', name.lower())
 
+
+def _parse_yy_mon_token(token: str):
+    parts = token.strip().split('.')
+    if len(parts) != 2:
+        return None
+    yy_raw, mon_raw = parts[0].strip(), parts[1].strip().lower()
+    if not yy_raw.isdigit() or len(yy_raw) != 2:
+        return None
+    month_map = {
+        'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
+        'may': 5, 'jun': 6, 'jul': 7, 'aug': 8,
+        'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
+    }
+    mon = month_map.get(mon_raw[:3])
+    if mon is None:
+        return None
+    yy = int(yy_raw)
+    year = 2000 + yy
+    return year, mon
+
+
+def resolve_split_ratios_with_cutoff(data_path: str, train_ratio: float, valid_ratio: float, seq_in_len: int, cutoff_yy: int, min_valid_months: int):
+    cutoff_year = 2000 + int(cutoff_yy)
+    path = Path(data_path)
+    if not path.exists():
+        return train_ratio, valid_ratio, None
+
+    try:
+        with open(path, 'r', encoding='utf-8-sig') as f:
+            lines = f.read().splitlines()
+    except Exception:
+        return train_ratio, valid_ratio, None
+
+    if len(lines) <= 1:
+        return train_ratio, valid_ratio, None
+
+    header = [x.strip() for x in lines[0].split(',')]
+    if not header or header[0].lower() != 'date':
+        return train_ratio, valid_ratio, None
+
+    dates = []
+    for row in lines[1:]:
+        cols = row.split(',')
+        if not cols:
+            continue
+        dates.append(cols[0].strip())
+
+    n = len(dates)
+    if n == 0:
+        return train_ratio, valid_ratio, None
+
+    cutoff_idx = None
+    for i, token in enumerate(dates):
+        parsed = _parse_yy_mon_token(token)
+        if parsed is None:
+            continue
+        year, _ = parsed
+        if year >= cutoff_year:
+            cutoff_idx = i
+            break
+
+    if cutoff_idx is None:
+        return train_ratio, valid_ratio, {
+            'n': n,
+            'cutoff_idx': None,
+            'cutoff_label': f'{cutoff_year}-01',
+            'message': 'cutoff_not_found_keep_ratio',
+        }
+
+    valid_end = cutoff_idx
+    min_train_end = max(seq_in_len + 1, 2)
+    valid_start = max(min_train_end, valid_end - max(int(min_valid_months), 1))
+
+    if valid_start >= valid_end:
+        valid_start = max(min_train_end, valid_end - 1)
+
+    if valid_start >= valid_end:
+        return train_ratio, valid_ratio, {
+            'n': n,
+            'cutoff_idx': cutoff_idx,
+            'cutoff_label': dates[cutoff_idx],
+            'message': 'insufficient_history_keep_ratio',
+        }
+
+    new_train_ratio = valid_start / n
+    new_valid_ratio = (valid_end - valid_start) / n
+
+    return new_train_ratio, new_valid_ratio, {
+        'n': n,
+        'cutoff_idx': cutoff_idx,
+        'cutoff_label': dates[cutoff_idx],
+        'valid_start_idx': valid_start,
+        'valid_end_idx': valid_end,
+        'valid_months': valid_end - valid_start,
+    }
+
 def get_rse_target_columns(data):
     tokens = [x.strip() for x in args.rse_targets.split(',') if x.strip()]
     if not tokens:
@@ -211,6 +309,44 @@ def estimate_bias_offset_from_arrays(data, predict_t, test_t):
     return offset
 
 
+def estimate_affine_calibration_from_arrays(data, predict_t, test_t):
+    if predict_t.dim() == 3:
+        pred2 = predict_t.reshape(-1, predict_t.size(-1))
+        true2 = test_t.reshape(-1, test_t.size(-1))
+    else:
+        pred2 = predict_t
+        true2 = test_t
+
+    slope = torch.ones(pred2.size(1), device=pred2.device, dtype=pred2.dtype)
+    intercept = torch.zeros(pred2.size(1), device=pred2.device, dtype=pred2.dtype)
+
+    if args.debias_apply_to == 'all':
+        target_cols = list(range(pred2.size(1)))
+    else:
+        target_cols = get_focus_columns(data)
+
+    eps = 1e-12
+    for col in target_cols:
+        x = pred2[:, col]
+        y = true2[:, col]
+        x_mean = torch.mean(x)
+        y_mean = torch.mean(y)
+        x_centered = x - x_mean
+        y_centered = y - y_mean
+        var_x = torch.mean(x_centered * x_centered)
+        if var_x <= eps:
+            slope[col] = 1.0
+            intercept[col] = y_mean - x_mean
+        else:
+            cov_xy = torch.mean(x_centered * y_centered)
+            a = cov_xy / var_x
+            b = y_mean - a * x_mean
+            slope[col] = a
+            intercept[col] = b
+
+    return slope, intercept
+
+
 def save_metrics_1d(predict, test, title, type):
     sum_squared_diff = torch.sum(torch.pow(test - predict, 2))
     root_sum_squared = math.sqrt(sum_squared_diff)
@@ -303,7 +439,13 @@ def plot_predicted_actual(predicted, actual, title, type, variance, confidence_9
     plt.plot(x, predicted, '--', color='purple', label='Predicted')
     if isinstance(confidence_95, torch.Tensor):
         confidence_95 = confidence_95.cpu().numpy()
-    plt.fill_between(x, predicted - confidence_95, predicted + confidence_95, alpha=0.5, color='pink', label='95% Confidence')
+    conf_pct = int(round(args.confidence_level * 100))
+    mode_suffix = ' PI' if args.confidence_mode == 'predictive' else ''
+    if args.confidence_scale > 1.0:
+        conf_label = f'{conf_pct}% Confidence{mode_suffix} (x{args.confidence_scale:.2f})'
+    else:
+        conf_label = f'{conf_pct}% Confidence{mode_suffix}'
+    plt.fill_between(x, predicted - confidence_95, predicted + confidence_95, alpha=0.5, color='pink', label=conf_label)
     plt.legend(loc="best", prop={'size': 11})
     plt.axis('tight')
     plt.grid(True)
@@ -338,7 +480,9 @@ def s_mape(yTrue, yPred):
     return mape
 
 
-def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_input, is_plot, split_type='Testing', bias_offset=None, return_arrays=False):
+def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_input, is_plot, split_type='Testing', bias_offset=None, affine_calibration=None, return_arrays=False):
+    prev_mode = model.training
+    model.eval()
     total_loss = 0
     total_loss_l1 = 0
     n_samples = 0
@@ -379,17 +523,25 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         ws = w_std[0, 0, :, 0]   # [N]
         # =====================================================
 
-        y_true = test_window[i: i + 1, :].clone()
+        y_true_full = test_window[i: i + data.out_len, :].clone()
+        y_true = y_true_full[:1, :].clone()
 
-        num_runs = 10
+        num_runs = 1
         outputs = []
 
         for _ in range(num_runs):
             with torch.no_grad():
                 output = model(X)
-                y_pred_single = output[-1, :, :, -1].clone()
-                y_pred_single = y_pred_single * ws + wm
-                outputs.append(y_pred_single[:1, :])
+                y_pred = output[-1, :, :, -1].clone()
+                
+                # =====================================================
+                # [수정 3] 현재 윈도우의 통계로 복원 (Denormalization)
+                # =====================================================
+                y_pred = y_pred * ws + wm
+                # =====================================================
+                
+                y_pred = y_pred[:1, :]
+            outputs.append(y_pred)
 
         outputs = torch.stack(outputs)
         y_pred = torch.mean(outputs, dim=0)
@@ -397,7 +549,7 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         if args.anchor_focus_to_last > 0:
             focus_cols = get_focus_columns(data)
             if focus_cols:
-                alpha = args.anchor_focus_to_last
+                alpha = min(max(args.anchor_focus_to_last, 0.0), 1.0)
                 focus_idx = torch.tensor(focus_cols, device=y_pred.device)
                 last_obs = x_input[-1, :].to(y_pred.device)
                 y_focus = torch.index_select(y_pred, dim=1, index=focus_idx)
@@ -405,20 +557,21 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
                 y_focus = (1.0 - alpha) * y_focus + alpha * last_focus
                 y_pred[:, focus_idx] = y_focus
 
-        var = torch.var(outputs, dim=0)
-        std_dev = torch.std(outputs, dim=0)
+        var = torch.var(outputs, dim=0, unbiased=False)
+        std_dev = torch.std(outputs, dim=0, unbiased=False)
 
-        z = 1.96
-        confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
-
-        # 다음 스텝을 위한 입력 업데이트
-        if split_type == 'Testing' or args.rollout_mode == 'recursive':
-            next_chunk = y_pred
+        conf_level = min(max(float(args.confidence_level), 0.50), 0.999)
+        z = NormalDist().inv_cdf(0.5 + conf_level / 2.0)
+        if args.confidence_mode == 'predictive':
+            confidence = z * std_dev
         else:
-            # teacher-forced 1-step: 다음 시점 실제값을 사용해 윈도우 갱신
-            next_chunk = y_true
+            confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
+        confidence = confidence * float(args.confidence_scale)
 
-        x_input = torch.cat([x_input[1:, :].clone(), next_chunk.detach().clone()], dim=0)
+        # 다음 스텝을 위한 입력 업데이트 (recursive only)
+        next_chunk = y_pred
+
+        x_input = torch.cat([x_input[1:, :].clone(), next_chunk.clone()], dim=0)
 
         if predict is None:
             predict = y_pred
@@ -444,6 +597,16 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         if b.dim() == 1:
             b = b.unsqueeze(0)
         predict = predict - b
+
+    if affine_calibration is not None:
+        slope, intercept = affine_calibration
+        a = slope.to(predict.device)
+        c = intercept.to(predict.device)
+        if a.dim() == 1:
+            a = a.unsqueeze(0)
+        if c.dim() == 1:
+            c = c.unsqueeze(0)
+        predict = predict * a + c
 
     # --- Metrics 계산: target/all 동시 계산 후 report mode 선택 ---
     selected_cols = get_rse_target_columns(data)
@@ -492,6 +655,32 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
 
     focus_rrse = compute_focus_rrse(predict, Ytest, data)
 
+    per_target_rrse = {}
+    per_target_lag_mae = {}
+    per_target_dir_mismatch = {}
+    target_cols = get_rse_target_columns(data)
+    for col in target_cols:
+        series_true = Ytest[:, col]
+        series_pred = predict[:, col]
+        num = np.sum((series_true - series_pred) ** 2)
+        den = np.sum((series_true - np.mean(series_true)) ** 2)
+        if den > 1e-12:
+            per_target_rrse[data.col[col]] = float(np.sqrt(num / den))
+
+        if len(series_true) > 1:
+            grad_true = np.diff(series_true)
+            grad_pred = np.diff(series_pred)
+            per_target_lag_mae[data.col[col]] = float(np.mean(np.abs(grad_true - grad_pred)))
+            dir_mismatch = np.mean(np.sign(grad_true) != np.sign(grad_pred))
+            per_target_dir_mismatch[data.col[col]] = float(dir_mismatch)
+
+    if per_target_rrse:
+        print(f"[{split_type}] per_target_rrse_json={json.dumps(per_target_rrse, ensure_ascii=False)}")
+    if per_target_lag_mae:
+        print(f"[{split_type}] per_target_lag_mae_json={json.dumps(per_target_lag_mae, ensure_ascii=False)}")
+    if per_target_dir_mismatch:
+        print(f"[{split_type}] per_target_dir_mismatch_json={json.dumps(per_target_dir_mismatch, ensure_ascii=False)}")
+
     # --- Plotting (기존 코드 유지) ---
     counter = 0
     if is_plot:
@@ -519,11 +708,17 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
             print(f"[{split_type}] skipped near-constant nodes for per-node metrics: {skipped_nodes}")
 
     if return_arrays:
+        if prev_mode:
+            model.train()
         return rrse, rae, correlation, smape, focus_rrse, predict_t.detach().cpu(), test_t.detach().cpu()
+    if prev_mode:
+        model.train()
     return rrse, rae, correlation, smape, focus_rrse
 
 
 def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
+    prev_mode = model.training
+    model.eval()
     total_loss = 0
     total_loss_l1 = 0
     n_samples = 0
@@ -552,7 +747,7 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
         ws = w_std[:, 0, :, 0]   # [B, N]
         # ============================================
 
-        num_runs = 10
+        num_runs = 1
         outputs = []
 
         with torch.no_grad():
@@ -567,11 +762,16 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
 
         outputs = torch.stack(outputs)
         mean = torch.mean(outputs, dim=0)
-        var = torch.var(outputs, dim=0)
-        std_dev = torch.std(outputs, dim=0)
+        var = torch.var(outputs, dim=0, unbiased=False)
+        std_dev = torch.std(outputs, dim=0, unbiased=False)
 
-        z = 1.96
-        confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
+        conf_level = min(max(float(args.confidence_level), 0.50), 0.999)
+        z = NormalDist().inv_cdf(0.5 + conf_level / 2.0)
+        if args.confidence_mode == 'predictive':
+            confidence = z * std_dev
+        else:
+            confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
+        confidence = confidence * float(args.confidence_scale)
 
         output = mean
 
@@ -704,6 +904,8 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
             save_metrics_1d(torch.from_numpy(predict[:, 0, col]), torch.from_numpy(Ytest[:, 0, col]), node_name, 'Validation')
             plot_predicted_actual(predict[:, 0, col], Ytest[:, 0, col], node_name, 'Validation', variance[:, 0, col], confidence_95[:, 0, col])
             counter += 1
+    if prev_mode:
+        model.train()
     return rrse, rae, correlation, smape, jp_fx_rse
 
 
@@ -797,6 +999,23 @@ def train(data, X, Y, model, criterion, optim, batch_size):
             else:
                 grad_loss = None
 
+            lag_delta_loss = None
+            lag_sign_loss = None
+            if output.size(1) == 1 and tx.size(3) >= 2 and (args.lag_penalty_1step > 0 or args.lag_sign_penalty > 0):
+                last_in = tx[:, 0, :, -1]
+                prev_in = tx[:, 0, :, -2]
+                true_next = ty[:, 0, :]
+                pred_next = output[:, 0, :]
+
+                true_delta = true_next - last_in
+                pred_delta = pred_next - last_in
+
+                lag_delta_loss = torch.abs(pred_delta - true_delta)
+
+                eps = 1e-12
+                sign_conflict = torch.relu(-(pred_delta * true_delta))
+                lag_sign_loss = sign_conflict / (torch.abs(true_delta) + eps)
+
             w = target_weight.unsqueeze(0).unsqueeze(0)  # [1, 1, N]
             
             if args.focus_targets == 1 and args.focus_only_loss == 1:
@@ -814,11 +1033,25 @@ def train(data, X, Y, model, criterion, optim, batch_size):
                     # [추가] 트렌드 오차 반영 (기울기가 틀리면 벌칙 부여)
                     if grad_loss is not None:
                         grad_focus = torch.index_select(grad_loss, dim=2, index=focus_idx)
-                        loss += 2.0 * grad_focus.mean() # 트렌드 가중치 0.5
+                        loss += 0.5 * grad_focus.mean() # 트렌드 가중치 0.5
+
+                    if lag_delta_loss is not None and args.lag_penalty_1step > 0:
+                        lag_delta_focus = torch.index_select(lag_delta_loss, dim=1, index=focus_idx)
+                        loss += args.lag_penalty_1step * lag_delta_focus.mean()
+
+                    if lag_sign_loss is not None and args.lag_sign_penalty > 0:
+                        lag_sign_focus = torch.index_select(lag_sign_loss, dim=1, index=focus_idx)
+                        loss += args.lag_sign_penalty * lag_sign_focus.mean()
                 else:
                     loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
             else:
                 loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
+
+                if lag_delta_loss is not None and args.lag_penalty_1step > 0:
+                    loss += args.lag_penalty_1step * lag_delta_loss.mean()
+
+                if lag_sign_loss is not None and args.lag_sign_penalty > 0:
+                    loss += args.lag_sign_penalty * lag_sign_loss.mean()
 
             if args.bias_penalty > 0:
                 err_signed = output - ty
@@ -892,7 +1125,7 @@ parser.add_argument('--tanhalpha', type=float, default=0.1, help='tanh alpha')
 parser.add_argument('--epochs', type=int, default=200, help='')
 parser.add_argument('--num_split', type=int, default=1, help='number of splits for graphs')
 parser.add_argument('--step_size', type=int, default=100, help='step_size')
-parser.add_argument('--ss_prob', type=float, default=0.4, help='scheduled sampling probability')
+parser.add_argument('--ss_prob', type=float, default=0.2, help='scheduled sampling probability')
 parser.add_argument('--train_ratio', type=float, default=0.8666666667, help='train split ratio')
 parser.add_argument('--valid_ratio', type=float, default=0.0666666667, help='validation split ratio')
 parser.add_argument('--focus_targets', type=int, default=0, help='1 to upweight us/kr/jp target nodes')
@@ -900,16 +1133,24 @@ parser.add_argument('--focus_nodes', type=str, default='us_Trade Weighted Dollar
 parser.add_argument('--focus_weight', type=float, default=0.7, help='priority weight for focus-node RRSE in model selection (0~1)')
 parser.add_argument('--focus_target_gain', type=float, default=12.0, help='loss weight applied to focus target columns when focus_targets=1')
 parser.add_argument('--focus_only_loss', type=int, default=0, choices=[0, 1], help='1 to optimize loss only on focus/rse target columns')
-parser.add_argument('--anchor_focus_to_last', type=float, default=0.2, help='0~1 level anchoring strength for focus columns during evaluation/forecast')
+parser.add_argument('--anchor_focus_to_last', type=float, default=0.0, help='0~1 level anchoring strength for focus columns during evaluation/forecast')
 parser.add_argument('--rse_targets', type=str, default='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', help='comma-separated target series/file names used for terminal RSE/RAE aggregation')
 parser.add_argument('--rse_report_mode', type=str, default='targets', choices=['targets', 'all'], help='which RSE/RAE to report in terminal and final summary')
-parser.add_argument('--debias_mode', type=str, default='none', choices=['none', 'val_mean_error'], help='bias correction mode for final evaluation/reporting')
+parser.add_argument('--debias_mode', type=str, default='none', choices=['none', 'val_mean_error', 'val_affine'], help='bias correction mode for final evaluation/reporting')
 parser.add_argument('--debias_apply_to', type=str, default='focus', choices=['focus', 'all'], help='apply debias offset to focus targets only or all series')
-parser.add_argument('--bias_penalty', type=float, default=0.3, help='lambda for training-time signed-bias penalty (0 disables)')
+parser.add_argument('--bias_penalty', type=float, default=0.0, help='lambda for training-time signed-bias penalty (0 disables)')
 parser.add_argument('--bias_penalty_scope', type=str, default='focus', choices=['focus', 'all'], help='scope for training-time bias penalty')
+parser.add_argument('--lag_penalty_1step', type=float, default=0.0, help='lambda for 1-step delta matching penalty (anti-lag)')
+parser.add_argument('--lag_sign_penalty', type=float, default=0.0, help='lambda for 1-step direction mismatch penalty (anti-lag)')
 parser.add_argument('--plot_focus_only', type=int, default=0, help='1 to plot/save only focus nodes')
 parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
-parser.add_argument('--rollout_mode', type=str, default='recursive', choices=['teacher_forced', 'recursive'], help='test rollout mode')
+parser.add_argument('--rollout_mode', type=str, default='recursive', choices=['recursive'], help='test rollout mode (recursive only)')
+parser.add_argument('--enforce_cutoff_split', type=int, default=1, choices=[0, 1], help='1 to force train/valid to end before cutoff year (no 2025+ actuals in learning stage)')
+parser.add_argument('--cutoff_year_yy', type=int, default=25, help='two-digit year where test period starts; learning stage uses data before this year')
+parser.add_argument('--min_valid_months', type=int, default=12, help='minimum validation months when enforcing date cutoff split')
+parser.add_argument('--confidence_level', type=float, default=0.95, help='confidence level for interval band (e.g., 0.95, 0.99)')
+parser.add_argument('--confidence_scale', type=float, default=3.0, help='extra widening multiplier for confidence band (>=1.0 widens)')
+parser.add_argument('--confidence_mode', type=str, default='predictive', choices=['predictive', 'mean'], help='predictive: z*std (wider), mean: z*std/sqrt(n) (narrower)')
 parser.add_argument('--seed', type=int, default=777, help='random seed')
 parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to skip plotting')
 parser.add_argument('--clean_cache', type=int, default=0, choices=[0, 1], help='1 to delete cached *.pt in data dir before training')
@@ -1009,20 +1250,22 @@ if args.target_profile == 'triple_050':
     args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt'
     args.rse_report_mode = 'targets'
     args.loss_mode = 'mse'
-    args.lr = 0.0002
+    args.lr = 0.0004
     args.dropout = 0.05
     args.seq_in_len = 36
-    args.ss_prob = 0.4
+    args.ss_prob = 0.15
     args.seed = 123
     args.focus_weight = 1.0
-    args.focus_target_gain = 60.0
+    args.focus_target_gain = 45.0
     args.focus_only_loss = 1
-    args.anchor_focus_to_last = 0.2
+    args.anchor_focus_to_last = 0.0
     args.rollout_mode = 'recursive'
     args.debias_mode = 'none'
     args.debias_apply_to = 'focus'
     args.bias_penalty = 0.3
     args.bias_penalty_scope = 'focus'
+    args.lag_penalty_1step = 0.8
+    args.lag_sign_penalty = 0.3
     args.use_graph = 0
     print('[target_profile] applied: triple_050')
 
@@ -1034,20 +1277,22 @@ if args.target_profile == 'run001_us':
     args.layers = 2
     args.seq_in_len = 24
     args.seq_out_len = 1
-    args.ss_prob = 0.4
+    args.ss_prob = 0.2
     args.epochs = 120
     args.seed = 2026
     args.focus_targets = 1
     args.focus_nodes = 'us_Trade Weighted Dollar Index'
     args.focus_weight = 1.0
-    args.focus_target_gain = 60.0
+    args.focus_target_gain = 40.0
     args.focus_only_loss = 1
-    args.anchor_focus_to_last = 0.2
+    args.anchor_focus_to_last = 0.0
     args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt'
     args.rse_report_mode = 'targets'
     args.debias_mode = 'none'
     args.debias_apply_to = 'focus'
     args.rollout_mode = 'recursive'
+    args.lag_penalty_1step = 0.6
+    args.lag_sign_penalty = 0.2
     print('[target_profile] applied: run001_us')
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -1118,10 +1363,24 @@ def main(experiment):
             print("!!! Cache Clean Complete !!!")
         # ============================================================
 
-        if args.train_ratio <= 0 or args.valid_ratio <= 0 or (args.train_ratio + args.valid_ratio) >= 1:
+        local_train_ratio = args.train_ratio
+        local_valid_ratio = args.valid_ratio
+        if args.enforce_cutoff_split == 1:
+            local_train_ratio, local_valid_ratio, split_info = resolve_split_ratios_with_cutoff(
+                args.data,
+                args.train_ratio,
+                args.valid_ratio,
+                args.seq_in_len,
+                args.cutoff_year_yy,
+                args.min_valid_months,
+            )
+            if split_info is not None:
+                print(f"[split_guard] {split_info}")
+
+        if local_train_ratio <= 0 or local_valid_ratio <= 0 or (local_train_ratio + local_valid_ratio) >= 1:
             raise ValueError("train_ratio + valid_ratio must be < 1 and both must be > 0")
 
-        Data = DataLoaderS(args.data, args.train_ratio, args.valid_ratio, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
+        Data = DataLoaderS(args.data, local_train_ratio, local_valid_ratio, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
 
         print('train X:', Data.train[0].shape)
         print('train Y:', Data.train[1].shape)
@@ -1134,7 +1393,7 @@ def main(experiment):
         print('length of training set=', Data.train[0].shape[0])
         print('length of validation set=', Data.valid[0].shape[0])
         print('length of testing set=', Data.test[0].shape[0])
-        print('valid=', int((args.train_ratio + args.valid_ratio) * Data.n))
+        print('valid=', int((local_train_ratio + local_valid_ratio) * Data.n))
 
         if len(Data.train[0].shape) == 4: 
              args.num_nodes = Data.train[0].shape[2]
@@ -1276,6 +1535,7 @@ def main(experiment):
         clear_split_outputs('Testing')
 
     bias_offset = None
+    affine_calibration = None
     if args.debias_mode == 'val_mean_error':
         _, _, _, _, _, v_pred_t, v_true_t = evaluate_sliding_window(
             Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Validation', return_arrays=True
@@ -1285,13 +1545,29 @@ def main(experiment):
         if focus_cols:
             summary = {Data.col[c]: float(bias_offset[c].item()) for c in focus_cols}
             print(f"[debias] mode={args.debias_mode} apply_to={args.debias_apply_to} offset={summary}")
+    elif args.debias_mode == 'val_affine':
+        _, _, _, _, _, v_pred_t, v_true_t = evaluate_sliding_window(
+            Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Validation', return_arrays=True
+        )
+        affine_calibration = estimate_affine_calibration_from_arrays(Data, v_pred_t, v_true_t)
+        focus_cols = get_focus_columns(Data)
+        if focus_cols:
+            slope, intercept = affine_calibration
+            summary = {
+                Data.col[c]: {
+                    'slope': float(slope[c].item()),
+                    'intercept': float(intercept[c].item())
+                }
+                for c in focus_cols
+            }
+            print(f"[debias] mode={args.debias_mode} apply_to={args.debias_apply_to} affine={summary}")
 
     vtest_acc, vtest_rae, vtest_corr, vtest_smape, _ = evaluate_sliding_window(
-        Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Validation', bias_offset=bias_offset
+        Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Validation', bias_offset=bias_offset, affine_calibration=affine_calibration
     )
 
     test_acc, test_rae, test_corr, test_smape, _ = evaluate_sliding_window(
-        Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Testing', bias_offset=bias_offset
+        Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Testing', bias_offset=bias_offset, affine_calibration=affine_calibration
     )
     print('********************************************************************************************************')
     print("final test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f} | test smape {:5.4f}".format(test_acc, test_rae, test_corr, test_smape))
