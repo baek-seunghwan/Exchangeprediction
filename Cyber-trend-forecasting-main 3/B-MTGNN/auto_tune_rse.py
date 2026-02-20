@@ -94,14 +94,6 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
     ckpt_dir.mkdir(parents=True, exist_ok=True)
     ckpt_path = ckpt_dir / f"model_{run_id:03d}.pt"
 
-    focus_gain = value_for_trial(trial, "focus_target_gain", common_args.focus_target_gain)
-    focus_gain = float(focus_gain) * float(common_args.focus_gain_scale)
-    focus_gain = max(1.0, min(300.0, focus_gain))
-
-    bias_lambda = value_for_trial(trial, "bias_penalty", common_args.bias_penalty)
-    bias_lambda = float(bias_lambda) * float(common_args.bias_penalty_scale)
-    bias_lambda = max(0.0, min(2.0, bias_lambda))
-
     cmd = [
         py_exec,
         str(script_path),
@@ -115,14 +107,14 @@ def run_once(py_exec, script_path, common_args, trial, seed, run_dir, run_id, da
         "--focus_targets", str(common_args.focus_targets),
         "--focus_nodes", common_args.focus_nodes,
         "--focus_weight", str(common_args.focus_weight),
-        "--focus_target_gain", str(focus_gain),
+        "--focus_target_gain", str(value_for_trial(trial, "focus_target_gain", common_args.focus_target_gain)),
         "--focus_only_loss", str(common_args.focus_only_loss),
         "--anchor_focus_to_last", str(value_for_trial(trial, "anchor_focus_to_last", common_args.anchor_focus_to_last)),
         "--rse_targets", common_args.rse_targets,
         "--rse_report_mode", common_args.rse_report_mode,
         "--loss_mode", common_args.loss_mode,
         "--target_profile", common_args.target_profile,
-        "--bias_penalty", str(bias_lambda),
+        "--bias_penalty", str(value_for_trial(trial, "bias_penalty", common_args.bias_penalty)),
         "--bias_penalty_scope", common_args.bias_penalty_scope,
         "--debias_mode", common_args.debias_mode,
         "--debias_apply_to", common_args.debias_apply_to,
@@ -225,7 +217,6 @@ def main():
     parser.add_argument("--focus_nodes", type=str, default="us_Trade Weighted Dollar Index,jp_fx,kr_fx")
     parser.add_argument("--focus_weight", type=float, default=1.0)
     parser.add_argument("--focus_target_gain", type=float, default=40.0)
-    parser.add_argument("--focus_gain_scale", type=float, default=1.0, help="global multiplier for trial focus_target_gain")
     parser.add_argument("--focus_only_loss", type=int, default=1, choices=[0, 1])
     parser.add_argument("--anchor_focus_to_last", type=float, default=0.1)
     parser.add_argument("--rse_targets", type=str, default="Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt")
@@ -233,7 +224,6 @@ def main():
     parser.add_argument("--loss_mode", type=str, default="mse", choices=["l1", "mse"])
     parser.add_argument("--target_profile", type=str, default="none", choices=["none", "triple_050", "run001_us"])
     parser.add_argument("--bias_penalty", type=float, default=0.3)
-    parser.add_argument("--bias_penalty_scale", type=float, default=1.0, help="global multiplier for trial bias_penalty")
     parser.add_argument("--bias_penalty_scope", type=str, default="focus", choices=["focus", "all"])
     parser.add_argument("--debias_mode", type=str, default="val_mean_error", choices=["none", "val_mean_error", "val_affine"])
     parser.add_argument("--debias_apply_to", type=str, default="focus", choices=["focus", "all"])
