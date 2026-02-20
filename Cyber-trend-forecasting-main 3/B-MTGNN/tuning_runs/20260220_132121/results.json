@@ -138,5 +138,75 @@
     },
     "max_target_rse": 4.547390460968018,
     "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260220_132121/run_004.log"
+  },
+  {
+    "run_id": 5,
+    "seed": 777,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 8.5e-05,
+      "dropout": 0.0,
+      "layers": 3,
+      "conv_channels": 32,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "subgraph_size": 30,
+      "node_dim": 40,
+      "seq_in_len": 36,
+      "seq_out_len": 1,
+      "ss_prob": 0.05,
+      "focus_target_gain": 90.0,
+      "anchor_focus_to_last": 0.9,
+      "bias_penalty": 0.45
+    },
+    "return_code": 0,
+    "policy_ok": true,
+    "final_test_rse": 2.6575,
+    "final_test_rae": 3.1762,
+    "best_test_rse": 3.356347897970985,
+    "per_target_rrse": {
+      "us_Trade Weighted Dollar Index": 2.7993218898773193,
+      "jp_fx": 4.130105495452881,
+      "kr_fx": 2.635784864425659
+    },
+    "max_target_rse": 4.130105495452881,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260220_132121/run_005.log"
+  },
+  {
+    "run_id": 6,
+    "seed": 777,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 0.0002125,
+      "dropout": 0.05,
+      "layers": 2,
+      "conv_channels": 16,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "subgraph_size": 40,
+      "node_dim": 30,
+      "seq_in_len": 48,
+      "seq_out_len": 1,
+      "ss_prob": 0.2,
+      "focus_target_gain": 50.0,
+      "anchor_focus_to_last": 0.7,
+      "bias_penalty": 0.2
+    },
+    "return_code": 0,
+    "policy_ok": true,
+    "final_test_rse": 5.9044,
+    "final_test_rae": 6.7853,
+    "best_test_rse": 5.015734697882106,
+    "per_target_rrse": {
+      "us_Trade Weighted Dollar Index": 8.039888381958008,
+      "jp_fx": 2.4947733879089355,
+      "kr_fx": 5.927296161651611
+    },
+    "max_target_rse": 8.039888381958008,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260220_132121/run_006.log"
   }
 ]

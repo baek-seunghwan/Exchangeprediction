@@ -1,0 +1,37 @@
+[
+  {
+    "run_id": 1,
+    "seed": 777,
+    "data": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv",
+    "use_graph": 0,
+    "trial": {
+      "lr": 0.00017,
+      "dropout": 0.05,
+      "layers": 2,
+      "conv_channels": 16,
+      "residual_channels": 128,
+      "skip_channels": 256,
+      "end_channels": 1024,
+      "subgraph_size": 40,
+      "node_dim": 30,
+      "seq_in_len": 60,
+      "seq_out_len": 1,
+      "ss_prob": 0.15,
+      "focus_target_gain": 45.0,
+      "anchor_focus_to_last": 0.7,
+      "bias_penalty": 0.3
+    },
+    "return_code": 0,
+    "policy_ok": true,
+    "final_test_rse": 4.9619,
+    "final_test_rae": 5.7179,
+    "best_test_rse": 5.941035696769812,
+    "per_target_rrse": {
+      "us_Trade Weighted Dollar Index": 6.599719524383545,
+      "jp_fx": 3.42513108253479,
+      "kr_fx": 4.973170280456543
+    },
+    "max_target_rse": 6.599719524383545,
+    "log_file": "/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs/20260220_151251/run_001.log"
+  }
+]
