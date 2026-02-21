@@ -82,7 +82,10 @@ def build_predefined_adj(columns, graph_file='data/graph.csv'):
 def normal_std(x):
     if isinstance(x, torch.Tensor):
         x = x.numpy()
-    return x.std() * np.sqrt((len(x) - 1.)/(len(x)))
+    n = len(x)
+    if n <= 1:
+        return 1e-12
+    return x.std() * np.sqrt((n - 1.) / n)
 
 
 class DataLoaderS(object):
@@ -146,8 +149,14 @@ class DataLoaderS(object):
         graph_path = os.path.join(os.path.dirname(file_name), 'graph.csv')
         self.adj = build_predefined_adj(self.col, graph_path)
 
-        # Calculate metrics using Test set
-        tmp = self.test[1] * self.scale.expand(self.test[1].size(0), self.test[1].size(1), self.m)
+        # Calculate metrics using Test set (fallback to test_window if batched test is empty)
+        if self.test[1].numel() > 0:
+            tmp = self.test[1] * self.scale.expand(self.test[1].size(0), self.test[1].size(1), self.m)
+        else:
+            # When seq_out_len >= test period, batched test is empty; use test_window instead
+            tw = self.test_window
+            tmp = tw * self.scale.expand(tw.size(0), self.m)
+            tmp = tmp.unsqueeze(1)  # add dummy time dim for compatibility
         self.rse = normal_std(tmp)
         self.rae = torch.mean(torch.abs(tmp - torch.mean(tmp)))
 

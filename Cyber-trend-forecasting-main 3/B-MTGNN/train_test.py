@@ -444,7 +444,180 @@ def s_mape(yTrue, yPred):
     return mape
 
 
+def _evaluate_direct_mode(data, test_window, model, n_input, is_plot,
+                         split_type='Testing', bias_offset=None, return_arrays=False):
+    """Direct multi-step: single forward pass predicts all future steps at once.
+
+    No recursive rollout → no compounding error accumulation.
+    """
+    test_window = test_window.to(data.device)
+    n_forecast = test_window.shape[0] - n_input
+
+    # --- Input context ---
+    x_input = test_window[0:n_input, :].clone()          # [T_in, N]
+    X = x_input.unsqueeze(0).unsqueeze(0)                 # [1, 1, T_in, N]
+    X = X.transpose(2, 3).float()                         # [1, 1, N, T_in]
+
+    # --- RevIN normalisation ---
+    w_mean = X.mean(dim=-1, keepdim=True)                 # [1, 1, N, 1]
+    w_std  = X.std(dim=-1, keepdim=True)                  # [1, 1, N, 1]
+    w_std[w_std == 0] = 1
+    X_norm = (X - w_mean) / w_std
+    wm = w_mean[0, 0, :, 0]                              # [N]
+    ws = w_std[0, 0, :, 0]                                # [N]
+
+    # --- Forward pass ---
+    num_runs = 1 if args.autotune_mode else 10
+    outputs = []
+
+    if num_runs == 1:
+        model.eval()
+        with torch.no_grad():
+            out = model(X_norm)[0, :, :, 0]              # [H, N]
+            out = out * ws.unsqueeze(0) + wm.unsqueeze(0)
+            outputs.append(out)
+        model.train()
+    else:
+        model.train()  # MC dropout for uncertainty
+        for _ in range(num_runs):
+            with torch.no_grad():
+                out = model(X_norm)[0, :, :, 0]
+                out = out * ws.unsqueeze(0) + wm.unsqueeze(0)
+                outputs.append(out)
+
+    if num_runs > 1:
+        stacked  = torch.stack(outputs)
+        y_pred   = stacked.mean(dim=0)
+        var      = stacked.var(dim=0)
+        std_dev  = stacked.std(dim=0)
+    else:
+        y_pred  = outputs[0]
+        var     = torch.zeros_like(y_pred)
+        std_dev = torch.zeros_like(y_pred)
+
+    z_val = 1.96
+    confidence = z_val * std_dev / math.sqrt(max(num_runs, 1))
+
+    # --- Trim to actual forecast length ---
+    steps = min(args.seq_out_len, n_forecast)
+    predict       = y_pred[:steps].clone()
+    test_actual   = test_window[n_input:n_input + steps, :].clone()
+    variance      = var[:steps]
+    confidence_95 = confidence[:steps]
+
+    # --- Anchor focus with temporal decay ---
+    if args.anchor_focus_to_last > 0:
+        focus_cols = get_focus_columns(data)
+        if focus_cols:
+            alpha = args.anchor_focus_to_last
+            focus_idx = torch.tensor(focus_cols, device=predict.device)
+            last_obs  = x_input[-1, :].to(predict.device)
+            anchor_gain_map = parse_metric_gain_map(args.anchor_boost_map)
+            gains = get_col_gain_vector(data, focus_cols, anchor_gain_map)
+            for t in range(steps):
+                decay = 0.85 ** t
+                alpha_t = torch.clamp(alpha * gains * decay, 0.0, 0.95)
+                y_f    = predict[t, focus_idx]
+                last_f = last_obs[focus_idx]
+                predict[t, focus_idx] = (1.0 - alpha_t) * y_f + alpha_t * last_f
+
+    # --- Scale to original space ---
+    scale = data.scale.expand(steps, data.m)
+    predict       = predict * scale
+    test_actual   = test_actual * scale
+    variance      = variance * scale
+    confidence_95 = confidence_95 * scale
+
+    if bias_offset is not None:
+        b = bias_offset.to(predict.device)
+        if b.dim() == 1:
+            b = b.unsqueeze(0)
+        predict = predict - b
+
+    # --- Metrics (tensor) ---
+    selected_cols = get_rse_target_columns(data)
+    rrse_target, rae_target, rss_t, rss_r_t = compute_rrse_rae_subset(predict, test_actual, selected_cols)
+    all_cols = list(range(data.m))
+    rrse_all, rae_all, rss_a, rss_r_a = compute_rrse_rae_subset(predict, test_actual, all_cols)
+
+    if args.rse_report_mode == 'all':
+        rrse, rae = rrse_all, rae_all
+    else:
+        rrse, rae = rrse_target, rae_target
+
+    print(
+        f"[direct] rrse(target)={rss_t:.4f}/{rss_r_t:.4f} | "
+        f"rrse(all)={rss_a:.4f}/{rss_r_a:.4f} | mode={args.rse_report_mode}"
+    )
+
+    # --- Metrics (numpy) ---
+    predict_t  = predict.clone()
+    test_t     = test_actual.clone()
+    predict_np = predict.data.cpu().numpy()
+    test_np    = test_actual.data.cpu().numpy()
+
+    sigma_p = predict_np.std(axis=0)
+    sigma_g = test_np.std(axis=0)
+    mean_p  = predict_np.mean(axis=0)
+    mean_g  = test_np.mean(axis=0)
+    index = (sigma_g != 0) & (sigma_p != 0)
+    if index.sum() > 0:
+        with np.errstate(divide='ignore', invalid='ignore'):
+            corr_arr = ((predict_np - mean_p) * (test_np - mean_g)).mean(axis=0) / (sigma_p * sigma_g)
+        corr_arr = corr_arr[index]
+        corr_arr = corr_arr[np.isfinite(corr_arr)]
+        correlation = corr_arr.mean() if corr_arr.size > 0 else 0.0
+    else:
+        correlation = 0.0
+
+    smape_val = 0
+    for z in range(test_np.shape[1]):
+        smape_val += s_mape(test_np[:, z], predict_np[:, z])
+    smape_val /= test_np.shape[1]
+
+    focus_rrse = compute_focus_rrse(predict_np, test_np, data)
+
+    # --- Per-node RSE report ---
+    if not args.autotune_mode:
+        for col in (selected_cols or []):
+            pred_c = predict_np[:, col]
+            true_c = test_np[:, col]
+            num = np.sum((true_c - pred_c) ** 2)
+            den = np.sum((true_c - np.mean(true_c)) ** 2)
+            node_rse = np.sqrt(num / den) if den > 1e-12 else 0.0
+            print(f"  [{split_type}] {data.col[col]:>40s}  RSE={node_rse:.4f}")
+
+    # --- Plotting ---
+    if is_plot:
+        skipped_nodes = []
+        focus_nodes = set(get_focus_nodes())
+        for v in range(data.m):
+            raw_name = data.col[v]
+            if args.plot_focus_only == 1 and raw_name not in focus_nodes:
+                continue
+            if np.std(test_np[:, v]) < 1e-10:
+                skipped_nodes.append(raw_name)
+                continue
+            node_name = raw_name.replace('-ALL', '').replace('Mentions-', 'Mentions of ').replace(' ALL', '').replace('Solution_', '').replace('_Mentions', '')
+            node_name = consistent_name(node_name)
+            save_metrics_1d(torch.from_numpy(predict_np[:, v]),
+                            torch.from_numpy(test_np[:, v]), node_name, split_type)
+            plot_predicted_actual(predict_np[:, v], test_np[:, v], node_name, split_type,
+                                 variance[:, v].cpu().numpy(), confidence_95[:, v].cpu().numpy())
+        if skipped_nodes:
+            print(f"[{split_type}] skipped near-constant nodes: {skipped_nodes}")
+
+    if return_arrays:
+        return rrse, rae, correlation, smape_val, focus_rrse, predict_t.detach().cpu(), test_t.detach().cpu()
+    return rrse, rae, correlation, smape_val, focus_rrse
+
+
 def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_input, is_plot, split_type='Testing', bias_offset=None, return_arrays=False):
+    # --- Direct mode dispatch ---
+    if args.rollout_mode == 'direct' and args.seq_out_len > 1:
+        return _evaluate_direct_mode(data, test_window, model, n_input, is_plot,
+                                     split_type, bias_offset, return_arrays)
+
     total_loss = 0
     total_loss_l1 = 0
     n_samples = 0
@@ -930,11 +1103,14 @@ def train(data, X, Y, model, criterion, optim, batch_size):
                     # [추가] 트렌드 오차 반영 (기울기가 틀리면 벌칙 부여)
                     if grad_loss is not None:
                         grad_focus = torch.index_select(grad_loss, dim=2, index=focus_idx)
-                        loss += 2.0 * grad_focus.mean() # 트렌드 가중치 0.5
+                        loss += args.grad_loss_weight * grad_focus.mean()
                 else:
                     loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
             else:
                 loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
+                # Also apply gradient loss when not focus_only
+                if grad_loss is not None and args.grad_loss_weight > 0:
+                    loss += args.grad_loss_weight * grad_loss.mean()
 
             if args.bias_penalty > 0:
                 err_signed = output - ty
@@ -1063,7 +1239,7 @@ parser.add_argument('--bias_penalty', type=float, default=0.3, help='lambda for 
 parser.add_argument('--bias_penalty_scope', type=str, default='focus', choices=['focus', 'all'], help='scope for training-time bias penalty')
 parser.add_argument('--plot_focus_only', type=int, default=0, help='1 to plot/save only focus nodes')
 parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-step eval tensors')
-parser.add_argument('--rollout_mode', type=str, default='recursive', choices=['teacher_forced', 'recursive'], help='test rollout mode')
+parser.add_argument('--rollout_mode', type=str, default='direct', choices=['teacher_forced', 'recursive', 'direct'], help='test rollout mode; direct=single forward pass for multi-step')
 parser.add_argument('--seed', type=int, default=777, help='random seed')
 parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to skip plotting')
 parser.add_argument('--enforce_cutoff_split', type=int, default=1, choices=[0, 1], help='1: train/validation cannot use rows from cutoff_year_yy and later')
@@ -1072,6 +1248,7 @@ parser.add_argument('--min_valid_months', type=int, default=12, help='minimum va
 parser.add_argument('--lag_penalty_1step', type=float, default=1.2, help='1-step delta lag penalty weight')
 parser.add_argument('--lag_sign_penalty', type=float, default=0.6, help='direction-mismatch proxy penalty weight')
 parser.add_argument('--lag_penalty_gain_map', type=str, default='kr_fx:2.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', help='per-focus-node lag penalty multiplier map')
+parser.add_argument('--grad_loss_weight', type=float, default=0.3, help='weight for gradient/trend loss (0 disables)')
 parser.add_argument('--clean_cache', type=int, default=0, choices=[0, 1], help='1 to delete cached *.pt in data dir before training')
 parser.add_argument('--autotune_mode', type=int, default=0, choices=[0, 1], help='1 to optimize for repeated auto-tuning runs')
 parser.add_argument('--apply_best_tuning', type=int, default=0, choices=[0, 1], help='1 to override args with best tuning run values')
@@ -1169,25 +1346,27 @@ if args.target_profile == 'triple_050':
     args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt'
     args.rse_report_mode = 'targets'
     args.loss_mode = 'mse'
-    args.lr = 0.0002
-    args.dropout = 0.05
+    args.lr = 0.0003
+    args.dropout = 0.03
     args.seq_in_len = 36
-    args.ss_prob = 0.4
+    args.seq_out_len = 12
+    args.ss_prob = 0.05
     args.seed = 123
     args.focus_weight = 1.0
     args.focus_target_gain = 60.0
-    args.focus_only_loss = 1
+    args.focus_only_loss = 0
     args.focus_rrse_mode = 'max'
-    args.anchor_focus_to_last = 0.2
-    args.rollout_mode = 'recursive'
+    args.anchor_focus_to_last = 0.1
+    args.rollout_mode = 'direct'
     args.debias_mode = 'none'
     args.debias_apply_to = 'focus'
-    args.bias_penalty = 0.3
+    args.bias_penalty = 0.2
     args.bias_penalty_scope = 'focus'
-    args.lag_penalty_1step = 1.2
-    args.lag_sign_penalty = 0.6
+    args.lag_penalty_1step = 0.5
+    args.lag_sign_penalty = 0.3
+    args.grad_loss_weight = 0.3
     args.use_graph = 0
-    print('[target_profile] applied: triple_050')
+    print('[target_profile] applied: triple_050 (direct mode, seq_out_len=12)')
 
 if args.target_profile == 'run001_us':
     args.loss_mode = 'mse'
@@ -1210,8 +1389,8 @@ if args.target_profile == 'run001_us':
     args.rse_report_mode = 'targets'
     args.debias_mode = 'none'
     args.debias_apply_to = 'focus'
-    args.rollout_mode = 'recursive'
-    print('[target_profile] applied: run001_us')
+    args.rollout_mode = 'direct'
+    print('[target_profile] applied: run001_us (direct mode)')
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 if device.type == 'cuda':
@@ -1345,7 +1524,7 @@ def main(experiment):
         evaluateL1 = nn.L1Loss(reduction='sum').to(device)
 
         optim = Optim(
-            model.parameters(), args.optim, lr, args.clip, lr_decay=args.weight_decay
+            model.parameters(), args.optim, lr, args.clip, weight_decay=args.weight_decay
         )
 
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
