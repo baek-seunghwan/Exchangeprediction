@@ -19,6 +19,12 @@ from pathlib import Path
 
 import glob
 
+MONTH_TO_NUM = {
+    'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
+    'may': 5, 'jun': 6, 'jul': 7, 'aug': 8,
+    'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
+}
+
 plt.rcParams['savefig.dpi'] = 1200
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
@@ -113,9 +119,106 @@ def get_focus_columns(data):
         if node_name in data.col:
             cols.append(data.col.index(node_name))
     return cols
+
+
+def parse_month_token(token):
+    if token is None:
+        return None
+    m = re.match(r'^\s*(\d{2})\.([A-Za-z]{3})\s*$', str(token))
+    if not m:
+        return None
+    yy = int(m.group(1))
+    mon = MONTH_TO_NUM.get(m.group(2).lower())
+    if mon is None:
+        return None
+    return 2000 + yy, mon
+
+
+def compute_effective_split_by_cutoff(data_path, train_ratio, valid_ratio, enforce_cutoff_split, cutoff_year_yy, min_valid_months):
+    train_ratio = float(train_ratio)
+    valid_ratio = float(valid_ratio)
+
+    if train_ratio <= 0 or valid_ratio <= 0 or (train_ratio + valid_ratio) >= 1:
+        raise ValueError("train_ratio + valid_ratio must be < 1 and both must be > 0")
+
+    if int(enforce_cutoff_split) != 1:
+        return train_ratio, valid_ratio, {'enforced': False}
+
+    df = pd.read_csv(data_path)
+    if df.shape[0] == 0:
+        raise ValueError("empty data")
+
+    date_tokens = df.iloc[:, 0].astype(str).tolist()
+    total_n = len(date_tokens)
+    forbidden_year = 2000 + int(cutoff_year_yy)
+
+    allowed_end = -1
+    for i, token in enumerate(date_tokens):
+        parsed = parse_month_token(token)
+        if parsed is None:
+            continue
+        year, _ = parsed
+        if year < forbidden_year:
+            allowed_end = i
+
+    if allowed_end < 0:
+        raise ValueError(f"No rows found before forbidden year {forbidden_year}")
+
+    allowed_n = allowed_end + 1
+    tv_ratio = train_ratio + valid_ratio
+    train_share = train_ratio / tv_ratio
+
+    train_n = int(round(allowed_n * train_share))
+    train_n = max(1, min(train_n, allowed_n - 1))
+
+    valid_n = allowed_n - train_n
+    min_valid = max(1, int(min_valid_months))
+    if valid_n < min_valid:
+        valid_n = min(min_valid, allowed_n - 1)
+        train_n = allowed_n - valid_n
+
+    if train_n <= 0 or valid_n <= 0:
+        raise ValueError(f"Invalid split after cutoff: train={train_n}, valid={valid_n}, allowed={allowed_n}")
+
+    return train_n / total_n, valid_n / total_n, {
+        'enforced': True,
+        'forbidden_year': forbidden_year,
+        'total_rows': total_n,
+        'allowed_rows': allowed_n,
+        'train_rows': train_n,
+        'valid_rows': valid_n,
+        'last_allowed': date_tokens[allowed_end],
+    }
     
 def _normalize_metric_name(name: str):
     return re.sub(r'[^a-z0-9]+', '', name.lower())
+
+
+def parse_metric_gain_map(raw: str):
+    out = {}
+    if raw is None:
+        return out
+    tokens = [x.strip() for x in str(raw).split(',') if x.strip()]
+    for token in tokens:
+        if ':' not in token:
+            continue
+        k, v = token.split(':', 1)
+        key = _normalize_metric_name(k)
+        try:
+            out[key] = float(v)
+        except Exception:
+            continue
+    return out
+
+
+def get_col_gain_vector(data, selected_cols, gain_map):
+    if not selected_cols:
+        return torch.ones(0, device=device)
+    vals = []
+    for col in selected_cols:
+        key = _normalize_metric_name(data.col[col])
+        vals.append(float(gain_map.get(key, 1.0)))
+    return torch.tensor(vals, device=device, dtype=torch.float32)
 
 def get_rse_target_columns(data):
     tokens = [x.strip() for x in args.rse_targets.split(',') if x.strip()]
@@ -188,6 +291,9 @@ def compute_focus_rrse(predict_np, ytest_np, data):
             values.append(np.sqrt(num / den))
     if not values:
         return None
+    mode = getattr(args, 'focus_rrse_mode', 'mean') if 'args' in globals() else 'mean'
+    if mode == 'max':
+        return float(np.max(values))
     return float(np.mean(values))
 
 
@@ -402,7 +508,10 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
                 last_obs = x_input[-1, :].to(y_pred.device)
                 y_focus = torch.index_select(y_pred, dim=1, index=focus_idx)
                 last_focus = torch.index_select(last_obs, dim=0, index=focus_idx).unsqueeze(0)
-                y_focus = (1.0 - alpha) * y_focus + alpha * last_focus
+                anchor_gain_map = parse_metric_gain_map(args.anchor_boost_map)
+                gains = get_col_gain_vector(data, focus_cols, anchor_gain_map).unsqueeze(0)
+                alpha_vec = torch.clamp(alpha * gains, 0.0, 0.98)
+                y_focus = (1.0 - alpha_vec) * y_focus + alpha_vec * last_focus
                 y_pred[:, focus_idx] = y_focus
 
         var = torch.var(outputs, dim=0)
@@ -412,7 +521,7 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
 
         # 다음 스텝을 위한 입력 업데이트
-        if split_type == 'Testing' or args.rollout_mode == 'recursive':
+        if args.rollout_mode == 'recursive':
             next_chunk = y_pred
         else:
             # teacher-forced 1-step: 다음 시점 실제값을 사용해 윈도우 갱신
@@ -599,7 +708,10 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
                 last_obs = X_raw[:, -1, :] * data.scale.expand(X_raw.size(0), data.m)
                 y_focus = torch.index_select(output, dim=2, index=focus_idx)
                 last_focus = torch.index_select(last_obs, dim=1, index=focus_idx).unsqueeze(1)
-                y_focus = (1.0 - alpha) * y_focus + alpha * last_focus
+                anchor_gain_map = parse_metric_gain_map(args.anchor_boost_map)
+                gains = get_col_gain_vector(data, focus_cols, anchor_gain_map).view(1, 1, -1)
+                alpha_vec = torch.clamp(alpha * gains, 0.0, 0.98)
+                y_focus = (1.0 - alpha_vec) * y_focus + alpha_vec * last_focus
                 output[:, :, focus_idx] = y_focus
 
         if predict is None:
@@ -719,6 +831,10 @@ def train(data, X, Y, model, criterion, optim, batch_size):
         focus_cols = get_focus_columns(data)
         for col in focus_cols:
             target_weight[col] = args.focus_target_gain
+        focus_gain_map = parse_metric_gain_map(args.focus_gain_map)
+        for col in focus_cols:
+            key = _normalize_metric_name(data.col[col])
+            target_weight[col] = target_weight[col] * float(focus_gain_map.get(key, 1.0))
         print(f"[Target-Weighted Loss] weights applied: "
               f"{ {data.col[i]: target_weight[i].item() for i in range(data.m) if target_weight[i] > 1} }")
         if args.focus_only_loss == 1 and focus_cols:
@@ -840,6 +956,41 @@ def train(data, X, Y, model, criterion, optim, batch_size):
                     # 전체 노드에 대해 적용할 때의 로직
                     bias_term = torch.mean(torch.mean(err_signed, dim=(0, 1)) ** 2)
                     loss = loss + args.bias_penalty * bias_term
+
+            if args.lag_penalty_1step > 0 or args.lag_sign_penalty > 0:
+                last_obs = tx[:, 0, :, -1]
+                pred_1 = output[:, 0, :]
+                true_1 = ty[:, 0, :]
+
+                pred_delta = pred_1 - last_obs
+                true_delta = true_1 - last_obs
+
+                if args.focus_targets == 1:
+                    focus_cols = get_focus_columns(data)
+                    if focus_cols:
+                        focus_idx = torch.tensor(focus_cols, device=device)
+                        pred_delta = torch.index_select(pred_delta, dim=1, index=focus_idx)
+                        true_delta = torch.index_select(true_delta, dim=1, index=focus_idx)
+
+                if args.lag_penalty_1step > 0:
+                    lag_diff = torch.abs(pred_delta - true_delta)
+                    if args.focus_targets == 1 and focus_cols:
+                        lag_gain_map = parse_metric_gain_map(args.lag_penalty_gain_map)
+                        lag_w = get_col_gain_vector(data, focus_cols, lag_gain_map).unsqueeze(0)
+                        lag_term = torch.sum(lag_diff * lag_w) / torch.clamp(torch.sum(lag_w), min=1e-12)
+                    else:
+                        lag_term = torch.mean(lag_diff)
+                    loss = loss + args.lag_penalty_1step * lag_term
+
+                if args.lag_sign_penalty > 0:
+                    sign_raw = torch.relu(-(pred_delta * true_delta))
+                    if args.focus_targets == 1 and focus_cols:
+                        lag_gain_map = parse_metric_gain_map(args.lag_penalty_gain_map)
+                        lag_w = get_col_gain_vector(data, focus_cols, lag_gain_map).unsqueeze(0)
+                        sign_term = torch.sum(sign_raw * lag_w) / torch.clamp(torch.sum(lag_w), min=1e-12)
+                    else:
+                        sign_term = torch.mean(sign_raw)
+                    loss = loss + args.lag_sign_penalty * sign_term
             # ==================================
             loss.backward()
             total_loss += loss.item()
@@ -900,7 +1051,10 @@ parser.add_argument('--focus_nodes', type=str, default='us_Trade Weighted Dollar
 parser.add_argument('--focus_weight', type=float, default=0.7, help='priority weight for focus-node RRSE in model selection (0~1)')
 parser.add_argument('--focus_target_gain', type=float, default=12.0, help='loss weight applied to focus target columns when focus_targets=1')
 parser.add_argument('--focus_only_loss', type=int, default=0, choices=[0, 1], help='1 to optimize loss only on focus/rse target columns')
+parser.add_argument('--focus_rrse_mode', type=str, default='max', choices=['mean', 'max'], help='focus RRSE aggregation mode used for model selection')
+parser.add_argument('--focus_gain_map', type=str, default='kr_fx:2.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', help='per-focus-node extra gain map, e.g. kr_fx:2.0,jp_fx:1.0')
 parser.add_argument('--anchor_focus_to_last', type=float, default=0.2, help='0~1 level anchoring strength for focus columns during evaluation/forecast')
+parser.add_argument('--anchor_boost_map', type=str, default='kr_fx:1.8,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', help='per-focus-node anchor multiplier map')
 parser.add_argument('--rse_targets', type=str, default='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', help='comma-separated target series/file names used for terminal RSE/RAE aggregation')
 parser.add_argument('--rse_report_mode', type=str, default='targets', choices=['targets', 'all'], help='which RSE/RAE to report in terminal and final summary')
 parser.add_argument('--debias_mode', type=str, default='none', choices=['none', 'val_mean_error'], help='bias correction mode for final evaluation/reporting')
@@ -912,6 +1066,12 @@ parser.add_argument('--debug_eval', type=int, default=0, help='1 to print per-st
 parser.add_argument('--rollout_mode', type=str, default='recursive', choices=['teacher_forced', 'recursive'], help='test rollout mode')
 parser.add_argument('--seed', type=int, default=777, help='random seed')
 parser.add_argument('--plot', type=int, default=1, help='1 to save plots, 0 to skip plotting')
+parser.add_argument('--enforce_cutoff_split', type=int, default=1, choices=[0, 1], help='1: train/validation cannot use rows from cutoff_year_yy and later')
+parser.add_argument('--cutoff_year_yy', type=int, default=25, help='forbidden starting yy year for train/validation split')
+parser.add_argument('--min_valid_months', type=int, default=12, help='minimum validation rows inside allowed period')
+parser.add_argument('--lag_penalty_1step', type=float, default=1.2, help='1-step delta lag penalty weight')
+parser.add_argument('--lag_sign_penalty', type=float, default=0.6, help='direction-mismatch proxy penalty weight')
+parser.add_argument('--lag_penalty_gain_map', type=str, default='kr_fx:2.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', help='per-focus-node lag penalty multiplier map')
 parser.add_argument('--clean_cache', type=int, default=0, choices=[0, 1], help='1 to delete cached *.pt in data dir before training')
 parser.add_argument('--autotune_mode', type=int, default=0, choices=[0, 1], help='1 to optimize for repeated auto-tuning runs')
 parser.add_argument('--apply_best_tuning', type=int, default=0, choices=[0, 1], help='1 to override args with best tuning run values')
@@ -1017,12 +1177,15 @@ if args.target_profile == 'triple_050':
     args.focus_weight = 1.0
     args.focus_target_gain = 60.0
     args.focus_only_loss = 1
+    args.focus_rrse_mode = 'max'
     args.anchor_focus_to_last = 0.2
     args.rollout_mode = 'recursive'
     args.debias_mode = 'none'
     args.debias_apply_to = 'focus'
     args.bias_penalty = 0.3
     args.bias_penalty_scope = 'focus'
+    args.lag_penalty_1step = 1.2
+    args.lag_sign_penalty = 0.6
     args.use_graph = 0
     print('[target_profile] applied: triple_050')
 
@@ -1033,7 +1196,7 @@ if args.target_profile == 'run001_us':
     args.dropout = 0.1
     args.layers = 2
     args.seq_in_len = 24
-    args.seq_out_len = 1
+    args.seq_out_len = 12
     args.ss_prob = 0.4
     args.epochs = 120
     args.seed = 2026
@@ -1118,10 +1281,26 @@ def main(experiment):
             print("!!! Cache Clean Complete !!!")
         # ============================================================
 
-        if args.train_ratio <= 0 or args.valid_ratio <= 0 or (args.train_ratio + args.valid_ratio) >= 1:
-            raise ValueError("train_ratio + valid_ratio must be < 1 and both must be > 0")
+        eff_train_ratio, eff_valid_ratio, split_info = compute_effective_split_by_cutoff(
+            args.data,
+            args.train_ratio,
+            args.valid_ratio,
+            args.enforce_cutoff_split,
+            args.cutoff_year_yy,
+            args.min_valid_months,
+        )
 
-        Data = DataLoaderS(args.data, args.train_ratio, args.valid_ratio, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
+        if split_info.get('enforced'):
+            print(
+                f"[split-cutoff] enforced=1 forbidden_year>={split_info['forbidden_year']} "
+                f"allowed_rows={split_info['allowed_rows']}/{split_info['total_rows']} "
+                f"train_rows={split_info['train_rows']} valid_rows={split_info['valid_rows']} "
+                f"last_allowed={split_info['last_allowed']}"
+            )
+        else:
+            print('[split-cutoff] enforced=0')
+
+        Data = DataLoaderS(args.data, eff_train_ratio, eff_valid_ratio, device, args.horizon, args.seq_in_len, args.normalize, args.seq_out_len)
 
         print('train X:', Data.train[0].shape)
         print('train Y:', Data.train[1].shape)

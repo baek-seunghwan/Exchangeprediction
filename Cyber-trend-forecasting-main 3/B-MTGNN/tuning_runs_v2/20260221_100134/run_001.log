@@ -1,0 +1,96 @@
+CUDA not available, using CPU
+[split-cutoff] enforced=1 forbidden_year>=2025 allowed_rows=168/180 train_rows=156 valid_rows=12 last_allowed=24.Dec
+Loading data from /Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv...
+Data loaded and converted to numeric successfully.
+Graph loaded with 1 attacks...
+33 columns loaded
+Adjacency created...
+train X: torch.Size([95, 60, 33])
+train Y: torch.Size([95, 1, 33])
+valid X: torch.Size([11, 60, 33])
+valid Y: torch.Size([11, 1, 33])
+test X: torch.Size([11, 60, 33])
+test Y: torch.Size([11, 1, 33])
+test window: torch.Size([72, 33])
+length of training set= 95
+length of validation set= 11
+length of testing set= 11
+valid= 168
+Auto-detected num_nodes: 33
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/tuning_runs_v2/20260221_100134/checkpoints/model_001.pt', optim='adam', L1Loss=True, loss_mode='mse', normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=0, gcn_depth=1, num_nodes=33, dropout=0.03, subgraph_size=40, node_dim=40, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=60, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.000132, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=1, num_split=1, step_size=100, ss_prob=0.04000000000000001, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx', focus_weight=1.0, focus_target_gain=56.0, focus_only_loss=1, focus_rrse_mode='max', anchor_focus_to_last=0.08000000000000002, rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', rse_report_mode='targets', debias_mode='none', debias_apply_to='focus', bias_penalty=0.20000000000000004, bias_penalty_scope='focus', plot_focus_only=0, debug_eval=0, rollout_mode='recursive', seed=777, plot=0, enforce_cutoff_split=1, cutoff_year_yy=25, min_valid_months=12, lag_penalty_1step=1.2, lag_sign_penalty=0.5, clean_cache=0, autotune_mode=1, apply_best_tuning=0, eval_best_tuning=0, target_profile='none', best_tuning_checkpoint='')
+The recpetive field size is 19
+Number of model parameters is 2097505
+begin training
+Experiment: 1
+Iter: 0
+epoch: 1
+hp= [1, 0.000132, 16, 128, 256, 1024, 40, 0.03, 2, 40, 0.6, 0.1, 2, 1]
+best sum= 10000000
+best rrse= 10000000
+best rrae= 10000000
+best corr= -10000000
+best smape= 10000000
+best objective= 10000000
+best hps= []
+best test rse= 10000000
+best test corr= -10000000
+[Target-Weighted Loss] weights applied: {'us_Trade Weighted Dollar Index': 56.0, 'kr_fx': 56.0, 'jp_fx': 56.0}
+[Target-Only Loss] enabled for columns: ['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+[Bias Penalty] enabled lambda=0.20000000000000004 scope=focus cols=['us_Trade Weighted Dollar Index', 'jp_fx', 'kr_fx']
+iter:  0 | loss: 0.044
+iter:  1 | loss: 0.016
+iter:  2 | loss: 0.015
+iter:  3 | loss: 0.021
+iter:  4 | loss: 0.015
+iter:  5 | loss: 0.014
+iter:  6 | loss: 0.010
+iter:  7 | loss: 0.021
+iter:  8 | loss: 0.015
+iter:  9 | loss: 0.019
+iter: 10 | loss: 0.027
+iter: 11 | loss: 0.019
+iter: 12 | loss: 0.024
+iter: 13 | loss: 0.039
+iter: 14 | loss: 0.031
+iter: 15 | loss: 0.012
+iter: 16 | loss: 0.022
+iter: 17 | loss: 0.008
+iter: 18 | loss: 0.010
+iter: 19 | loss: 0.024
+iter: 20 | loss: 0.007
+iter: 21 | loss: 0.016
+iter: 22 | loss: 0.011
+iter: 23 | loss: 0.055
+testing r= 5
+rrse(target)=204.98777593127352 / 34.87594854780834 | rrse(all)=91570797832750.42 / 34622966134154.824 | report_mode=targets
+| end of epoch   1 | time:  6.09s | train_loss 0.0203 | valid rse 5.8776 | valid rae 7.8257 | valid corr  0.3324 | valid smape  0.3283 | focus_rrse 13.9008 | obj 13.9008
+testing r= 5
+rrse(target)=407.79902755524074 / 87.05327089004898 | rrse(all)=49200381429897.45 / 13118448721317.795 | report_mode=targets
+********************************************************************************************************
+test rse 4.6845 | test rae 5.5057 | test corr 0.0406| test smape 0.2731 | test focus_rrse 4.6952
+********************************************************************************************************
+best val loss= 13.370953889958466
+best hps= [1, 0.000132, 16, 128, 256, 1024, 40, 0.03, 2, 40, 0.6, 0.1, 2, 1]
+testing r= 5
+rrse(target)=203.34725340842448 / 34.87594854780834 | rrse(all)=91681961825333.61 / 34622966134154.824 | report_mode=targets
+testing r= 5
+rrse(target)=405.93757217089427 / 87.05327089004898 | rrse(all)=49288835104824.95 / 13118448721317.795 | report_mode=targets
+********************************************************************************************************
+final test rse 4.6631 | test rae 5.4824 | test corr 0.0289 | test smape 0.2732
+********************************************************************************************************
+
+
+
+1 run average
+
+
+
+valid	rse	rae
+mean	5.8306	7.7739
+std	0.0000	0.0000
+
+
+
+test	rse	rae
+mean	4.6631	5.4824
+std	0.0000	0.0000
