@@ -1,0 +1,528 @@
+============================================
+CONFIG 1: TRIPLE050-like seed=1, 180ep
+============================================
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/AXIS/model/Bayesian/model.pt', optim='adam', L1Loss=True, loss_mode='l1', normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=0, gcn_depth=1, num_nodes=33, dropout=0.02, subgraph_size=40, node_dim=30, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=24, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.00015, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=180, num_split=1, step_size=100, ss_prob=0.05, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx', focus_weight=0.7, focus_target_gain=80.0, focus_only_loss=1, focus_rrse_mode='max', focus_gain_map='kr_fx:1.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', anchor_focus_to_last=0.06, anchor_boost_map='kr_fx:1.8,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', rse_report_mode='targets', debias_mode='none', debias_apply_to='focus', debias_skip_nodes='', bias_penalty=0.5, bias_penalty_scope='focus', plot_focus_only=0, debug_eval=0, rollout_mode='direct', seed=1, plot=0, enforce_cutoff_split=1, cutoff_year_yy=25, min_valid_months=12, lag_penalty_1step=0.0, lag_sign_penalty=0.0, lag_penalty_gain_map='kr_fx:2.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', grad_loss_weight=0.0, smoothness_penalty=0.0, clean_cache=0, eval_last_epoch=1, autotune_mode=1, apply_best_tuning=0, eval_best_tuning=0, target_profile='none', save_pred_dir='ensemble_runs/verify_triple050_s1', ensemble_seeds='', best_tuning_checkpoint='')
+| end of epoch   1 | time:  2.50s | train_loss 0.0081 | valid rse 1.3112 | valid rae 1.3059 | valid corr  0.7770 | valid smape  0.1761 | focus_rrse 1.3252 | obj 1.3210
+test rse 0.7958 | test rae 0.8247 | test corr 0.7667| test smape 0.1223 | test focus_rrse 1.8717
+| end of epoch   2 | time:  2.31s | train_loss 0.0030 | valid rse 2.0560 | valid rae 2.0874 | valid corr  0.8629 | valid smape  0.1520 | focus_rrse 2.0802 | obj 2.0729
+| end of epoch   3 | time:  2.30s | train_loss 0.0023 | valid rse 1.0811 | valid rae 1.1979 | valid corr  0.8454 | valid smape  0.1518 | focus_rrse 1.6282 | obj 1.4641
+| end of epoch   4 | time:  2.26s | train_loss 0.0017 | valid rse 2.1085 | valid rae 2.1107 | valid corr  0.8685 | valid smape  0.1489 | focus_rrse 2.1334 | obj 2.1259
+| end of epoch   5 | time:  2.27s | train_loss 0.0015 | valid rse 1.1761 | valid rae 1.1485 | valid corr  0.8721 | valid smape  0.1594 | focus_rrse 1.1835 | obj 1.1813
+test rse 0.3926 | test rae 0.4090 | test corr 0.9211| test smape 0.0958 | test focus_rrse 0.7878
+| end of epoch   6 | time:  2.28s | train_loss 0.0014 | valid rse 0.9586 | valid rae 1.0003 | valid corr  0.8700 | valid smape  0.1445 | focus_rrse 0.9651 | obj 0.9632
+test rse 0.3205 | test rae 0.3546 | test corr 0.9313| test smape 0.0904 | test focus_rrse 0.4280
+| end of epoch   7 | time:  2.43s | train_loss 0.0011 | valid rse 0.8524 | valid rae 0.9577 | valid corr  0.8776 | valid smape  0.1598 | focus_rrse 1.2096 | obj 1.1024
+| end of epoch   8 | time:  2.24s | train_loss 0.0010 | valid rse 1.0390 | valid rae 1.0639 | valid corr  0.8848 | valid smape  0.1473 | focus_rrse 1.0476 | obj 1.0450
+| end of epoch   9 | time:  2.27s | train_loss 0.0012 | valid rse 0.9955 | valid rae 0.9501 | valid corr  0.8750 | valid smape  0.1496 | focus_rrse 0.9980 | obj 0.9973
+| end of epoch  10 | time:  2.20s | train_loss 0.0010 | valid rse 1.3431 | valid rae 1.3644 | valid corr  0.8793 | valid smape  0.1528 | focus_rrse 1.3561 | obj 1.3522
+| end of epoch  11 | time:  2.29s | train_loss 0.0009 | valid rse 0.6677 | valid rae 0.7030 | valid corr  0.8899 | valid smape  0.1431 | focus_rrse 0.7170 | obj 0.7022
+test rse 0.3066 | test rae 0.3436 | test corr 0.9425| test smape 0.0785 | test focus_rrse 0.3952
+| end of epoch  12 | time:  2.26s | train_loss 0.0010 | valid rse 1.1203 | valid rae 1.1279 | valid corr  0.9018 | valid smape  0.1553 | focus_rrse 1.1296 | obj 1.1268
+| end of epoch  13 | time:  2.23s | train_loss 0.0009 | valid rse 0.8956 | valid rae 0.9628 | valid corr  0.9050 | valid smape  0.1601 | focus_rrse 0.8989 | obj 0.8979
+| end of epoch  14 | time:  2.24s | train_loss 0.0009 | valid rse 1.2189 | valid rae 1.2567 | valid corr  0.9042 | valid smape  0.1484 | focus_rrse 1.2312 | obj 1.2275
+| end of epoch  15 | time:  2.26s | train_loss 0.0011 | valid rse 0.8189 | valid rae 0.9228 | valid corr  0.9072 | valid smape  0.1600 | focus_rrse 0.8946 | obj 0.8719
+| end of epoch  16 | time:  2.25s | train_loss 0.0010 | valid rse 1.4798 | valid rae 1.4788 | valid corr  0.8960 | valid smape  0.1552 | focus_rrse 1.4957 | obj 1.4909
+| end of epoch  17 | time:  2.29s | train_loss 0.0009 | valid rse 0.7593 | valid rae 0.8020 | valid corr  0.8997 | valid smape  0.1475 | focus_rrse 0.8417 | obj 0.8170
+| end of epoch  18 | time:  2.28s | train_loss 0.0009 | valid rse 0.9786 | valid rae 1.0140 | valid corr  0.9069 | valid smape  0.1467 | focus_rrse 0.9853 | obj 0.9833
+| end of epoch  19 | time:  2.22s | train_loss 0.0009 | valid rse 0.6728 | valid rae 0.7307 | valid corr  0.8981 | valid smape  0.1416 | focus_rrse 0.7625 | obj 0.7356
+| end of epoch  20 | time:  2.24s | train_loss 0.0008 | valid rse 0.8857 | valid rae 0.9159 | valid corr  0.9066 | valid smape  0.1382 | focus_rrse 0.8911 | obj 0.8895
+| end of epoch  21 | time:  2.22s | train_loss 0.0008 | valid rse 0.6714 | valid rae 0.7314 | valid corr  0.9096 | valid smape  0.1468 | focus_rrse 0.6722 | obj 0.6719
+test rse 0.2550 | test rae 0.2925 | test corr 0.9533| test smape 0.0784 | test focus_rrse 0.3914
+| end of epoch  22 | time:  2.31s | train_loss 0.0009 | valid rse 0.7437 | valid rae 0.8011 | valid corr  0.8986 | valid smape  0.1442 | focus_rrse 0.7599 | obj 0.7551
+| end of epoch  23 | time:  2.19s | train_loss 0.0009 | valid rse 0.6097 | valid rae 0.6706 | valid corr  0.9148 | valid smape  0.1470 | focus_rrse 0.7083 | obj 0.6787
+| end of epoch  24 | time:  2.27s | train_loss 0.0008 | valid rse 1.0597 | valid rae 1.1096 | valid corr  0.9059 | valid smape  0.1438 | focus_rrse 1.0688 | obj 1.0661
+| end of epoch  25 | time:  2.23s | train_loss 0.0009 | valid rse 0.9944 | valid rae 1.0162 | valid corr  0.9087 | valid smape  0.1390 | focus_rrse 1.0034 | obj 1.0007
+| end of epoch  26 | time:  2.21s | train_loss 0.0008 | valid rse 1.3489 | valid rae 1.3898 | valid corr  0.9163 | valid smape  0.1596 | focus_rrse 1.3613 | obj 1.3576
+| end of epoch  27 | time:  2.27s | train_loss 0.0009 | valid rse 0.5718 | valid rae 0.6496 | valid corr  0.9080 | valid smape  0.1352 | focus_rrse 0.9653 | obj 0.8473
+| end of epoch  28 | time:  2.23s | train_loss 0.0007 | valid rse 0.7933 | valid rae 0.8455 | valid corr  0.9142 | valid smape  0.1325 | focus_rrse 0.7969 | obj 0.7959
+| end of epoch  29 | time:  2.24s | train_loss 0.0008 | valid rse 0.6532 | valid rae 0.6746 | valid corr  0.9020 | valid smape  0.1412 | focus_rrse 0.6548 | obj 0.6543
+test rse 0.3091 | test rae 0.3369 | test corr 0.9426| test smape 0.0782 | test focus_rrse 0.4160
+| end of epoch  30 | time:  2.25s | train_loss 0.0009 | valid rse 0.9158 | valid rae 0.9995 | valid corr  0.9164 | valid smape  0.1351 | focus_rrse 0.9228 | obj 0.9207
+| end of epoch  31 | time:  2.25s | train_loss 0.0008 | valid rse 0.7660 | valid rae 0.8424 | valid corr  0.9135 | valid smape  0.1344 | focus_rrse 0.7682 | obj 0.7675
+| end of epoch  32 | time:  2.27s | train_loss 0.0006 | valid rse 0.8454 | valid rae 0.9121 | valid corr  0.9088 | valid smape  0.1345 | focus_rrse 0.8516 | obj 0.8497
+| end of epoch  33 | time:  2.44s | train_loss 0.0009 | valid rse 0.9617 | valid rae 0.9946 | valid corr  0.9180 | valid smape  0.1396 | focus_rrse 0.9711 | obj 0.9683
+| end of epoch  34 | time:  2.31s | train_loss 0.0011 | valid rse 0.6665 | valid rae 0.6991 | valid corr  0.9069 | valid smape  0.1403 | focus_rrse 0.6689 | obj 0.6682
+| end of epoch  35 | time:  2.30s | train_loss 0.0007 | valid rse 0.5483 | valid rae 0.6001 | valid corr  0.9066 | valid smape  0.1413 | focus_rrse 0.7493 | obj 0.6890
+| end of epoch  36 | time:  2.27s | train_loss 0.0007 | valid rse 1.0164 | valid rae 1.0756 | valid corr  0.9137 | valid smape  0.1392 | focus_rrse 1.0258 | obj 1.0230
+| end of epoch  37 | time:  2.28s | train_loss 0.0009 | valid rse 0.7293 | valid rae 0.7882 | valid corr  0.9074 | valid smape  0.1470 | focus_rrse 0.7443 | obj 0.7398
+| end of epoch  38 | time:  2.29s | train_loss 0.0008 | valid rse 1.0773 | valid rae 1.1309 | valid corr  0.9126 | valid smape  0.1352 | focus_rrse 1.0880 | obj 1.0848
+| end of epoch  39 | time:  2.29s | train_loss 0.0009 | valid rse 1.2183 | valid rae 1.3443 | valid corr  0.9231 | valid smape  0.1507 | focus_rrse 1.2325 | obj 1.2282
+| end of epoch  40 | time:  2.23s | train_loss 0.0008 | valid rse 0.6414 | valid rae 0.7161 | valid corr  0.9165 | valid smape  0.1432 | focus_rrse 0.6908 | obj 0.6760
+| end of epoch  41 | time:  2.21s | train_loss 0.0006 | valid rse 0.9832 | valid rae 1.0634 | valid corr  0.9167 | valid smape  0.1414 | focus_rrse 0.9917 | obj 0.9891
+| end of epoch  42 | time:  2.23s | train_loss 0.0006 | valid rse 0.5172 | valid rae 0.5871 | valid corr  0.9170 | valid smape  0.1400 | focus_rrse 0.6845 | obj 0.6343
+test rse 0.2415 | test rae 0.2583 | test corr 0.9560| test smape 0.0760 | test focus_rrse 0.3561
+| end of epoch  43 | time:  2.23s | train_loss 0.0007 | valid rse 0.5181 | valid rae 0.5637 | valid corr  0.9155 | valid smape  0.1322 | focus_rrse 0.6206 | obj 0.5898
+test rse 0.2062 | test rae 0.2264 | test corr 0.9540| test smape 0.0742 | test focus_rrse 0.2474
+| end of epoch  44 | time:  2.27s | train_loss 0.0008 | valid rse 0.8238 | valid rae 0.8800 | valid corr  0.9222 | valid smape  0.1397 | focus_rrse 0.8282 | obj 0.8269
+| end of epoch  45 | time:  2.23s | train_loss 0.0008 | valid rse 0.5783 | valid rae 0.6507 | valid corr  0.9133 | valid smape  0.1340 | focus_rrse 0.6102 | obj 0.6006
+| end of epoch  46 | time:  2.22s | train_loss 0.0008 | valid rse 0.4487 | valid rae 0.5502 | valid corr  0.9075 | valid smape  0.1459 | focus_rrse 0.9651 | obj 0.8102
+| end of epoch  47 | time:  2.21s | train_loss 0.0006 | valid rse 0.5740 | valid rae 0.6522 | valid corr  0.9117 | valid smape  0.1392 | focus_rrse 0.7153 | obj 0.6729
+| end of epoch  48 | time:  2.24s | train_loss 0.0007 | valid rse 1.0131 | valid rae 1.0938 | valid corr  0.9245 | valid smape  0.1362 | focus_rrse 1.0228 | obj 1.0199
+| end of epoch  49 | time:  2.28s | train_loss 0.0010 | valid rse 0.5236 | valid rae 0.6016 | valid corr  0.9081 | valid smape  0.1440 | focus_rrse 1.1194 | obj 0.9407
+| end of epoch  50 | time:  2.25s | train_loss 0.0008 | valid rse 0.7131 | valid rae 0.7604 | valid corr  0.9174 | valid smape  0.1468 | focus_rrse 0.7140 | obj 0.7137
+| end of epoch  51 | time:  2.23s | train_loss 0.0008 | valid rse 0.9009 | valid rae 0.9842 | valid corr  0.9172 | valid smape  0.1461 | focus_rrse 0.9042 | obj 0.9032
+| end of epoch  52 | time:  2.25s | train_loss 0.0009 | valid rse 0.5909 | valid rae 0.6841 | valid corr  0.9129 | valid smape  0.1535 | focus_rrse 0.9555 | obj 0.8461
+| end of epoch  53 | time:  2.29s | train_loss 0.0011 | valid rse 0.4029 | valid rae 0.4039 | valid corr  0.9123 | valid smape  0.1430 | focus_rrse 0.5531 | obj 0.5080
+test rse 0.1426 | test rae 0.1667 | test corr 0.9497| test smape 0.0780 | test focus_rrse 0.2518
+| end of epoch  54 | time:  2.21s | train_loss 0.0009 | valid rse 0.8128 | valid rae 0.8898 | valid corr  0.9097 | valid smape  0.1343 | focus_rrse 0.8179 | obj 0.8164
+| end of epoch  55 | time:  2.37s | train_loss 0.0006 | valid rse 1.0927 | valid rae 1.2103 | valid corr  0.9253 | valid smape  0.1433 | focus_rrse 1.1091 | obj 1.1042
+| end of epoch  56 | time:  2.18s | train_loss 0.0006 | valid rse 0.8278 | valid rae 0.9130 | valid corr  0.9128 | valid smape  0.1412 | focus_rrse 0.8329 | obj 0.8314
+| end of epoch  57 | time:  2.25s | train_loss 0.0009 | valid rse 0.7577 | valid rae 0.8415 | valid corr  0.9129 | valid smape  0.1355 | focus_rrse 0.7622 | obj 0.7609
+| end of epoch  58 | time:  2.33s | train_loss 0.0008 | valid rse 0.8592 | valid rae 0.9628 | valid corr  0.9200 | valid smape  0.1453 | focus_rrse 0.8839 | obj 0.8765
+| end of epoch  59 | time:  2.27s | train_loss 0.0009 | valid rse 0.6689 | valid rae 0.7389 | valid corr  0.9191 | valid smape  0.1447 | focus_rrse 0.7538 | obj 0.7283
+| end of epoch  60 | time:  2.26s | train_loss 0.0009 | valid rse 0.4384 | valid rae 0.4816 | valid corr  0.9084 | valid smape  0.1488 | focus_rrse 0.7968 | obj 0.6893
+| end of epoch  61 | time:  2.29s | train_loss 0.0007 | valid rse 0.7579 | valid rae 0.8333 | valid corr  0.9202 | valid smape  0.1385 | focus_rrse 0.7609 | obj 0.7600
+| end of epoch  62 | time:  2.25s | train_loss 0.0006 | valid rse 0.5819 | valid rae 0.6559 | valid corr  0.9176 | valid smape  0.1462 | focus_rrse 0.7533 | obj 0.7019
+| end of epoch  63 | time:  2.24s | train_loss 0.0007 | valid rse 0.6525 | valid rae 0.7069 | valid corr  0.9169 | valid smape  0.1473 | focus_rrse 0.7019 | obj 0.6871
+| end of epoch  64 | time:  2.27s | train_loss 0.0008 | valid rse 1.3042 | valid rae 1.3495 | valid corr  0.9180 | valid smape  0.1445 | focus_rrse 1.3191 | obj 1.3147
+| end of epoch  65 | time:  2.22s | train_loss 0.0006 | valid rse 0.4692 | valid rae 0.5436 | valid corr  0.9126 | valid smape  0.1346 | focus_rrse 0.6175 | obj 0.5730
+| end of epoch  66 | time:  2.20s | train_loss 0.0006 | valid rse 0.6906 | valid rae 0.7704 | valid corr  0.9191 | valid smape  0.1436 | focus_rrse 0.6922 | obj 0.6917
+| end of epoch  67 | time:  2.22s | train_loss 0.0005 | valid rse 0.8213 | valid rae 0.8799 | valid corr  0.9096 | valid smape  0.1528 | focus_rrse 0.8263 | obj 0.8248
+| end of epoch  68 | time:  2.28s | train_loss 0.0006 | valid rse 0.7577 | valid rae 0.8176 | valid corr  0.9150 | valid smape  0.1474 | focus_rrse 0.7605 | obj 0.7596
+| end of epoch  69 | time:  2.23s | train_loss 0.0007 | valid rse 0.7808 | valid rae 0.8667 | valid corr  0.9189 | valid smape  0.1421 | focus_rrse 0.7827 | obj 0.7821
+| end of epoch  70 | time:  2.29s | train_loss 0.0008 | valid rse 0.6308 | valid rae 0.7049 | valid corr  0.9132 | valid smape  0.1462 | focus_rrse 0.6634 | obj 0.6536
+| end of epoch  71 | time:  2.25s | train_loss 0.0005 | valid rse 0.7395 | valid rae 0.8107 | valid corr  0.9141 | valid smape  0.1425 | focus_rrse 0.7422 | obj 0.7414
+| end of epoch  72 | time:  2.20s | train_loss 0.0006 | valid rse 0.7621 | valid rae 0.8360 | valid corr  0.9163 | valid smape  0.1433 | focus_rrse 0.7651 | obj 0.7642
+| end of epoch  73 | time:  2.21s | train_loss 0.0005 | valid rse 0.5580 | valid rae 0.6274 | valid corr  0.9174 | valid smape  0.1452 | focus_rrse 0.8068 | obj 0.7321
+| end of epoch  74 | time:  2.25s | train_loss 0.0006 | valid rse 0.5067 | valid rae 0.6118 | valid corr  0.9166 | valid smape  0.1459 | focus_rrse 0.8055 | obj 0.7159
+| end of epoch  75 | time:  2.23s | train_loss 0.0005 | valid rse 0.4789 | valid rae 0.5548 | valid corr  0.9135 | valid smape  0.1480 | focus_rrse 0.7090 | obj 0.6400
+| end of epoch  76 | time:  2.24s | train_loss 0.0005 | valid rse 0.5272 | valid rae 0.5988 | valid corr  0.9137 | valid smape  0.1364 | focus_rrse 0.5987 | obj 0.5773
+| end of epoch  77 | time:  2.27s | train_loss 0.0008 | valid rse 0.5393 | valid rae 0.6251 | valid corr  0.9163 | valid smape  0.1500 | focus_rrse 0.7400 | obj 0.6798
+| end of epoch  78 | time:  2.23s | train_loss 0.0006 | valid rse 0.7303 | valid rae 0.8027 | valid corr  0.9180 | valid smape  0.1435 | focus_rrse 0.7326 | obj 0.7319
+| end of epoch  79 | time:  2.30s | train_loss 0.0008 | valid rse 0.5439 | valid rae 0.6199 | valid corr  0.9200 | valid smape  0.1400 | focus_rrse 0.6869 | obj 0.6440
+| end of epoch  80 | time:  2.29s | train_loss 0.0007 | valid rse 0.5610 | valid rae 0.6258 | valid corr  0.9202 | valid smape  0.1459 | focus_rrse 0.7289 | obj 0.6785
+| end of epoch  81 | time:  2.29s | train_loss 0.0007 | valid rse 0.7934 | valid rae 0.8718 | valid corr  0.9161 | valid smape  0.1450 | focus_rrse 0.7958 | obj 0.7951
+| end of epoch  82 | time:  2.29s | train_loss 0.0005 | valid rse 0.5849 | valid rae 0.6649 | valid corr  0.9164 | valid smape  0.1489 | focus_rrse 0.7051 | obj 0.6690
+| end of epoch  83 | time:  2.37s | train_loss 0.0005 | valid rse 0.4919 | valid rae 0.5279 | valid corr  0.9105 | valid smape  0.1432 | focus_rrse 0.6565 | obj 0.6071
+| end of epoch  84 | time:  2.34s | train_loss 0.0009 | valid rse 0.6477 | valid rae 0.7187 | valid corr  0.9191 | valid smape  0.1445 | focus_rrse 0.8195 | obj 0.7680
+| end of epoch  85 | time:  2.34s | train_loss 0.0006 | valid rse 0.8078 | valid rae 0.8752 | valid corr  0.9180 | valid smape  0.1389 | focus_rrse 0.8109 | obj 0.8100
+| end of epoch  86 | time:  2.22s | train_loss 0.0006 | valid rse 0.4483 | valid rae 0.5170 | valid corr  0.9151 | valid smape  0.1484 | focus_rrse 0.7515 | obj 0.6605
+| end of epoch  87 | time:  2.21s | train_loss 0.0004 | valid rse 0.6855 | valid rae 0.7467 | valid corr  0.9177 | valid smape  0.1429 | focus_rrse 0.6874 | obj 0.6868
+| end of epoch  88 | time:  2.24s | train_loss 0.0005 | valid rse 0.6322 | valid rae 0.7052 | valid corr  0.9185 | valid smape  0.1442 | focus_rrse 0.6950 | obj 0.6762
+| end of epoch  89 | time:  2.25s | train_loss 0.0005 | valid rse 0.7133 | valid rae 0.7834 | valid corr  0.9192 | valid smape  0.1395 | focus_rrse 0.7138 | obj 0.7137
+| end of epoch  90 | time:  2.24s | train_loss 0.0004 | valid rse 0.5696 | valid rae 0.6512 | valid corr  0.9169 | valid smape  0.1411 | focus_rrse 0.6970 | obj 0.6588
+| end of epoch  91 | time:  2.25s | train_loss 0.0004 | valid rse 0.5685 | valid rae 0.6444 | valid corr  0.9167 | valid smape  0.1438 | focus_rrse 0.7017 | obj 0.6617
+| end of epoch  92 | time:  2.28s | train_loss 0.0005 | valid rse 0.6748 | valid rae 0.7464 | valid corr  0.9142 | valid smape  0.1389 | focus_rrse 0.6754 | obj 0.6752
+| end of epoch  93 | time:  2.28s | train_loss 0.0005 | valid rse 0.6392 | valid rae 0.7277 | valid corr  0.9187 | valid smape  0.1429 | focus_rrse 0.7318 | obj 0.7040
+| end of epoch  94 | time:  2.25s | train_loss 0.0003 | valid rse 0.6167 | valid rae 0.6880 | valid corr  0.9150 | valid smape  0.1419 | focus_rrse 0.6309 | obj 0.6266
+| end of epoch  95 | time:  2.26s | train_loss 0.0006 | valid rse 0.7086 | valid rae 0.7829 | valid corr  0.9187 | valid smape  0.1452 | focus_rrse 0.7190 | obj 0.7159
+| end of epoch  96 | time:  2.23s | train_loss 0.0005 | valid rse 0.6356 | valid rae 0.7089 | valid corr  0.9185 | valid smape  0.1441 | focus_rrse 0.6456 | obj 0.6426
+| end of epoch  97 | time:  2.23s | train_loss 0.0005 | valid rse 0.5541 | valid rae 0.6301 | valid corr  0.9184 | valid smape  0.1433 | focus_rrse 0.6937 | obj 0.6518
+| end of epoch  98 | time:  2.30s | train_loss 0.0006 | valid rse 0.6132 | valid rae 0.6818 | valid corr  0.9196 | valid smape  0.1417 | focus_rrse 0.6655 | obj 0.6498
+| end of epoch  99 | time:  2.27s | train_loss 0.0004 | valid rse 0.6730 | valid rae 0.7493 | valid corr  0.9189 | valid smape  0.1435 | focus_rrse 0.7019 | obj 0.6932
+| end of epoch 100 | time:  2.28s | train_loss 0.0006 | valid rse 0.6578 | valid rae 0.7325 | valid corr  0.9187 | valid smape  0.1440 | focus_rrse 0.7137 | obj 0.6969
+| end of epoch 101 | time:  2.24s | train_loss 0.0005 | valid rse 0.5049 | valid rae 0.5827 | valid corr  0.9159 | valid smape  0.1504 | focus_rrse 0.7505 | obj 0.6768
+| end of epoch 102 | time:  2.22s | train_loss 0.0004 | valid rse 0.7249 | valid rae 0.8073 | valid corr  0.9181 | valid smape  0.1440 | focus_rrse 0.7263 | obj 0.7258
+| end of epoch 103 | time:  2.20s | train_loss 0.0004 | valid rse 0.6335 | valid rae 0.7060 | valid corr  0.9171 | valid smape  0.1431 | focus_rrse 0.6622 | obj 0.6536
+| end of epoch 104 | time:  2.24s | train_loss 0.0003 | valid rse 0.6091 | valid rae 0.6753 | valid corr  0.9152 | valid smape  0.1444 | focus_rrse 0.6442 | obj 0.6337
+| end of epoch 105 | time:  2.20s | train_loss 0.0003 | valid rse 0.5970 | valid rae 0.6783 | valid corr  0.9144 | valid smape  0.1488 | focus_rrse 0.6783 | obj 0.6539
+| end of epoch 106 | time:  2.26s | train_loss 0.0004 | valid rse 0.6751 | valid rae 0.7387 | valid corr  0.9171 | valid smape  0.1438 | focus_rrse 0.6761 | obj 0.6758
+| end of epoch 107 | time:  2.26s | train_loss 0.0005 | valid rse 0.6498 | valid rae 0.7336 | valid corr  0.9177 | valid smape  0.1409 | focus_rrse 0.6716 | obj 0.6651
+| end of epoch 108 | time:  2.29s | train_loss 0.0004 | valid rse 0.6138 | valid rae 0.6834 | valid corr  0.9172 | valid smape  0.1432 | focus_rrse 0.6543 | obj 0.6421
+| end of epoch 109 | time:  2.30s | train_loss 0.0006 | valid rse 0.7333 | valid rae 0.7958 | valid corr  0.9170 | valid smape  0.1356 | focus_rrse 0.7369 | obj 0.7358
+| end of epoch 110 | time:  2.24s | train_loss 0.0004 | valid rse 0.6526 | valid rae 0.7314 | valid corr  0.9168 | valid smape  0.1450 | focus_rrse 0.7115 | obj 0.6938
+| end of epoch 111 | time:  2.36s | train_loss 0.0005 | valid rse 0.6242 | valid rae 0.6998 | valid corr  0.9154 | valid smape  0.1427 | focus_rrse 0.6866 | obj 0.6679
+| end of epoch 112 | time:  2.20s | train_loss 0.0003 | valid rse 0.6223 | valid rae 0.6883 | valid corr  0.9164 | valid smape  0.1418 | focus_rrse 0.6585 | obj 0.6476
+| end of epoch 113 | time:  2.21s | train_loss 0.0003 | valid rse 0.6625 | valid rae 0.7355 | valid corr  0.9166 | valid smape  0.1430 | focus_rrse 0.6957 | obj 0.6857
+| end of epoch 114 | time:  2.25s | train_loss 0.0004 | valid rse 0.5915 | valid rae 0.6592 | valid corr  0.9150 | valid smape  0.1463 | focus_rrse 0.7124 | obj 0.6761
+| end of epoch 115 | time:  2.30s | train_loss 0.0005 | valid rse 0.6273 | valid rae 0.6958 | valid corr  0.9169 | valid smape  0.1457 | focus_rrse 0.7221 | obj 0.6937
+| end of epoch 116 | time:  2.25s | train_loss 0.0004 | valid rse 0.5820 | valid rae 0.6517 | valid corr  0.9169 | valid smape  0.1420 | focus_rrse 0.6670 | obj 0.6415
+| end of epoch 117 | time:  2.24s | train_loss 0.0003 | valid rse 0.6511 | valid rae 0.7347 | valid corr  0.9173 | valid smape  0.1432 | focus_rrse 0.6930 | obj 0.6804
+| end of epoch 118 | time:  2.21s | train_loss 0.0003 | valid rse 0.6433 | valid rae 0.7103 | valid corr  0.9174 | valid smape  0.1410 | focus_rrse 0.6686 | obj 0.6610
+| end of epoch 119 | time:  2.24s | train_loss 0.0004 | valid rse 0.6853 | valid rae 0.7532 | valid corr  0.9181 | valid smape  0.1401 | focus_rrse 0.6864 | obj 0.6860
+| end of epoch 120 | time:  2.29s | train_loss 0.0006 | valid rse 0.6797 | valid rae 0.7482 | valid corr  0.9176 | valid smape  0.1411 | focus_rrse 0.6806 | obj 0.6804
+| end of epoch 121 | time:  2.27s | train_loss 0.0003 | valid rse 0.6370 | valid rae 0.7179 | valid corr  0.9169 | valid smape  0.1439 | focus_rrse 0.6966 | obj 0.6787
+| end of epoch 122 | time:  2.25s | train_loss 0.0003 | valid rse 0.6455 | valid rae 0.7247 | valid corr  0.9180 | valid smape  0.1460 | focus_rrse 0.7112 | obj 0.6915
+| end of epoch 123 | time:  2.25s | train_loss 0.0004 | valid rse 0.6547 | valid rae 0.7151 | valid corr  0.9177 | valid smape  0.1436 | focus_rrse 0.7088 | obj 0.6926
+| end of epoch 124 | time:  2.25s | train_loss 0.0005 | valid rse 0.5867 | valid rae 0.6556 | valid corr  0.9168 | valid smape  0.1445 | focus_rrse 0.6986 | obj 0.6650
+| end of epoch 125 | time:  2.29s | train_loss 0.0003 | valid rse 0.6351 | valid rae 0.7108 | valid corr  0.9160 | valid smape  0.1458 | focus_rrse 0.7009 | obj 0.6811
+| end of epoch 126 | time:  2.30s | train_loss 0.0005 | valid rse 0.6967 | valid rae 0.7603 | valid corr  0.9179 | valid smape  0.1430 | focus_rrse 0.6980 | obj 0.6976
+| end of epoch 127 | time:  2.25s | train_loss 0.0003 | valid rse 0.6638 | valid rae 0.7382 | valid corr  0.9180 | valid smape  0.1439 | focus_rrse 0.7027 | obj 0.6910
+| end of epoch 128 | time:  2.26s | train_loss 0.0004 | valid rse 0.6553 | valid rae 0.7234 | valid corr  0.9186 | valid smape  0.1411 | focus_rrse 0.6786 | obj 0.6716
+| end of epoch 129 | time:  2.23s | train_loss 0.0003 | valid rse 0.6387 | valid rae 0.7158 | valid corr  0.9177 | valid smape  0.1424 | focus_rrse 0.6915 | obj 0.6757
+| end of epoch 130 | time:  2.26s | train_loss 0.0004 | valid rse 0.6145 | valid rae 0.6896 | valid corr  0.9177 | valid smape  0.1434 | focus_rrse 0.7181 | obj 0.6871
+| end of epoch 131 | time:  2.25s | train_loss 0.0003 | valid rse 0.6628 | valid rae 0.7307 | valid corr  0.9190 | valid smape  0.1423 | focus_rrse 0.6790 | obj 0.6742
+| end of epoch 132 | time:  2.23s | train_loss 0.0003 | valid rse 0.6963 | valid rae 0.7589 | valid corr  0.9179 | valid smape  0.1418 | focus_rrse 0.6981 | obj 0.6976
+| end of epoch 133 | time:  2.29s | train_loss 0.0004 | valid rse 0.6574 | valid rae 0.7266 | valid corr  0.9168 | valid smape  0.1422 | focus_rrse 0.6580 | obj 0.6578
+| end of epoch 134 | time:  2.24s | train_loss 0.0003 | valid rse 0.6526 | valid rae 0.7196 | valid corr  0.9176 | valid smape  0.1422 | focus_rrse 0.6824 | obj 0.6735
+| end of epoch 135 | time:  2.25s | train_loss 0.0003 | valid rse 0.6705 | valid rae 0.7429 | valid corr  0.9174 | valid smape  0.1433 | focus_rrse 0.6953 | obj 0.6878
+| end of epoch 136 | time:  2.28s | train_loss 0.0003 | valid rse 0.6656 | valid rae 0.7362 | valid corr  0.9163 | valid smape  0.1432 | focus_rrse 0.6935 | obj 0.6851
+| end of epoch 137 | time:  2.31s | train_loss 0.0006 | valid rse 0.6397 | valid rae 0.7062 | valid corr  0.9173 | valid smape  0.1424 | focus_rrse 0.6778 | obj 0.6664
+| end of epoch 138 | time:  2.31s | train_loss 0.0003 | valid rse 0.6445 | valid rae 0.7131 | valid corr  0.9173 | valid smape  0.1441 | focus_rrse 0.6929 | obj 0.6783
+| end of epoch 139 | time:  2.21s | train_loss 0.0006 | valid rse 0.6263 | valid rae 0.6901 | valid corr  0.9181 | valid smape  0.1425 | focus_rrse 0.6726 | obj 0.6587
+| end of epoch 140 | time:  2.06s | train_loss 0.0004 | valid rse 0.6507 | valid rae 0.7212 | valid corr  0.9169 | valid smape  0.1403 | focus_rrse 0.6524 | obj 0.6519
+| end of epoch 141 | time:  2.09s | train_loss 0.0005 | valid rse 0.6058 | valid rae 0.6622 | valid corr  0.9173 | valid smape  0.1432 | focus_rrse 0.6795 | obj 0.6574
+| end of epoch 142 | time:  2.07s | train_loss 0.0004 | valid rse 0.6553 | valid rae 0.7215 | valid corr  0.9175 | valid smape  0.1419 | focus_rrse 0.6644 | obj 0.6616
+| end of epoch 143 | time:  2.10s | train_loss 0.0003 | valid rse 0.7102 | valid rae 0.7773 | valid corr  0.9182 | valid smape  0.1404 | focus_rrse 0.7123 | obj 0.7117
+| end of epoch 144 | time:  2.09s | train_loss 0.0004 | valid rse 0.6087 | valid rae 0.6823 | valid corr  0.9182 | valid smape  0.1436 | focus_rrse 0.6849 | obj 0.6620
+| end of epoch 145 | time:  2.03s | train_loss 0.0003 | valid rse 0.6431 | valid rae 0.7080 | valid corr  0.9176 | valid smape  0.1444 | focus_rrse 0.6718 | obj 0.6632
+| end of epoch 146 | time:  2.15s | train_loss 0.0003 | valid rse 0.6308 | valid rae 0.6970 | valid corr  0.9168 | valid smape  0.1431 | focus_rrse 0.6842 | obj 0.6682
+| end of epoch 147 | time:  2.12s | train_loss 0.0004 | valid rse 0.6349 | valid rae 0.6966 | valid corr  0.9174 | valid smape  0.1439 | focus_rrse 0.6927 | obj 0.6753
+| end of epoch 148 | time:  2.02s | train_loss 0.0003 | valid rse 0.7025 | valid rae 0.7632 | valid corr  0.9188 | valid smape  0.1424 | focus_rrse 0.7041 | obj 0.7036
+| end of epoch 149 | time:  2.08s | train_loss 0.0005 | valid rse 0.6204 | valid rae 0.6866 | valid corr  0.9172 | valid smape  0.1435 | focus_rrse 0.6839 | obj 0.6648
+| end of epoch 150 | time:  2.12s | train_loss 0.0003 | valid rse 0.6624 | valid rae 0.7241 | valid corr  0.9183 | valid smape  0.1433 | focus_rrse 0.6869 | obj 0.6795
+| end of epoch 151 | time:  2.14s | train_loss 0.0004 | valid rse 0.6604 | valid rae 0.7265 | valid corr  0.9176 | valid smape  0.1420 | focus_rrse 0.6715 | obj 0.6682
+| end of epoch 152 | time:  2.18s | train_loss 0.0005 | valid rse 0.6540 | valid rae 0.7202 | valid corr  0.9184 | valid smape  0.1416 | focus_rrse 0.6691 | obj 0.6646
+| end of epoch 153 | time:  2.08s | train_loss 0.0003 | valid rse 0.6651 | valid rae 0.7323 | valid corr  0.9172 | valid smape  0.1428 | focus_rrse 0.6688 | obj 0.6677
+| end of epoch 154 | time:  2.08s | train_loss 0.0003 | valid rse 0.6599 | valid rae 0.7325 | valid corr  0.9184 | valid smape  0.1428 | focus_rrse 0.6817 | obj 0.6752
+| end of epoch 155 | time:  2.09s | train_loss 0.0003 | valid rse 0.6383 | valid rae 0.7005 | valid corr  0.9186 | valid smape  0.1433 | focus_rrse 0.6847 | obj 0.6708
+| end of epoch 156 | time:  2.07s | train_loss 0.0004 | valid rse 0.6553 | valid rae 0.7172 | valid corr  0.9185 | valid smape  0.1421 | focus_rrse 0.6676 | obj 0.6639
+| end of epoch 157 | time:  2.04s | train_loss 0.0004 | valid rse 0.6714 | valid rae 0.7377 | valid corr  0.9188 | valid smape  0.1411 | focus_rrse 0.6723 | obj 0.6720
+| end of epoch 158 | time:  2.10s | train_loss 0.0003 | valid rse 0.6364 | valid rae 0.7007 | valid corr  0.9180 | valid smape  0.1430 | focus_rrse 0.6708 | obj 0.6605
+| end of epoch 159 | time:  2.02s | train_loss 0.0004 | valid rse 0.6531 | valid rae 0.7217 | valid corr  0.9183 | valid smape  0.1424 | focus_rrse 0.6651 | obj 0.6615
+| end of epoch 160 | time:  2.10s | train_loss 0.0004 | valid rse 0.6253 | valid rae 0.6805 | valid corr  0.9177 | valid smape  0.1420 | focus_rrse 0.6712 | obj 0.6574
+| end of epoch 161 | time:  2.07s | train_loss 0.0004 | valid rse 0.6463 | valid rae 0.7143 | valid corr  0.9180 | valid smape  0.1429 | focus_rrse 0.6702 | obj 0.6630
+| end of epoch 162 | time:  2.06s | train_loss 0.0004 | valid rse 0.6540 | valid rae 0.7236 | valid corr  0.9180 | valid smape  0.1423 | focus_rrse 0.6813 | obj 0.6731
+| end of epoch 163 | time:  2.08s | train_loss 0.0003 | valid rse 0.6449 | valid rae 0.7146 | valid corr  0.9182 | valid smape  0.1423 | focus_rrse 0.6714 | obj 0.6634
+| end of epoch 164 | time:  2.10s | train_loss 0.0004 | valid rse 0.6597 | valid rae 0.7280 | valid corr  0.9187 | valid smape  0.1418 | focus_rrse 0.6726 | obj 0.6687
+| end of epoch 165 | time:  2.10s | train_loss 0.0004 | valid rse 0.6414 | valid rae 0.7055 | valid corr  0.9177 | valid smape  0.1421 | focus_rrse 0.6810 | obj 0.6691
+| end of epoch 166 | time:  2.14s | train_loss 0.0003 | valid rse 0.6362 | valid rae 0.6995 | valid corr  0.9179 | valid smape  0.1432 | focus_rrse 0.6813 | obj 0.6678
+| end of epoch 167 | time:  2.13s | train_loss 0.0004 | valid rse 0.6467 | valid rae 0.7193 | valid corr  0.9179 | valid smape  0.1423 | focus_rrse 0.6667 | obj 0.6607
+| end of epoch 168 | time:  2.03s | train_loss 0.0003 | valid rse 0.6298 | valid rae 0.6946 | valid corr  0.9177 | valid smape  0.1427 | focus_rrse 0.6812 | obj 0.6658
+| end of epoch 169 | time:  2.04s | train_loss 0.0003 | valid rse 0.6498 | valid rae 0.7132 | valid corr  0.9178 | valid smape  0.1428 | focus_rrse 0.6790 | obj 0.6702
+| end of epoch 170 | time:  2.06s | train_loss 0.0003 | valid rse 0.6605 | valid rae 0.7230 | valid corr  0.9177 | valid smape  0.1419 | focus_rrse 0.6757 | obj 0.6711
+| end of epoch 171 | time:  2.01s | train_loss 0.0003 | valid rse 0.6661 | valid rae 0.7323 | valid corr  0.9180 | valid smape  0.1413 | focus_rrse 0.6731 | obj 0.6710
+| end of epoch 172 | time:  2.12s | train_loss 0.0004 | valid rse 0.6342 | valid rae 0.7063 | valid corr  0.9175 | valid smape  0.1425 | focus_rrse 0.6757 | obj 0.6633
+| end of epoch 173 | time:  2.06s | train_loss 0.0003 | valid rse 0.6602 | valid rae 0.7324 | valid corr  0.9177 | valid smape  0.1424 | focus_rrse 0.6692 | obj 0.6665
+| end of epoch 174 | time:  2.07s | train_loss 0.0003 | valid rse 0.6575 | valid rae 0.7268 | valid corr  0.9181 | valid smape  0.1418 | focus_rrse 0.6692 | obj 0.6657
+| end of epoch 175 | time:  2.09s | train_loss 0.0004 | valid rse 0.6394 | valid rae 0.7012 | valid corr  0.9176 | valid smape  0.1430 | focus_rrse 0.6807 | obj 0.6683
+| end of epoch 176 | time:  2.13s | train_loss 0.0004 | valid rse 0.6493 | valid rae 0.7183 | valid corr  0.9170 | valid smape  0.1430 | focus_rrse 0.6743 | obj 0.6668
+| end of epoch 177 | time:  2.13s | train_loss 0.0005 | valid rse 0.6572 | valid rae 0.7226 | valid corr  0.9182 | valid smape  0.1422 | focus_rrse 0.6768 | obj 0.6709
+| end of epoch 178 | time:  2.01s | train_loss 0.0003 | valid rse 0.6317 | valid rae 0.6947 | valid corr  0.9182 | valid smape  0.1422 | focus_rrse 0.6702 | obj 0.6587
+| end of epoch 179 | time:  2.00s | train_loss 0.0003 | valid rse 0.6601 | valid rae 0.7261 | valid corr  0.9178 | valid smape  0.1428 | focus_rrse 0.6759 | obj 0.6711
+| end of epoch 180 | time:  2.09s | train_loss 0.0003 | valid rse 0.6381 | valid rae 0.7052 | valid corr  0.9178 | valid smape  0.1422 | focus_rrse 0.6743 | obj 0.6635
+[eval_last_epoch] Using final epoch model (skipping checkpoint load)
+final test rse 0.2754 | test rae 0.2703 | test corr 0.9522 | test smape 0.0726 | focus_rrse 0.3916
+  [FINAL]                us_Trade Weighted Dollar Index  RSE=0.3927
+  [FINAL]                                         jp_fx  RSE=0.2603
+  [FINAL]                                         kr_fx  RSE=0.2810
+
+============================================
+CONFIG 1b: TRIPLE050-like seed=1, 180ep, eval_last_epoch=0 (best val checkpoint)
+============================================
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/AXIS/model/Bayesian/model.pt', optim='adam', L1Loss=True, loss_mode='l1', normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=0, gcn_depth=1, num_nodes=33, dropout=0.02, subgraph_size=40, node_dim=30, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=24, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.00015, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=180, num_split=1, step_size=100, ss_prob=0.05, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx', focus_weight=0.7, focus_target_gain=80.0, focus_only_loss=1, focus_rrse_mode='max', focus_gain_map='kr_fx:1.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', anchor_focus_to_last=0.06, anchor_boost_map='kr_fx:1.8,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', rse_report_mode='targets', debias_mode='none', debias_apply_to='focus', debias_skip_nodes='', bias_penalty=0.5, bias_penalty_scope='focus', plot_focus_only=0, debug_eval=0, rollout_mode='direct', seed=1, plot=0, enforce_cutoff_split=1, cutoff_year_yy=25, min_valid_months=12, lag_penalty_1step=0.0, lag_sign_penalty=0.0, lag_penalty_gain_map='kr_fx:2.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', grad_loss_weight=0.0, smoothness_penalty=0.0, clean_cache=0, eval_last_epoch=0, autotune_mode=1, apply_best_tuning=0, eval_best_tuning=0, target_profile='none', save_pred_dir='ensemble_runs/verify_triple050_s1_bestval', ensemble_seeds='', best_tuning_checkpoint='')
+| end of epoch   1 | time:  2.18s | train_loss 0.0081 | valid rse 1.3112 | valid rae 1.3059 | valid corr  0.7770 | valid smape  0.1761 | focus_rrse 1.3252 | obj 1.3210
+test rse 0.7958 | test rae 0.8247 | test corr 0.7667| test smape 0.1223 | test focus_rrse 1.8717
+| end of epoch   2 | time:  2.20s | train_loss 0.0030 | valid rse 2.0560 | valid rae 2.0874 | valid corr  0.8629 | valid smape  0.1520 | focus_rrse 2.0802 | obj 2.0729
+| end of epoch   3 | time:  2.11s | train_loss 0.0023 | valid rse 1.0811 | valid rae 1.1979 | valid corr  0.8454 | valid smape  0.1518 | focus_rrse 1.6282 | obj 1.4641
+| end of epoch   4 | time:  2.13s | train_loss 0.0017 | valid rse 2.1085 | valid rae 2.1107 | valid corr  0.8685 | valid smape  0.1489 | focus_rrse 2.1334 | obj 2.1259
+| end of epoch   5 | time:  2.04s | train_loss 0.0015 | valid rse 1.1761 | valid rae 1.1485 | valid corr  0.8721 | valid smape  0.1594 | focus_rrse 1.1835 | obj 1.1813
+test rse 0.3926 | test rae 0.4090 | test corr 0.9211| test smape 0.0958 | test focus_rrse 0.7878
+| end of epoch   6 | time:  2.03s | train_loss 0.0014 | valid rse 0.9586 | valid rae 1.0003 | valid corr  0.8700 | valid smape  0.1445 | focus_rrse 0.9651 | obj 0.9632
+test rse 0.3205 | test rae 0.3546 | test corr 0.9313| test smape 0.0904 | test focus_rrse 0.4280
+| end of epoch   7 | time:  2.00s | train_loss 0.0011 | valid rse 0.8524 | valid rae 0.9577 | valid corr  0.8776 | valid smape  0.1598 | focus_rrse 1.2096 | obj 1.1024
+| end of epoch   8 | time:  2.00s | train_loss 0.0010 | valid rse 1.0390 | valid rae 1.0639 | valid corr  0.8848 | valid smape  0.1473 | focus_rrse 1.0476 | obj 1.0450
+| end of epoch   9 | time:  2.08s | train_loss 0.0012 | valid rse 0.9955 | valid rae 0.9501 | valid corr  0.8750 | valid smape  0.1496 | focus_rrse 0.9980 | obj 0.9973
+| end of epoch  10 | time:  1.97s | train_loss 0.0010 | valid rse 1.3431 | valid rae 1.3644 | valid corr  0.8793 | valid smape  0.1528 | focus_rrse 1.3561 | obj 1.3522
+| end of epoch  11 | time:  2.03s | train_loss 0.0009 | valid rse 0.6677 | valid rae 0.7030 | valid corr  0.8899 | valid smape  0.1431 | focus_rrse 0.7170 | obj 0.7022
+test rse 0.3066 | test rae 0.3436 | test corr 0.9425| test smape 0.0785 | test focus_rrse 0.3952
+| end of epoch  12 | time:  1.95s | train_loss 0.0010 | valid rse 1.1203 | valid rae 1.1279 | valid corr  0.9018 | valid smape  0.1553 | focus_rrse 1.1296 | obj 1.1268
+| end of epoch  13 | time:  1.99s | train_loss 0.0009 | valid rse 0.8956 | valid rae 0.9628 | valid corr  0.9050 | valid smape  0.1601 | focus_rrse 0.8989 | obj 0.8979
+| end of epoch  14 | time:  1.92s | train_loss 0.0009 | valid rse 1.2189 | valid rae 1.2567 | valid corr  0.9042 | valid smape  0.1484 | focus_rrse 1.2312 | obj 1.2275
+| end of epoch  15 | time:  1.97s | train_loss 0.0011 | valid rse 0.8189 | valid rae 0.9228 | valid corr  0.9072 | valid smape  0.1600 | focus_rrse 0.8946 | obj 0.8719
+| end of epoch  16 | time:  1.97s | train_loss 0.0010 | valid rse 1.4798 | valid rae 1.4788 | valid corr  0.8960 | valid smape  0.1552 | focus_rrse 1.4957 | obj 1.4909
+| end of epoch  17 | time:  1.92s | train_loss 0.0009 | valid rse 0.7593 | valid rae 0.8020 | valid corr  0.8997 | valid smape  0.1475 | focus_rrse 0.8417 | obj 0.8170
+| end of epoch  18 | time:  1.95s | train_loss 0.0009 | valid rse 0.9786 | valid rae 1.0140 | valid corr  0.9069 | valid smape  0.1467 | focus_rrse 0.9853 | obj 0.9833
+| end of epoch  19 | time:  1.92s | train_loss 0.0009 | valid rse 0.6728 | valid rae 0.7307 | valid corr  0.8981 | valid smape  0.1416 | focus_rrse 0.7625 | obj 0.7356
+| end of epoch  20 | time:  1.92s | train_loss 0.0008 | valid rse 0.8857 | valid rae 0.9159 | valid corr  0.9066 | valid smape  0.1382 | focus_rrse 0.8911 | obj 0.8895
+| end of epoch  21 | time:  2.11s | train_loss 0.0008 | valid rse 0.6714 | valid rae 0.7314 | valid corr  0.9096 | valid smape  0.1468 | focus_rrse 0.6722 | obj 0.6719
+test rse 0.2550 | test rae 0.2925 | test corr 0.9533| test smape 0.0784 | test focus_rrse 0.3914
+| end of epoch  22 | time:  2.00s | train_loss 0.0009 | valid rse 0.7437 | valid rae 0.8011 | valid corr  0.8986 | valid smape  0.1442 | focus_rrse 0.7599 | obj 0.7551
+| end of epoch  23 | time:  1.95s | train_loss 0.0009 | valid rse 0.6097 | valid rae 0.6706 | valid corr  0.9148 | valid smape  0.1470 | focus_rrse 0.7083 | obj 0.6787
+| end of epoch  24 | time:  1.99s | train_loss 0.0008 | valid rse 1.0597 | valid rae 1.1096 | valid corr  0.9059 | valid smape  0.1438 | focus_rrse 1.0688 | obj 1.0661
+| end of epoch  25 | time:  1.87s | train_loss 0.0009 | valid rse 0.9944 | valid rae 1.0162 | valid corr  0.9087 | valid smape  0.1390 | focus_rrse 1.0034 | obj 1.0007
+| end of epoch  26 | time:  1.94s | train_loss 0.0008 | valid rse 1.3489 | valid rae 1.3898 | valid corr  0.9163 | valid smape  0.1596 | focus_rrse 1.3613 | obj 1.3576
+| end of epoch  27 | time:  1.99s | train_loss 0.0009 | valid rse 0.5718 | valid rae 0.6496 | valid corr  0.9080 | valid smape  0.1352 | focus_rrse 0.9653 | obj 0.8473
+| end of epoch  28 | time:  1.95s | train_loss 0.0007 | valid rse 0.7933 | valid rae 0.8455 | valid corr  0.9142 | valid smape  0.1325 | focus_rrse 0.7969 | obj 0.7959
+| end of epoch  29 | time:  1.93s | train_loss 0.0008 | valid rse 0.6532 | valid rae 0.6746 | valid corr  0.9020 | valid smape  0.1412 | focus_rrse 0.6548 | obj 0.6543
+test rse 0.3091 | test rae 0.3369 | test corr 0.9426| test smape 0.0782 | test focus_rrse 0.4160
+| end of epoch  30 | time:  1.99s | train_loss 0.0009 | valid rse 0.9158 | valid rae 0.9995 | valid corr  0.9164 | valid smape  0.1351 | focus_rrse 0.9228 | obj 0.9207
+| end of epoch  31 | time:  1.94s | train_loss 0.0008 | valid rse 0.7660 | valid rae 0.8424 | valid corr  0.9135 | valid smape  0.1344 | focus_rrse 0.7682 | obj 0.7675
+| end of epoch  32 | time:  1.90s | train_loss 0.0006 | valid rse 0.8454 | valid rae 0.9121 | valid corr  0.9088 | valid smape  0.1345 | focus_rrse 0.8516 | obj 0.8497
+| end of epoch  33 | time:  1.96s | train_loss 0.0009 | valid rse 0.9617 | valid rae 0.9946 | valid corr  0.9180 | valid smape  0.1396 | focus_rrse 0.9711 | obj 0.9683
+| end of epoch  34 | time:  2.02s | train_loss 0.0011 | valid rse 0.6665 | valid rae 0.6991 | valid corr  0.9069 | valid smape  0.1403 | focus_rrse 0.6689 | obj 0.6682
+| end of epoch  35 | time:  1.92s | train_loss 0.0007 | valid rse 0.5483 | valid rae 0.6001 | valid corr  0.9066 | valid smape  0.1413 | focus_rrse 0.7493 | obj 0.6890
+| end of epoch  36 | time:  1.95s | train_loss 0.0007 | valid rse 1.0164 | valid rae 1.0756 | valid corr  0.9137 | valid smape  0.1392 | focus_rrse 1.0258 | obj 1.0230
+| end of epoch  37 | time:  2.03s | train_loss 0.0009 | valid rse 0.7293 | valid rae 0.7882 | valid corr  0.9074 | valid smape  0.1470 | focus_rrse 0.7443 | obj 0.7398
+| end of epoch  38 | time:  2.01s | train_loss 0.0008 | valid rse 1.0773 | valid rae 1.1309 | valid corr  0.9126 | valid smape  0.1352 | focus_rrse 1.0880 | obj 1.0848
+| end of epoch  39 | time:  1.93s | train_loss 0.0009 | valid rse 1.2183 | valid rae 1.3443 | valid corr  0.9231 | valid smape  0.1507 | focus_rrse 1.2325 | obj 1.2282
+| end of epoch  40 | time:  2.05s | train_loss 0.0008 | valid rse 0.6414 | valid rae 0.7161 | valid corr  0.9165 | valid smape  0.1432 | focus_rrse 0.6908 | obj 0.6760
+| end of epoch  41 | time:  1.88s | train_loss 0.0006 | valid rse 0.9832 | valid rae 1.0634 | valid corr  0.9167 | valid smape  0.1414 | focus_rrse 0.9917 | obj 0.9891
+| end of epoch  42 | time:  1.94s | train_loss 0.0006 | valid rse 0.5172 | valid rae 0.5871 | valid corr  0.9170 | valid smape  0.1400 | focus_rrse 0.6845 | obj 0.6343
+test rse 0.2415 | test rae 0.2583 | test corr 0.9560| test smape 0.0760 | test focus_rrse 0.3561
+| end of epoch  43 | time:  1.96s | train_loss 0.0007 | valid rse 0.5181 | valid rae 0.5637 | valid corr  0.9155 | valid smape  0.1322 | focus_rrse 0.6206 | obj 0.5898
+test rse 0.2062 | test rae 0.2264 | test corr 0.9540| test smape 0.0742 | test focus_rrse 0.2474
+| end of epoch  44 | time:  1.94s | train_loss 0.0008 | valid rse 0.8238 | valid rae 0.8800 | valid corr  0.9222 | valid smape  0.1397 | focus_rrse 0.8282 | obj 0.8269
+| end of epoch  45 | time:  1.87s | train_loss 0.0008 | valid rse 0.5783 | valid rae 0.6507 | valid corr  0.9133 | valid smape  0.1340 | focus_rrse 0.6102 | obj 0.6006
+| end of epoch  46 | time:  1.98s | train_loss 0.0008 | valid rse 0.4487 | valid rae 0.5502 | valid corr  0.9075 | valid smape  0.1459 | focus_rrse 0.9651 | obj 0.8102
+| end of epoch  47 | time:  1.94s | train_loss 0.0006 | valid rse 0.5740 | valid rae 0.6522 | valid corr  0.9117 | valid smape  0.1392 | focus_rrse 0.7153 | obj 0.6729
+| end of epoch  48 | time:  1.94s | train_loss 0.0007 | valid rse 1.0131 | valid rae 1.0938 | valid corr  0.9245 | valid smape  0.1362 | focus_rrse 1.0228 | obj 1.0199
+| end of epoch  49 | time:  1.95s | train_loss 0.0010 | valid rse 0.5236 | valid rae 0.6016 | valid corr  0.9081 | valid smape  0.1440 | focus_rrse 1.1194 | obj 0.9407
+| end of epoch  50 | time:  2.18s | train_loss 0.0008 | valid rse 0.7131 | valid rae 0.7604 | valid corr  0.9174 | valid smape  0.1468 | focus_rrse 0.7140 | obj 0.7137
+| end of epoch  51 | time:  2.04s | train_loss 0.0008 | valid rse 0.9009 | valid rae 0.9842 | valid corr  0.9172 | valid smape  0.1461 | focus_rrse 0.9042 | obj 0.9032
+| end of epoch  52 | time:  2.11s | train_loss 0.0009 | valid rse 0.5909 | valid rae 0.6841 | valid corr  0.9129 | valid smape  0.1535 | focus_rrse 0.9555 | obj 0.8461
+| end of epoch  53 | time:  2.08s | train_loss 0.0011 | valid rse 0.4029 | valid rae 0.4039 | valid corr  0.9123 | valid smape  0.1430 | focus_rrse 0.5531 | obj 0.5080
+test rse 0.1426 | test rae 0.1667 | test corr 0.9497| test smape 0.0780 | test focus_rrse 0.2518
+| end of epoch  54 | time:  1.99s | train_loss 0.0009 | valid rse 0.8128 | valid rae 0.8898 | valid corr  0.9097 | valid smape  0.1343 | focus_rrse 0.8179 | obj 0.8164
+| end of epoch  55 | time:  2.02s | train_loss 0.0006 | valid rse 1.0927 | valid rae 1.2103 | valid corr  0.9253 | valid smape  0.1433 | focus_rrse 1.1091 | obj 1.1042
+| end of epoch  56 | time:  1.94s | train_loss 0.0006 | valid rse 0.8278 | valid rae 0.9130 | valid corr  0.9128 | valid smape  0.1412 | focus_rrse 0.8329 | obj 0.8314
+| end of epoch  57 | time:  1.98s | train_loss 0.0009 | valid rse 0.7577 | valid rae 0.8415 | valid corr  0.9129 | valid smape  0.1355 | focus_rrse 0.7622 | obj 0.7609
+| end of epoch  58 | time:  1.95s | train_loss 0.0008 | valid rse 0.8592 | valid rae 0.9628 | valid corr  0.9200 | valid smape  0.1453 | focus_rrse 0.8839 | obj 0.8765
+| end of epoch  59 | time:  1.96s | train_loss 0.0009 | valid rse 0.6689 | valid rae 0.7389 | valid corr  0.9191 | valid smape  0.1447 | focus_rrse 0.7538 | obj 0.7283
+| end of epoch  60 | time:  1.94s | train_loss 0.0009 | valid rse 0.4384 | valid rae 0.4816 | valid corr  0.9084 | valid smape  0.1488 | focus_rrse 0.7968 | obj 0.6893
+| end of epoch  61 | time:  1.97s | train_loss 0.0007 | valid rse 0.7579 | valid rae 0.8333 | valid corr  0.9202 | valid smape  0.1385 | focus_rrse 0.7609 | obj 0.7600
+| end of epoch  62 | time:  2.01s | train_loss 0.0006 | valid rse 0.5819 | valid rae 0.6559 | valid corr  0.9176 | valid smape  0.1462 | focus_rrse 0.7533 | obj 0.7019
+| end of epoch  63 | time:  1.96s | train_loss 0.0007 | valid rse 0.6525 | valid rae 0.7069 | valid corr  0.9169 | valid smape  0.1473 | focus_rrse 0.7019 | obj 0.6871
+| end of epoch  64 | time:  1.93s | train_loss 0.0008 | valid rse 1.3042 | valid rae 1.3495 | valid corr  0.9180 | valid smape  0.1445 | focus_rrse 1.3191 | obj 1.3147
+| end of epoch  65 | time:  2.01s | train_loss 0.0006 | valid rse 0.4692 | valid rae 0.5436 | valid corr  0.9126 | valid smape  0.1346 | focus_rrse 0.6175 | obj 0.5730
+| end of epoch  66 | time:  1.89s | train_loss 0.0006 | valid rse 0.6906 | valid rae 0.7704 | valid corr  0.9191 | valid smape  0.1436 | focus_rrse 0.6922 | obj 0.6917
+| end of epoch  67 | time:  1.96s | train_loss 0.0005 | valid rse 0.8213 | valid rae 0.8799 | valid corr  0.9096 | valid smape  0.1528 | focus_rrse 0.8263 | obj 0.8248
+| end of epoch  68 | time:  1.96s | train_loss 0.0006 | valid rse 0.7577 | valid rae 0.8176 | valid corr  0.9150 | valid smape  0.1474 | focus_rrse 0.7605 | obj 0.7596
+| end of epoch  69 | time:  2.01s | train_loss 0.0007 | valid rse 0.7808 | valid rae 0.8667 | valid corr  0.9189 | valid smape  0.1421 | focus_rrse 0.7827 | obj 0.7821
+| end of epoch  70 | time:  1.96s | train_loss 0.0008 | valid rse 0.6308 | valid rae 0.7049 | valid corr  0.9132 | valid smape  0.1462 | focus_rrse 0.6634 | obj 0.6536
+| end of epoch  71 | time:  1.92s | train_loss 0.0005 | valid rse 0.7395 | valid rae 0.8107 | valid corr  0.9141 | valid smape  0.1425 | focus_rrse 0.7422 | obj 0.7414
+| end of epoch  72 | time:  1.94s | train_loss 0.0006 | valid rse 0.7621 | valid rae 0.8360 | valid corr  0.9163 | valid smape  0.1433 | focus_rrse 0.7651 | obj 0.7642
+| end of epoch  73 | time:  1.94s | train_loss 0.0005 | valid rse 0.5580 | valid rae 0.6274 | valid corr  0.9174 | valid smape  0.1452 | focus_rrse 0.8068 | obj 0.7321
+| end of epoch  74 | time:  1.99s | train_loss 0.0006 | valid rse 0.5067 | valid rae 0.6118 | valid corr  0.9166 | valid smape  0.1459 | focus_rrse 0.8055 | obj 0.7159
+| end of epoch  75 | time:  1.94s | train_loss 0.0005 | valid rse 0.4789 | valid rae 0.5548 | valid corr  0.9135 | valid smape  0.1480 | focus_rrse 0.7090 | obj 0.6400
+| end of epoch  76 | time:  1.95s | train_loss 0.0005 | valid rse 0.5272 | valid rae 0.5988 | valid corr  0.9137 | valid smape  0.1364 | focus_rrse 0.5987 | obj 0.5773
+| end of epoch  77 | time:  1.98s | train_loss 0.0008 | valid rse 0.5393 | valid rae 0.6251 | valid corr  0.9163 | valid smape  0.1500 | focus_rrse 0.7400 | obj 0.6798
+| end of epoch  78 | time:  1.94s | train_loss 0.0006 | valid rse 0.7303 | valid rae 0.8027 | valid corr  0.9180 | valid smape  0.1435 | focus_rrse 0.7326 | obj 0.7319
+| end of epoch  79 | time:  1.94s | train_loss 0.0008 | valid rse 0.5439 | valid rae 0.6199 | valid corr  0.9200 | valid smape  0.1400 | focus_rrse 0.6869 | obj 0.6440
+| end of epoch  80 | time:  1.99s | train_loss 0.0007 | valid rse 0.5610 | valid rae 0.6258 | valid corr  0.9202 | valid smape  0.1459 | focus_rrse 0.7289 | obj 0.6785
+| end of epoch  81 | time:  1.98s | train_loss 0.0007 | valid rse 0.7934 | valid rae 0.8718 | valid corr  0.9161 | valid smape  0.1450 | focus_rrse 0.7958 | obj 0.7951
+| end of epoch  82 | time:  1.99s | train_loss 0.0005 | valid rse 0.5849 | valid rae 0.6649 | valid corr  0.9164 | valid smape  0.1489 | focus_rrse 0.7051 | obj 0.6690
+| end of epoch  83 | time:  2.00s | train_loss 0.0005 | valid rse 0.4919 | valid rae 0.5279 | valid corr  0.9105 | valid smape  0.1432 | focus_rrse 0.6565 | obj 0.6071
+| end of epoch  84 | time:  2.67s | train_loss 0.0009 | valid rse 0.6477 | valid rae 0.7187 | valid corr  0.9191 | valid smape  0.1445 | focus_rrse 0.8195 | obj 0.7680
+| end of epoch  85 | time:  3.12s | train_loss 0.0006 | valid rse 0.8078 | valid rae 0.8752 | valid corr  0.9180 | valid smape  0.1389 | focus_rrse 0.8109 | obj 0.8100
+| end of epoch  86 | time:  3.29s | train_loss 0.0006 | valid rse 0.4483 | valid rae 0.5170 | valid corr  0.9151 | valid smape  0.1484 | focus_rrse 0.7515 | obj 0.6605
+| end of epoch  87 | time:  2.92s | train_loss 0.0004 | valid rse 0.6855 | valid rae 0.7467 | valid corr  0.9177 | valid smape  0.1429 | focus_rrse 0.6874 | obj 0.6868
+| end of epoch  88 | time:  2.50s | train_loss 0.0005 | valid rse 0.6322 | valid rae 0.7052 | valid corr  0.9185 | valid smape  0.1442 | focus_rrse 0.6950 | obj 0.6762
+| end of epoch  89 | time:  2.50s | train_loss 0.0005 | valid rse 0.7133 | valid rae 0.7834 | valid corr  0.9192 | valid smape  0.1395 | focus_rrse 0.7138 | obj 0.7137
+| end of epoch  90 | time:  2.50s | train_loss 0.0004 | valid rse 0.5696 | valid rae 0.6512 | valid corr  0.9169 | valid smape  0.1411 | focus_rrse 0.6970 | obj 0.6588
+| end of epoch  91 | time:  2.36s | train_loss 0.0004 | valid rse 0.5685 | valid rae 0.6444 | valid corr  0.9167 | valid smape  0.1438 | focus_rrse 0.7017 | obj 0.6617
+| end of epoch  92 | time:  2.89s | train_loss 0.0005 | valid rse 0.6748 | valid rae 0.7464 | valid corr  0.9142 | valid smape  0.1389 | focus_rrse 0.6754 | obj 0.6752
+| end of epoch  93 | time:  3.14s | train_loss 0.0005 | valid rse 0.6392 | valid rae 0.7277 | valid corr  0.9187 | valid smape  0.1429 | focus_rrse 0.7318 | obj 0.7040
+| end of epoch  94 | time:  3.04s | train_loss 0.0003 | valid rse 0.6167 | valid rae 0.6880 | valid corr  0.9150 | valid smape  0.1419 | focus_rrse 0.6309 | obj 0.6266
+| end of epoch  95 | time:  2.97s | train_loss 0.0006 | valid rse 0.7086 | valid rae 0.7829 | valid corr  0.9187 | valid smape  0.1452 | focus_rrse 0.7190 | obj 0.7159
+| end of epoch  96 | time:  2.82s | train_loss 0.0005 | valid rse 0.6356 | valid rae 0.7089 | valid corr  0.9185 | valid smape  0.1441 | focus_rrse 0.6456 | obj 0.6426
+| end of epoch  97 | time:  3.01s | train_loss 0.0005 | valid rse 0.5541 | valid rae 0.6301 | valid corr  0.9184 | valid smape  0.1433 | focus_rrse 0.6937 | obj 0.6518
+| end of epoch  98 | time:  3.36s | train_loss 0.0006 | valid rse 0.6132 | valid rae 0.6818 | valid corr  0.9196 | valid smape  0.1417 | focus_rrse 0.6655 | obj 0.6498
+| end of epoch  99 | time:  2.54s | train_loss 0.0004 | valid rse 0.6730 | valid rae 0.7493 | valid corr  0.9189 | valid smape  0.1435 | focus_rrse 0.7019 | obj 0.6932
+| end of epoch 100 | time:  2.35s | train_loss 0.0006 | valid rse 0.6578 | valid rae 0.7325 | valid corr  0.9187 | valid smape  0.1440 | focus_rrse 0.7137 | obj 0.6969
+| end of epoch 101 | time:  2.28s | train_loss 0.0005 | valid rse 0.5049 | valid rae 0.5827 | valid corr  0.9159 | valid smape  0.1504 | focus_rrse 0.7505 | obj 0.6768
+| end of epoch 102 | time:  2.29s | train_loss 0.0004 | valid rse 0.7249 | valid rae 0.8073 | valid corr  0.9181 | valid smape  0.1440 | focus_rrse 0.7263 | obj 0.7258
+| end of epoch 103 | time:  2.32s | train_loss 0.0004 | valid rse 0.6335 | valid rae 0.7060 | valid corr  0.9171 | valid smape  0.1431 | focus_rrse 0.6622 | obj 0.6536
+| end of epoch 104 | time:  2.26s | train_loss 0.0003 | valid rse 0.6091 | valid rae 0.6753 | valid corr  0.9152 | valid smape  0.1444 | focus_rrse 0.6442 | obj 0.6337
+| end of epoch 105 | time:  2.26s | train_loss 0.0003 | valid rse 0.5970 | valid rae 0.6783 | valid corr  0.9144 | valid smape  0.1488 | focus_rrse 0.6783 | obj 0.6539
+| end of epoch 106 | time:  2.29s | train_loss 0.0004 | valid rse 0.6751 | valid rae 0.7387 | valid corr  0.9171 | valid smape  0.1438 | focus_rrse 0.6761 | obj 0.6758
+| end of epoch 107 | time:  2.33s | train_loss 0.0005 | valid rse 0.6498 | valid rae 0.7336 | valid corr  0.9177 | valid smape  0.1409 | focus_rrse 0.6716 | obj 0.6651
+| end of epoch 108 | time:  2.32s | train_loss 0.0004 | valid rse 0.6138 | valid rae 0.6834 | valid corr  0.9172 | valid smape  0.1432 | focus_rrse 0.6543 | obj 0.6421
+| end of epoch 109 | time:  2.32s | train_loss 0.0006 | valid rse 0.7333 | valid rae 0.7958 | valid corr  0.9170 | valid smape  0.1356 | focus_rrse 0.7369 | obj 0.7358
+| end of epoch 110 | time:  2.30s | train_loss 0.0004 | valid rse 0.6526 | valid rae 0.7314 | valid corr  0.9168 | valid smape  0.1450 | focus_rrse 0.7115 | obj 0.6938
+| end of epoch 111 | time:  2.33s | train_loss 0.0005 | valid rse 0.6242 | valid rae 0.6998 | valid corr  0.9154 | valid smape  0.1427 | focus_rrse 0.6866 | obj 0.6679
+| end of epoch 112 | time:  2.26s | train_loss 0.0003 | valid rse 0.6223 | valid rae 0.6883 | valid corr  0.9164 | valid smape  0.1418 | focus_rrse 0.6585 | obj 0.6476
+| end of epoch 113 | time:  2.25s | train_loss 0.0003 | valid rse 0.6625 | valid rae 0.7355 | valid corr  0.9166 | valid smape  0.1430 | focus_rrse 0.6957 | obj 0.6857
+| end of epoch 114 | time:  2.32s | train_loss 0.0004 | valid rse 0.5915 | valid rae 0.6592 | valid corr  0.9150 | valid smape  0.1463 | focus_rrse 0.7124 | obj 0.6761
+| end of epoch 115 | time:  2.32s | train_loss 0.0005 | valid rse 0.6273 | valid rae 0.6958 | valid corr  0.9169 | valid smape  0.1457 | focus_rrse 0.7221 | obj 0.6937
+| end of epoch 116 | time:  2.33s | train_loss 0.0004 | valid rse 0.5820 | valid rae 0.6517 | valid corr  0.9169 | valid smape  0.1420 | focus_rrse 0.6670 | obj 0.6415
+| end of epoch 117 | time:  2.31s | train_loss 0.0003 | valid rse 0.6511 | valid rae 0.7347 | valid corr  0.9173 | valid smape  0.1432 | focus_rrse 0.6930 | obj 0.6804
+| end of epoch 118 | time:  2.34s | train_loss 0.0003 | valid rse 0.6433 | valid rae 0.7103 | valid corr  0.9174 | valid smape  0.1410 | focus_rrse 0.6686 | obj 0.6610
+| end of epoch 119 | time:  2.31s | train_loss 0.0004 | valid rse 0.6853 | valid rae 0.7532 | valid corr  0.9181 | valid smape  0.1401 | focus_rrse 0.6864 | obj 0.6860
+| end of epoch 120 | time:  2.34s | train_loss 0.0006 | valid rse 0.6797 | valid rae 0.7482 | valid corr  0.9176 | valid smape  0.1411 | focus_rrse 0.6806 | obj 0.6804
+| end of epoch 121 | time:  2.35s | train_loss 0.0003 | valid rse 0.6370 | valid rae 0.7179 | valid corr  0.9169 | valid smape  0.1439 | focus_rrse 0.6966 | obj 0.6787
+| end of epoch 122 | time:  2.25s | train_loss 0.0003 | valid rse 0.6455 | valid rae 0.7247 | valid corr  0.9180 | valid smape  0.1460 | focus_rrse 0.7112 | obj 0.6915
+| end of epoch 123 | time:  2.34s | train_loss 0.0004 | valid rse 0.6547 | valid rae 0.7151 | valid corr  0.9177 | valid smape  0.1436 | focus_rrse 0.7088 | obj 0.6926
+| end of epoch 124 | time:  2.33s | train_loss 0.0005 | valid rse 0.5867 | valid rae 0.6556 | valid corr  0.9168 | valid smape  0.1445 | focus_rrse 0.6986 | obj 0.6650
+| end of epoch 125 | time:  2.32s | train_loss 0.0003 | valid rse 0.6351 | valid rae 0.7108 | valid corr  0.9160 | valid smape  0.1458 | focus_rrse 0.7009 | obj 0.6811
+| end of epoch 126 | time:  2.31s | train_loss 0.0005 | valid rse 0.6967 | valid rae 0.7603 | valid corr  0.9179 | valid smape  0.1430 | focus_rrse 0.6980 | obj 0.6976
+| end of epoch 127 | time:  2.31s | train_loss 0.0003 | valid rse 0.6638 | valid rae 0.7382 | valid corr  0.9180 | valid smape  0.1439 | focus_rrse 0.7027 | obj 0.6910
+| end of epoch 128 | time:  2.30s | train_loss 0.0004 | valid rse 0.6553 | valid rae 0.7234 | valid corr  0.9186 | valid smape  0.1411 | focus_rrse 0.6786 | obj 0.6716
+| end of epoch 129 | time:  2.29s | train_loss 0.0003 | valid rse 0.6387 | valid rae 0.7158 | valid corr  0.9177 | valid smape  0.1424 | focus_rrse 0.6915 | obj 0.6757
+| end of epoch 130 | time:  2.32s | train_loss 0.0004 | valid rse 0.6145 | valid rae 0.6896 | valid corr  0.9177 | valid smape  0.1434 | focus_rrse 0.7181 | obj 0.6871
+| end of epoch 131 | time:  2.31s | train_loss 0.0003 | valid rse 0.6628 | valid rae 0.7307 | valid corr  0.9190 | valid smape  0.1423 | focus_rrse 0.6790 | obj 0.6742
+| end of epoch 132 | time:  2.38s | train_loss 0.0003 | valid rse 0.6963 | valid rae 0.7589 | valid corr  0.9179 | valid smape  0.1418 | focus_rrse 0.6981 | obj 0.6976
+| end of epoch 133 | time:  2.34s | train_loss 0.0004 | valid rse 0.6574 | valid rae 0.7266 | valid corr  0.9168 | valid smape  0.1422 | focus_rrse 0.6580 | obj 0.6578
+| end of epoch 134 | time:  2.28s | train_loss 0.0003 | valid rse 0.6526 | valid rae 0.7196 | valid corr  0.9176 | valid smape  0.1422 | focus_rrse 0.6824 | obj 0.6735
+| end of epoch 135 | time:  2.26s | train_loss 0.0003 | valid rse 0.6705 | valid rae 0.7429 | valid corr  0.9174 | valid smape  0.1433 | focus_rrse 0.6953 | obj 0.6878
+| end of epoch 136 | time:  2.28s | train_loss 0.0003 | valid rse 0.6656 | valid rae 0.7362 | valid corr  0.9163 | valid smape  0.1432 | focus_rrse 0.6935 | obj 0.6851
+| end of epoch 137 | time:  2.36s | train_loss 0.0006 | valid rse 0.6397 | valid rae 0.7062 | valid corr  0.9173 | valid smape  0.1424 | focus_rrse 0.6778 | obj 0.6664
+| end of epoch 138 | time:  2.30s | train_loss 0.0003 | valid rse 0.6445 | valid rae 0.7131 | valid corr  0.9173 | valid smape  0.1441 | focus_rrse 0.6929 | obj 0.6783
+| end of epoch 139 | time:  2.32s | train_loss 0.0006 | valid rse 0.6263 | valid rae 0.6901 | valid corr  0.9181 | valid smape  0.1425 | focus_rrse 0.6726 | obj 0.6587
+| end of epoch 140 | time:  2.34s | train_loss 0.0004 | valid rse 0.6507 | valid rae 0.7212 | valid corr  0.9169 | valid smape  0.1403 | focus_rrse 0.6524 | obj 0.6519
+| end of epoch 141 | time:  2.32s | train_loss 0.0005 | valid rse 0.6058 | valid rae 0.6622 | valid corr  0.9173 | valid smape  0.1432 | focus_rrse 0.6795 | obj 0.6574
+| end of epoch 142 | time:  2.31s | train_loss 0.0004 | valid rse 0.6553 | valid rae 0.7215 | valid corr  0.9175 | valid smape  0.1419 | focus_rrse 0.6644 | obj 0.6616
+| end of epoch 143 | time:  2.29s | train_loss 0.0003 | valid rse 0.7102 | valid rae 0.7773 | valid corr  0.9182 | valid smape  0.1404 | focus_rrse 0.7123 | obj 0.7117
+| end of epoch 144 | time:  2.31s | train_loss 0.0004 | valid rse 0.6087 | valid rae 0.6823 | valid corr  0.9182 | valid smape  0.1436 | focus_rrse 0.6849 | obj 0.6620
+| end of epoch 145 | time:  2.29s | train_loss 0.0003 | valid rse 0.6431 | valid rae 0.7080 | valid corr  0.9176 | valid smape  0.1444 | focus_rrse 0.6718 | obj 0.6632
+| end of epoch 146 | time:  2.30s | train_loss 0.0003 | valid rse 0.6308 | valid rae 0.6970 | valid corr  0.9168 | valid smape  0.1431 | focus_rrse 0.6842 | obj 0.6682
+| end of epoch 147 | time:  2.43s | train_loss 0.0004 | valid rse 0.6349 | valid rae 0.6966 | valid corr  0.9174 | valid smape  0.1439 | focus_rrse 0.6927 | obj 0.6753
+| end of epoch 148 | time:  2.31s | train_loss 0.0003 | valid rse 0.7025 | valid rae 0.7632 | valid corr  0.9188 | valid smape  0.1424 | focus_rrse 0.7041 | obj 0.7036
+| end of epoch 149 | time:  2.34s | train_loss 0.0005 | valid rse 0.6204 | valid rae 0.6866 | valid corr  0.9172 | valid smape  0.1435 | focus_rrse 0.6839 | obj 0.6648
+| end of epoch 150 | time:  2.27s | train_loss 0.0003 | valid rse 0.6624 | valid rae 0.7241 | valid corr  0.9183 | valid smape  0.1433 | focus_rrse 0.6869 | obj 0.6795
+| end of epoch 151 | time:  2.32s | train_loss 0.0004 | valid rse 0.6604 | valid rae 0.7265 | valid corr  0.9176 | valid smape  0.1420 | focus_rrse 0.6715 | obj 0.6682
+| end of epoch 152 | time:  2.29s | train_loss 0.0005 | valid rse 0.6540 | valid rae 0.7202 | valid corr  0.9184 | valid smape  0.1416 | focus_rrse 0.6691 | obj 0.6646
+| end of epoch 153 | time:  2.22s | train_loss 0.0003 | valid rse 0.6651 | valid rae 0.7323 | valid corr  0.9172 | valid smape  0.1428 | focus_rrse 0.6688 | obj 0.6677
+| end of epoch 154 | time:  2.20s | train_loss 0.0003 | valid rse 0.6599 | valid rae 0.7325 | valid corr  0.9184 | valid smape  0.1428 | focus_rrse 0.6817 | obj 0.6752
+| end of epoch 155 | time:  2.20s | train_loss 0.0003 | valid rse 0.6383 | valid rae 0.7005 | valid corr  0.9186 | valid smape  0.1433 | focus_rrse 0.6847 | obj 0.6708
+| end of epoch 156 | time:  2.23s | train_loss 0.0004 | valid rse 0.6553 | valid rae 0.7172 | valid corr  0.9185 | valid smape  0.1421 | focus_rrse 0.6676 | obj 0.6639
+| end of epoch 157 | time:  2.24s | train_loss 0.0004 | valid rse 0.6714 | valid rae 0.7377 | valid corr  0.9188 | valid smape  0.1411 | focus_rrse 0.6723 | obj 0.6720
+| end of epoch 158 | time:  2.32s | train_loss 0.0003 | valid rse 0.6364 | valid rae 0.7007 | valid corr  0.9180 | valid smape  0.1430 | focus_rrse 0.6708 | obj 0.6605
+| end of epoch 159 | time:  2.24s | train_loss 0.0004 | valid rse 0.6531 | valid rae 0.7217 | valid corr  0.9183 | valid smape  0.1424 | focus_rrse 0.6651 | obj 0.6615
+| end of epoch 160 | time:  2.25s | train_loss 0.0004 | valid rse 0.6253 | valid rae 0.6805 | valid corr  0.9177 | valid smape  0.1420 | focus_rrse 0.6712 | obj 0.6574
+| end of epoch 161 | time:  2.25s | train_loss 0.0004 | valid rse 0.6463 | valid rae 0.7143 | valid corr  0.9180 | valid smape  0.1429 | focus_rrse 0.6702 | obj 0.6630
+| end of epoch 162 | time:  2.22s | train_loss 0.0004 | valid rse 0.6540 | valid rae 0.7236 | valid corr  0.9180 | valid smape  0.1423 | focus_rrse 0.6813 | obj 0.6731
+| end of epoch 163 | time:  2.25s | train_loss 0.0003 | valid rse 0.6449 | valid rae 0.7146 | valid corr  0.9182 | valid smape  0.1423 | focus_rrse 0.6714 | obj 0.6634
+| end of epoch 164 | time:  2.21s | train_loss 0.0004 | valid rse 0.6597 | valid rae 0.7280 | valid corr  0.9187 | valid smape  0.1418 | focus_rrse 0.6726 | obj 0.6687
+| end of epoch 165 | time:  2.26s | train_loss 0.0004 | valid rse 0.6414 | valid rae 0.7055 | valid corr  0.9177 | valid smape  0.1421 | focus_rrse 0.6810 | obj 0.6691
+| end of epoch 166 | time:  2.24s | train_loss 0.0003 | valid rse 0.6362 | valid rae 0.6995 | valid corr  0.9179 | valid smape  0.1432 | focus_rrse 0.6813 | obj 0.6678
+| end of epoch 167 | time:  2.29s | train_loss 0.0004 | valid rse 0.6467 | valid rae 0.7193 | valid corr  0.9179 | valid smape  0.1423 | focus_rrse 0.6667 | obj 0.6607
+| end of epoch 168 | time:  2.25s | train_loss 0.0003 | valid rse 0.6298 | valid rae 0.6946 | valid corr  0.9177 | valid smape  0.1427 | focus_rrse 0.6812 | obj 0.6658
+| end of epoch 169 | time:  2.28s | train_loss 0.0003 | valid rse 0.6498 | valid rae 0.7132 | valid corr  0.9178 | valid smape  0.1428 | focus_rrse 0.6790 | obj 0.6702
+| end of epoch 170 | time:  2.28s | train_loss 0.0003 | valid rse 0.6605 | valid rae 0.7230 | valid corr  0.9177 | valid smape  0.1419 | focus_rrse 0.6757 | obj 0.6711
+| end of epoch 171 | time:  2.27s | train_loss 0.0003 | valid rse 0.6661 | valid rae 0.7323 | valid corr  0.9180 | valid smape  0.1413 | focus_rrse 0.6731 | obj 0.6710
+| end of epoch 172 | time:  2.29s | train_loss 0.0004 | valid rse 0.6342 | valid rae 0.7063 | valid corr  0.9175 | valid smape  0.1425 | focus_rrse 0.6757 | obj 0.6633
+| end of epoch 173 | time:  2.34s | train_loss 0.0003 | valid rse 0.6602 | valid rae 0.7324 | valid corr  0.9177 | valid smape  0.1424 | focus_rrse 0.6692 | obj 0.6665
+| end of epoch 174 | time:  2.22s | train_loss 0.0003 | valid rse 0.6575 | valid rae 0.7268 | valid corr  0.9181 | valid smape  0.1418 | focus_rrse 0.6692 | obj 0.6657
+| end of epoch 175 | time:  2.23s | train_loss 0.0004 | valid rse 0.6394 | valid rae 0.7012 | valid corr  0.9176 | valid smape  0.1430 | focus_rrse 0.6807 | obj 0.6683
+| end of epoch 176 | time:  2.29s | train_loss 0.0004 | valid rse 0.6493 | valid rae 0.7183 | valid corr  0.9170 | valid smape  0.1430 | focus_rrse 0.6743 | obj 0.6668
+| end of epoch 177 | time:  2.27s | train_loss 0.0005 | valid rse 0.6572 | valid rae 0.7226 | valid corr  0.9182 | valid smape  0.1422 | focus_rrse 0.6768 | obj 0.6709
+| end of epoch 178 | time:  2.21s | train_loss 0.0003 | valid rse 0.6317 | valid rae 0.6947 | valid corr  0.9182 | valid smape  0.1422 | focus_rrse 0.6702 | obj 0.6587
+| end of epoch 179 | time:  2.24s | train_loss 0.0003 | valid rse 0.6601 | valid rae 0.7261 | valid corr  0.9178 | valid smape  0.1428 | focus_rrse 0.6759 | obj 0.6711
+| end of epoch 180 | time:  2.28s | train_loss 0.0003 | valid rse 0.6381 | valid rae 0.7052 | valid corr  0.9178 | valid smape  0.1422 | focus_rrse 0.6743 | obj 0.6635
+final test rse 0.2612 | test rae 0.2874 | test corr 0.9467 | test smape 0.0711 | focus_rrse 0.3715
+  [FINAL]                us_Trade Weighted Dollar Index  RSE=0.3761
+  [FINAL]                                         jp_fx  RSE=0.2235
+  [FINAL]                                         kr_fx  RSE=0.2552
+
+============================================
+CONFIG 2: FOCUSED seed=1, 3ep
+============================================
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/AXIS/model/Bayesian/model.pt', optim='adam', L1Loss=True, loss_mode='l1', normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=1, gcn_depth=1, num_nodes=33, dropout=0.1, subgraph_size=40, node_dim=30, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=24, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.0005, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=3, num_split=1, step_size=100, ss_prob=0.4, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx', focus_weight=0.7, focus_target_gain=12.0, focus_only_loss=0, focus_rrse_mode='max', focus_gain_map='kr_fx:0.5,jp_fx:3.0,us_Trade Weighted Dollar Index:0.5', anchor_focus_to_last=0.2, anchor_boost_map='kr_fx:1.8,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', rse_report_mode='targets', debias_mode='none', debias_apply_to='focus', debias_skip_nodes='', bias_penalty=0.3, bias_penalty_scope='focus', plot_focus_only=0, debug_eval=0, rollout_mode='direct', seed=1, plot=0, enforce_cutoff_split=1, cutoff_year_yy=25, min_valid_months=12, lag_penalty_1step=1.2, lag_sign_penalty=0.6, lag_penalty_gain_map='kr_fx:2.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', grad_loss_weight=0.3, smoothness_penalty=0.0, clean_cache=0, eval_last_epoch=1, autotune_mode=1, apply_best_tuning=0, eval_best_tuning=0, target_profile='none', save_pred_dir='ensemble_runs/verify_focused_s1_ep3', ensemble_seeds='', best_tuning_checkpoint='')
+| end of epoch   1 | time:  2.54s | train_loss 0.0226 | valid rse 1.2476 | valid rae 1.3390 | valid corr  0.7626 | valid smape  0.1977 | focus_rrse 1.3950 | obj 1.3508
+test rse 0.5485 | test rae 0.5775 | test corr 0.8918| test smape 0.1288 | test focus_rrse 0.7686
+| end of epoch   2 | time:  2.55s | train_loss 0.0138 | valid rse 0.8700 | valid rae 0.8904 | valid corr  0.8616 | valid smape  0.1411 | focus_rrse 0.8720 | obj 0.8714
+test rse 0.3878 | test rae 0.4254 | test corr 0.9047| test smape 0.1067 | test focus_rrse 0.7762
+| end of epoch   3 | time:  2.45s | train_loss 0.0125 | valid rse 0.7319 | valid rae 0.7985 | valid corr  0.8761 | valid smape  0.1533 | focus_rrse 0.8596 | obj 0.8213
+test rse 0.3106 | test rae 0.3329 | test corr 0.9260| test smape 0.0976 | test focus_rrse 0.7007
+[eval_last_epoch] Using final epoch model (skipping checkpoint load)
+final test rse 0.3133 | test rae 0.3357 | test corr 0.9264 | test smape 0.0977 | focus_rrse 0.6796
+  [FINAL]                us_Trade Weighted Dollar Index  RSE=0.6950
+  [FINAL]                                         jp_fx  RSE=0.4056
+  [FINAL]                                         kr_fx  RSE=0.2960
+
+============================================
+CONFIG 3: baseline seed=88, 5ep
+============================================
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/AXIS/model/Bayesian/model.pt', optim='adam', L1Loss=True, loss_mode='l1', normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=1, gcn_depth=1, num_nodes=33, dropout=0.1, subgraph_size=40, node_dim=30, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=24, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.0005, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=5, num_split=1, step_size=100, ss_prob=0.4, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx', focus_weight=0.7, focus_target_gain=12.0, focus_only_loss=0, focus_rrse_mode='max', focus_gain_map='kr_fx:1.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', anchor_focus_to_last=0.2, anchor_boost_map='kr_fx:1.8,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', rse_report_mode='targets', debias_mode='none', debias_apply_to='focus', debias_skip_nodes='', bias_penalty=0.3, bias_penalty_scope='focus', plot_focus_only=0, debug_eval=0, rollout_mode='direct', seed=88, plot=0, enforce_cutoff_split=1, cutoff_year_yy=25, min_valid_months=12, lag_penalty_1step=1.2, lag_sign_penalty=0.6, lag_penalty_gain_map='kr_fx:2.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', grad_loss_weight=0.3, smoothness_penalty=0.0, clean_cache=0, eval_last_epoch=1, autotune_mode=1, apply_best_tuning=0, eval_best_tuning=0, target_profile='none', save_pred_dir='ensemble_runs/verify_baseline_s88_ep5', ensemble_seeds='', best_tuning_checkpoint='')
+| end of epoch   1 | time:  2.50s | train_loss 0.0335 | valid rse 1.2347 | valid rae 1.3409 | valid corr  0.8030 | valid smape  0.1748 | focus_rrse 1.3439 | obj 1.3111
+test rse 0.4671 | test rae 0.4760 | test corr 0.8485| test smape 0.1272 | test focus_rrse 0.5911
+| end of epoch   2 | time:  2.68s | train_loss 0.0172 | valid rse 1.5083 | valid rae 1.7190 | valid corr  0.8360 | valid smape  0.2032 | focus_rrse 1.5919 | obj 1.5668
+| end of epoch   3 | time:  2.55s | train_loss 0.0136 | valid rse 1.3338 | valid rae 1.5664 | valid corr  0.8337 | valid smape  0.1723 | focus_rrse 1.5660 | obj 1.4963
+| end of epoch   4 | time:  2.54s | train_loss 0.0113 | valid rse 1.0779 | valid rae 1.1235 | valid corr  0.8568 | valid smape  0.1539 | focus_rrse 1.1578 | obj 1.1338
+test rse 0.3282 | test rae 0.3669 | test corr 0.9020| test smape 0.0987 | test focus_rrse 0.7506
+| end of epoch   5 | time:  2.52s | train_loss 0.0121 | valid rse 0.7932 | valid rae 0.8553 | valid corr  0.8644 | valid smape  0.1558 | focus_rrse 0.7952 | obj 0.7946
+test rse 0.2359 | test rae 0.2664 | test corr 0.9136| test smape 0.0972 | test focus_rrse 0.5187
+[eval_last_epoch] Using final epoch model (skipping checkpoint load)
+final test rse 0.2316 | test rae 0.2665 | test corr 0.9138 | test smape 0.0969 | focus_rrse 0.5275
+  [FINAL]                us_Trade Weighted Dollar Index  RSE=0.5214
+  [FINAL]                                         jp_fx  RSE=0.3649
+  [FINAL]                                         kr_fx  RSE=0.2379
+
+============================================
+CONFIG 4: kr_fx best (seed=37, 5ep)
+============================================
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/AXIS/model/Bayesian/model.pt', optim='adam', L1Loss=True, loss_mode='l1', normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=1, gcn_depth=1, num_nodes=33, dropout=0.1, subgraph_size=40, node_dim=30, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=24, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.0005, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=5, num_split=1, step_size=100, ss_prob=0.4, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx', focus_weight=0.7, focus_target_gain=12.0, focus_only_loss=0, focus_rrse_mode='max', focus_gain_map='kr_fx:1.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', anchor_focus_to_last=0.2, anchor_boost_map='kr_fx:1.8,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', rse_report_mode='targets', debias_mode='none', debias_apply_to='focus', debias_skip_nodes='', bias_penalty=0.3, bias_penalty_scope='focus', plot_focus_only=0, debug_eval=0, rollout_mode='direct', seed=37, plot=0, enforce_cutoff_split=1, cutoff_year_yy=25, min_valid_months=12, lag_penalty_1step=1.2, lag_sign_penalty=0.6, lag_penalty_gain_map='kr_fx:2.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', grad_loss_weight=0.3, smoothness_penalty=0.0, clean_cache=0, eval_last_epoch=1, autotune_mode=1, apply_best_tuning=0, eval_best_tuning=0, target_profile='none', save_pred_dir='ensemble_runs/verify_kr_s37_ep5', ensemble_seeds='', best_tuning_checkpoint='')
+| end of epoch   1 | time:  2.66s | train_loss 0.0264 | valid rse 1.1257 | valid rae 1.1341 | valid corr  0.8052 | valid smape  0.1684 | focus_rrse 1.2314 | obj 1.1997
+test rse 0.5087 | test rae 0.5433 | test corr 0.8380| test smape 0.1257 | test focus_rrse 1.2956
+| end of epoch   2 | time:  2.67s | train_loss 0.0140 | valid rse 0.5176 | valid rae 0.5769 | valid corr  0.7978 | valid smape  0.1511 | focus_rrse 0.7322 | obj 0.6678
+test rse 0.4406 | test rae 0.4807 | test corr 0.8964| test smape 0.1014 | test focus_rrse 0.7584
+| end of epoch   3 | time:  2.59s | train_loss 0.0118 | valid rse 1.0842 | valid rae 1.2294 | valid corr  0.8588 | valid smape  0.1752 | focus_rrse 1.4211 | obj 1.3201
+| end of epoch   4 | time:  2.86s | train_loss 0.0135 | valid rse 1.3968 | valid rae 1.5161 | valid corr  0.8664 | valid smape  0.2064 | focus_rrse 1.4709 | obj 1.4486
+| end of epoch   5 | time:  2.89s | train_loss 0.0136 | valid rse 0.8853 | valid rae 0.9452 | valid corr  0.8692 | valid smape  0.1548 | focus_rrse 0.9278 | obj 0.9150
+[eval_last_epoch] Using final epoch model (skipping checkpoint load)
+final test rse 0.3969 | test rae 0.4266 | test corr 0.9289 | test smape 0.0964 | focus_rrse 0.6686
+  [FINAL]                us_Trade Weighted Dollar Index  RSE=0.6535
+  [FINAL]                                         jp_fx  RSE=0.3586
+  [FINAL]                                         kr_fx  RSE=0.3974
+
+============================================
+CONFIG 5: TRIPLE050-like seed=1, 60ep (shorter, focus on good epoch range)
+============================================
+Namespace(data='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/B-MTGNN/data/sm_data.csv', log_interval=2000, save='/Users/samrobert/Documents/GitHub/Exchangeprediction/Cyber-trend-forecasting-main 3/AXIS/model/Bayesian/model.pt', optim='adam', L1Loss=True, loss_mode='l1', normalize=2, device='cuda:1', gcn_true=False, buildA_true=False, use_graph=0, gcn_depth=1, num_nodes=33, dropout=0.02, subgraph_size=40, node_dim=30, dilation_exponential=2, conv_channels=16, residual_channels=128, skip_channels=256, end_channels=1024, in_dim=1, seq_in_len=24, seq_out_len=1, horizon=1, layers=2, batch_size=4, lr=0.00015, weight_decay=1e-05, clip=10, propalpha=0.6, tanhalpha=0.1, epochs=60, num_split=1, step_size=100, ss_prob=0.05, train_ratio=0.8666666667, valid_ratio=0.0666666667, focus_targets=1, focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx', focus_weight=0.7, focus_target_gain=80.0, focus_only_loss=1, focus_rrse_mode='max', focus_gain_map='kr_fx:1.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', anchor_focus_to_last=0.06, anchor_boost_map='kr_fx:1.8,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', rse_report_mode='targets', debias_mode='none', debias_apply_to='focus', debias_skip_nodes='', bias_penalty=0.5, bias_penalty_scope='focus', plot_focus_only=0, debug_eval=0, rollout_mode='direct', seed=1, plot=0, enforce_cutoff_split=1, cutoff_year_yy=25, min_valid_months=12, lag_penalty_1step=0.0, lag_sign_penalty=0.0, lag_penalty_gain_map='kr_fx:2.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', grad_loss_weight=0.0, smoothness_penalty=0.0, clean_cache=0, eval_last_epoch=1, autotune_mode=1, apply_best_tuning=0, eval_best_tuning=0, target_profile='none', save_pred_dir='ensemble_runs/verify_triple050_s1_60ep', ensemble_seeds='', best_tuning_checkpoint='')
+| end of epoch   1 | time:  2.28s | train_loss 0.0081 | valid rse 1.3112 | valid rae 1.3059 | valid corr  0.7770 | valid smape  0.1761 | focus_rrse 1.3252 | obj 1.3210
+test rse 0.7958 | test rae 0.8247 | test corr 0.7667| test smape 0.1223 | test focus_rrse 1.8717
+| end of epoch   2 | time:  2.25s | train_loss 0.0030 | valid rse 2.0560 | valid rae 2.0874 | valid corr  0.8629 | valid smape  0.1520 | focus_rrse 2.0802 | obj 2.0729
+| end of epoch   3 | time:  2.36s | train_loss 0.0023 | valid rse 1.0811 | valid rae 1.1979 | valid corr  0.8454 | valid smape  0.1518 | focus_rrse 1.6282 | obj 1.4641
+| end of epoch   4 | time:  2.53s | train_loss 0.0017 | valid rse 2.1085 | valid rae 2.1107 | valid corr  0.8685 | valid smape  0.1489 | focus_rrse 2.1334 | obj 2.1259
+| end of epoch   5 | time:  2.18s | train_loss 0.0015 | valid rse 1.1761 | valid rae 1.1485 | valid corr  0.8721 | valid smape  0.1594 | focus_rrse 1.1835 | obj 1.1813
+test rse 0.3926 | test rae 0.4090 | test corr 0.9211| test smape 0.0958 | test focus_rrse 0.7878
+| end of epoch   6 | time:  2.23s | train_loss 0.0014 | valid rse 0.9586 | valid rae 1.0003 | valid corr  0.8700 | valid smape  0.1445 | focus_rrse 0.9651 | obj 0.9632
+test rse 0.3205 | test rae 0.3546 | test corr 0.9313| test smape 0.0904 | test focus_rrse 0.4280
+| end of epoch   7 | time:  2.20s | train_loss 0.0011 | valid rse 0.8524 | valid rae 0.9577 | valid corr  0.8776 | valid smape  0.1598 | focus_rrse 1.2096 | obj 1.1024
+| end of epoch   8 | time:  2.20s | train_loss 0.0010 | valid rse 1.0390 | valid rae 1.0639 | valid corr  0.8848 | valid smape  0.1473 | focus_rrse 1.0476 | obj 1.0450
+| end of epoch   9 | time:  2.27s | train_loss 0.0012 | valid rse 0.9955 | valid rae 0.9501 | valid corr  0.8750 | valid smape  0.1496 | focus_rrse 0.9980 | obj 0.9973
+| end of epoch  10 | time:  2.19s | train_loss 0.0010 | valid rse 1.3431 | valid rae 1.3644 | valid corr  0.8793 | valid smape  0.1528 | focus_rrse 1.3561 | obj 1.3522
+| end of epoch  11 | time:  2.25s | train_loss 0.0009 | valid rse 0.6677 | valid rae 0.7030 | valid corr  0.8899 | valid smape  0.1431 | focus_rrse 0.7170 | obj 0.7022
+test rse 0.3066 | test rae 0.3436 | test corr 0.9425| test smape 0.0785 | test focus_rrse 0.3952
+| end of epoch  12 | time:  2.29s | train_loss 0.0010 | valid rse 1.1203 | valid rae 1.1279 | valid corr  0.9018 | valid smape  0.1553 | focus_rrse 1.1296 | obj 1.1268
+| end of epoch  13 | time:  2.22s | train_loss 0.0009 | valid rse 0.8956 | valid rae 0.9628 | valid corr  0.9050 | valid smape  0.1601 | focus_rrse 0.8989 | obj 0.8979
+| end of epoch  14 | time:  2.36s | train_loss 0.0009 | valid rse 1.2189 | valid rae 1.2567 | valid corr  0.9042 | valid smape  0.1484 | focus_rrse 1.2312 | obj 1.2275
+| end of epoch  15 | time:  2.27s | train_loss 0.0011 | valid rse 0.8189 | valid rae 0.9228 | valid corr  0.9072 | valid smape  0.1600 | focus_rrse 0.8946 | obj 0.8719
+| end of epoch  16 | time:  2.34s | train_loss 0.0010 | valid rse 1.4798 | valid rae 1.4788 | valid corr  0.8960 | valid smape  0.1552 | focus_rrse 1.4957 | obj 1.4909
+| end of epoch  17 | time:  2.38s | train_loss 0.0009 | valid rse 0.7593 | valid rae 0.8020 | valid corr  0.8997 | valid smape  0.1475 | focus_rrse 0.8417 | obj 0.8170
+| end of epoch  18 | time:  2.30s | train_loss 0.0009 | valid rse 0.9786 | valid rae 1.0140 | valid corr  0.9069 | valid smape  0.1467 | focus_rrse 0.9853 | obj 0.9833
+| end of epoch  19 | time:  2.33s | train_loss 0.0009 | valid rse 0.6728 | valid rae 0.7307 | valid corr  0.8981 | valid smape  0.1416 | focus_rrse 0.7625 | obj 0.7356
+| end of epoch  20 | time:  2.33s | train_loss 0.0008 | valid rse 0.8857 | valid rae 0.9159 | valid corr  0.9066 | valid smape  0.1382 | focus_rrse 0.8911 | obj 0.8895
+| end of epoch  21 | time:  2.29s | train_loss 0.0008 | valid rse 0.6714 | valid rae 0.7314 | valid corr  0.9096 | valid smape  0.1468 | focus_rrse 0.6722 | obj 0.6719
+test rse 0.2550 | test rae 0.2925 | test corr 0.9533| test smape 0.0784 | test focus_rrse 0.3914
+| end of epoch  22 | time:  2.39s | train_loss 0.0009 | valid rse 0.7437 | valid rae 0.8011 | valid corr  0.8986 | valid smape  0.1442 | focus_rrse 0.7599 | obj 0.7551
+| end of epoch  23 | time:  2.27s | train_loss 0.0009 | valid rse 0.6097 | valid rae 0.6706 | valid corr  0.9148 | valid smape  0.1470 | focus_rrse 0.7083 | obj 0.6787
+| end of epoch  24 | time:  2.56s | train_loss 0.0008 | valid rse 1.0597 | valid rae 1.1096 | valid corr  0.9059 | valid smape  0.1438 | focus_rrse 1.0688 | obj 1.0661
+| end of epoch  25 | time:  2.33s | train_loss 0.0009 | valid rse 0.9944 | valid rae 1.0162 | valid corr  0.9087 | valid smape  0.1390 | focus_rrse 1.0034 | obj 1.0007
+| end of epoch  26 | time:  2.32s | train_loss 0.0008 | valid rse 1.3489 | valid rae 1.3898 | valid corr  0.9163 | valid smape  0.1596 | focus_rrse 1.3613 | obj 1.3576
+| end of epoch  27 | time:  2.52s | train_loss 0.0009 | valid rse 0.5718 | valid rae 0.6496 | valid corr  0.9080 | valid smape  0.1352 | focus_rrse 0.9653 | obj 0.8473
+| end of epoch  28 | time:  2.31s | train_loss 0.0007 | valid rse 0.7933 | valid rae 0.8455 | valid corr  0.9142 | valid smape  0.1325 | focus_rrse 0.7969 | obj 0.7959
+| end of epoch  29 | time:  2.32s | train_loss 0.0008 | valid rse 0.6532 | valid rae 0.6746 | valid corr  0.9020 | valid smape  0.1412 | focus_rrse 0.6548 | obj 0.6543
+test rse 0.3091 | test rae 0.3369 | test corr 0.9426| test smape 0.0782 | test focus_rrse 0.4160
+| end of epoch  30 | time:  2.24s | train_loss 0.0009 | valid rse 0.9158 | valid rae 0.9995 | valid corr  0.9164 | valid smape  0.1351 | focus_rrse 0.9228 | obj 0.9207
+| end of epoch  31 | time:  2.23s | train_loss 0.0008 | valid rse 0.7660 | valid rae 0.8424 | valid corr  0.9135 | valid smape  0.1344 | focus_rrse 0.7682 | obj 0.7675
+| end of epoch  32 | time:  2.23s | train_loss 0.0006 | valid rse 0.8454 | valid rae 0.9121 | valid corr  0.9088 | valid smape  0.1345 | focus_rrse 0.8516 | obj 0.8497
+| end of epoch  33 | time:  2.28s | train_loss 0.0009 | valid rse 0.9617 | valid rae 0.9946 | valid corr  0.9180 | valid smape  0.1396 | focus_rrse 0.9711 | obj 0.9683
+| end of epoch  34 | time:  2.30s | train_loss 0.0011 | valid rse 0.6665 | valid rae 0.6991 | valid corr  0.9069 | valid smape  0.1403 | focus_rrse 0.6689 | obj 0.6682
+| end of epoch  35 | time:  2.31s | train_loss 0.0007 | valid rse 0.5483 | valid rae 0.6001 | valid corr  0.9066 | valid smape  0.1413 | focus_rrse 0.7493 | obj 0.6890
+| end of epoch  36 | time:  2.20s | train_loss 0.0007 | valid rse 1.0164 | valid rae 1.0756 | valid corr  0.9137 | valid smape  0.1392 | focus_rrse 1.0258 | obj 1.0230
+| end of epoch  37 | time:  2.39s | train_loss 0.0009 | valid rse 0.7293 | valid rae 0.7882 | valid corr  0.9074 | valid smape  0.1470 | focus_rrse 0.7443 | obj 0.7398
+| end of epoch  38 | time:  2.29s | train_loss 0.0008 | valid rse 1.0773 | valid rae 1.1309 | valid corr  0.9126 | valid smape  0.1352 | focus_rrse 1.0880 | obj 1.0848
+| end of epoch  39 | time:  2.21s | train_loss 0.0009 | valid rse 1.2183 | valid rae 1.3443 | valid corr  0.9231 | valid smape  0.1507 | focus_rrse 1.2325 | obj 1.2282
+| end of epoch  40 | time:  2.22s | train_loss 0.0008 | valid rse 0.6414 | valid rae 0.7161 | valid corr  0.9165 | valid smape  0.1432 | focus_rrse 0.6908 | obj 0.6760
+| end of epoch  41 | time:  2.22s | train_loss 0.0006 | valid rse 0.9832 | valid rae 1.0634 | valid corr  0.9167 | valid smape  0.1414 | focus_rrse 0.9917 | obj 0.9891
+| end of epoch  42 | time:  2.26s | train_loss 0.0006 | valid rse 0.5172 | valid rae 0.5871 | valid corr  0.9170 | valid smape  0.1400 | focus_rrse 0.6845 | obj 0.6343
+test rse 0.2415 | test rae 0.2583 | test corr 0.9560| test smape 0.0760 | test focus_rrse 0.3561
+| end of epoch  43 | time:  2.27s | train_loss 0.0007 | valid rse 0.5181 | valid rae 0.5637 | valid corr  0.9155 | valid smape  0.1322 | focus_rrse 0.6206 | obj 0.5898
+test rse 0.2062 | test rae 0.2264 | test corr 0.9540| test smape 0.0742 | test focus_rrse 0.2474
+| end of epoch  44 | time:  2.26s | train_loss 0.0008 | valid rse 0.8238 | valid rae 0.8800 | valid corr  0.9222 | valid smape  0.1397 | focus_rrse 0.8282 | obj 0.8269
+| end of epoch  45 | time:  2.23s | train_loss 0.0008 | valid rse 0.5783 | valid rae 0.6507 | valid corr  0.9133 | valid smape  0.1340 | focus_rrse 0.6102 | obj 0.6006
+| end of epoch  46 | time:  2.27s | train_loss 0.0008 | valid rse 0.4487 | valid rae 0.5502 | valid corr  0.9075 | valid smape  0.1459 | focus_rrse 0.9651 | obj 0.8102
+| end of epoch  47 | time:  2.27s | train_loss 0.0006 | valid rse 0.5740 | valid rae 0.6522 | valid corr  0.9117 | valid smape  0.1392 | focus_rrse 0.7153 | obj 0.6729
+| end of epoch  48 | time:  2.25s | train_loss 0.0007 | valid rse 1.0131 | valid rae 1.0938 | valid corr  0.9245 | valid smape  0.1362 | focus_rrse 1.0228 | obj 1.0199
+| end of epoch  49 | time:  2.26s | train_loss 0.0010 | valid rse 0.5236 | valid rae 0.6016 | valid corr  0.9081 | valid smape  0.1440 | focus_rrse 1.1194 | obj 0.9407
+| end of epoch  50 | time:  2.23s | train_loss 0.0008 | valid rse 0.7131 | valid rae 0.7604 | valid corr  0.9174 | valid smape  0.1468 | focus_rrse 0.7140 | obj 0.7137
+| end of epoch  51 | time:  2.27s | train_loss 0.0008 | valid rse 0.9009 | valid rae 0.9842 | valid corr  0.9172 | valid smape  0.1461 | focus_rrse 0.9042 | obj 0.9032
+| end of epoch  52 | time:  2.38s | train_loss 0.0009 | valid rse 0.5909 | valid rae 0.6841 | valid corr  0.9129 | valid smape  0.1535 | focus_rrse 0.9555 | obj 0.8461
+| end of epoch  53 | time:  2.32s | train_loss 0.0011 | valid rse 0.4029 | valid rae 0.4039 | valid corr  0.9123 | valid smape  0.1430 | focus_rrse 0.5531 | obj 0.5080
+test rse 0.1426 | test rae 0.1667 | test corr 0.9497| test smape 0.0780 | test focus_rrse 0.2518
+| end of epoch  54 | time:  2.64s | train_loss 0.0009 | valid rse 0.8128 | valid rae 0.8898 | valid corr  0.9097 | valid smape  0.1343 | focus_rrse 0.8179 | obj 0.8164
+| end of epoch  55 | time:  2.35s | train_loss 0.0006 | valid rse 1.0927 | valid rae 1.2103 | valid corr  0.9253 | valid smape  0.1433 | focus_rrse 1.1091 | obj 1.1042
+| end of epoch  56 | time:  2.23s | train_loss 0.0006 | valid rse 0.8278 | valid rae 0.9130 | valid corr  0.9128 | valid smape  0.1412 | focus_rrse 0.8329 | obj 0.8314
+| end of epoch  57 | time:  2.28s | train_loss 0.0009 | valid rse 0.7577 | valid rae 0.8415 | valid corr  0.9129 | valid smape  0.1355 | focus_rrse 0.7622 | obj 0.7609
+| end of epoch  58 | time:  2.22s | train_loss 0.0008 | valid rse 0.8592 | valid rae 0.9628 | valid corr  0.9200 | valid smape  0.1453 | focus_rrse 0.8839 | obj 0.8765
+| end of epoch  59 | time:  2.26s | train_loss 0.0009 | valid rse 0.6689 | valid rae 0.7389 | valid corr  0.9191 | valid smape  0.1447 | focus_rrse 0.7538 | obj 0.7283
+| end of epoch  60 | time:  2.28s | train_loss 0.0009 | valid rse 0.4384 | valid rae 0.4816 | valid corr  0.9084 | valid smape  0.1488 | focus_rrse 0.7968 | obj 0.6893
+[eval_last_epoch] Using final epoch model (skipping checkpoint load)
+final test rse 0.2257 | test rae 0.2477 | test corr 0.9473 | test smape 0.0775 | focus_rrse 0.3993
+  [FINAL]                us_Trade Weighted Dollar Index  RSE=0.4081
+  [FINAL]                                         jp_fx  RSE=0.2465
+  [FINAL]                                         kr_fx  RSE=0.2277
+
+DONE!

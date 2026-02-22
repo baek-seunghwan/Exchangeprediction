@@ -1,0 +1,68 @@
+=== US_TRADE MINIMAL SWEEP ===
+
+--- Short training (3,7,10 epochs) ---
+  s=3 e=3: us=  jp=  kr=
+  s=3 e=7: us=  jp=  kr=
+  s=3 e=10: us=  jp=  kr=
+  s=99 e=3: us=  jp=  kr=
+  s=99 e=7: us=  jp=  kr=
+  s=99 e=10: us=  jp=  kr=
+  s=777 e=3: us=  jp=  kr=
+  s=777 e=7: us=  jp=  kr=
+  s=777 e=10: us=  jp=  kr=
+  s=42 e=3: us=  jp=  kr=
+  s=42 e=7: us=  jp=  kr=
+  s=42 e=10: us=  jp=  kr=
+  s=111 e=3: us=  jp=  kr=
+  s=111 e=7: us=  jp=  kr=
+  s=111 e=10: us=  jp=  kr=
+  s=1 e=3: us=  jp=  kr=
+  s=1 e=7: us=  jp=  kr=
+  s=1 e=10: us=  jp=  kr=
+  s=7 e=3: us=  jp=  kr=
+  s=7 e=7: us=  jp=  kr=
+  s=7 e=10: us=  jp=  kr=
+  s=13 e=3: us=  jp=  kr=
+  s=13 e=7: us=  jp=  kr=
+  s=13 e=10: us=  jp=  kr=
+  s=21 e=3: us=  jp=  kr=
+  s=21 e=7: us=  jp=  kr=
+  s=21 e=10: us=  jp=  kr=
+  s=37 e=3: us=  jp=  kr=
+  s=37 e=7: us=  jp=  kr=
+  s=37 e=10: us=  jp=  kr=
+  s=55 e=3: us=  jp=  kr=
+  s=55 e=7: us=  jp=  kr=
+  s=55 e=10: us=  jp=  kr=
+
+--- Short train + val_linear debias (5,10 ep) ---
+  s=3 e=5 val_lin: us=  jp=  kr=
+  s=3 e=10 val_lin: us=  jp=  kr=
+  s=99 e=5 val_lin: us=  jp=  kr=
+  s=99 e=10 val_lin: us=  jp=  kr=
+  s=777 e=5 val_lin: us=  jp=  kr=
+  s=777 e=10 val_lin: us=  jp=  kr=
+  s=42 e=5 val_lin: us=  jp=  kr=
+  s=42 e=10 val_lin: us=  jp=  kr=
+  s=111 e=5 val_lin: us=  jp=  kr=
+  s=111 e=10 val_lin: us=  jp=  kr=
+  s=1 e=5 val_lin: us=  jp=  kr=
+  s=1 e=10 val_lin: us=  jp=  kr=
+  s=7 e=5 val_lin: us=  jp=  kr=
+  s=7 e=10 val_lin: us=  jp=  kr=
+  s=13 e=5 val_lin: us=  jp=  kr=
+  s=13 e=10 val_lin: us=  jp=  kr=
+  s=21 e=5 val_lin: us=  jp=  kr=
+  s=21 e=10 val_lin: us=  jp=  kr=
+  s=37 e=5 val_lin: us=  jp=  kr=
+  s=37 e=10 val_lin: us=  jp=  kr=
+  s=55 e=5 val_lin: us=  jp=  kr=
+  s=55 e=10 val_lin: us=  jp=  kr=
+
+--- US-Trade focused (focus_only, us gain=5) 250ep best seeds ---
+  s=777 250ep us_foc: us=  jp=  kr=
+  s=3 250ep us_foc: us=  jp=  kr=
+  s=99 250ep us_foc: us=  jp=  kr=
+  s=42 250ep us_foc: us=  jp=  kr=
+
+=== DONE ===

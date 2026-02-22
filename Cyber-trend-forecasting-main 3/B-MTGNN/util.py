@@ -183,6 +183,16 @@ class DataLoaderS(object):
             # Avoid division by zero
             self.dat = self.rawdat / max_abs_val.cpu()
 
+        # Per-column z-score normalization (mean=0, std=1 based on train data)
+        if (normalize == 3):
+            train_data = self.rawdat[:self.train_end, :]
+            col_mean = train_data.mean(dim=0)
+            col_std = train_data.std(dim=0)
+            col_std[col_std == 0] = 1.0
+            self.scale = col_std.to(self.device)
+            self.mean = col_mean.to(self.device)
+            self.dat = (self.rawdat - col_mean.cpu()) / col_std.cpu()
+
     def _split(self, train, valid, test):
         # util.py Logic: Strictly separates Train / Valid / Test ranges
         train_set = range(self.P + self.h - 1, train) 

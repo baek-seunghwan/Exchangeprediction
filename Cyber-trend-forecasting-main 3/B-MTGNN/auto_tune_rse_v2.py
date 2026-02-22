@@ -76,17 +76,18 @@ def expand_local_trials(base_trials, extra_per_base=6, seed=123):
         b = dict(b)
         for _ in range(extra_per_base):
             t = dict(b)
-            t["lr"] = max(5e-5, min(5e-4, float(t.get("lr", 2e-4)) * random.choice([0.8, 0.9, 1.0, 1.1, 1.2])))
-            t["dropout"] = max(0.0, min(0.20, float(t.get("dropout", 0.08)) + random.choice([-0.03, -0.01, 0.0, 0.01, 0.03])))
-            t["seq_in_len"] = random.choice([24, 36, 48, 60])
-            t["ss_prob"] = max(0.0, min(0.12, float(t.get("ss_prob", 0.05)) + random.choice([-0.03, -0.01, 0.0, 0.01])))
-            t["focus_target_gain"] = max(20.0, min(160.0, float(t.get("focus_target_gain", 60.0)) * random.choice([0.85, 1.0, 1.15])))
-            t["anchor_focus_to_last"] = max(0.0, min(0.40, float(t.get("anchor_focus_to_last", 0.08)) + random.choice([-0.06, -0.03, -0.01, 0.0, 0.01, 0.03, 0.06, 0.10])))
-            t["bias_penalty"] = max(0.0, min(1.0, float(t.get("bias_penalty", 0.2)) + random.choice([-0.10, -0.05, 0.0, 0.05, 0.10])))
-            t["lag_penalty_1step"] = max(0.0, min(2.0, float(t.get("lag_penalty_1step", 0.5)) + random.choice([-0.2, -0.1, 0.0, 0.1, 0.2])))
-            t["lag_sign_penalty"] = max(0.0, min(1.0, float(t.get("lag_sign_penalty", 0.3)) + random.choice([-0.15, -0.1, 0.0, 0.1, 0.15])))
-            t["grad_loss_weight"] = max(0.0, min(1.0, float(t.get("grad_loss_weight", 0.3)) + random.choice([-0.15, -0.1, 0.0, 0.1, 0.15])))
-            t["focus_only_loss"] = random.choice([0, 0, 0, 1])
+            t["lr"] = max(5e-5, min(4e-4, float(t.get("lr", 1.5e-4)) * random.choice([0.75, 0.85, 1.0, 1.15, 1.25])))
+            t["dropout"] = max(0.0, min(0.08, float(t.get("dropout", 0.02)) + random.choice([-0.02, -0.01, 0.0, 0.01, 0.02])))
+            t["seq_in_len"] = random.choice([24, 24, 24, 36])  # heavily favour 24
+            t["layers"] = random.choice([2, 2, 2, 3])  # favour 2
+            t["ss_prob"] = max(0.0, min(0.10, float(t.get("ss_prob", 0.05)) + random.choice([-0.02, -0.01, 0.0, 0.01])))
+            t["focus_target_gain"] = max(40.0, min(160.0, float(t.get("focus_target_gain", 80.0)) * random.choice([0.85, 1.0, 1.15, 1.3])))
+            t["anchor_focus_to_last"] = max(0.0, min(0.15, float(t.get("anchor_focus_to_last", 0.06)) + random.choice([-0.04, -0.02, 0.0, 0.02, 0.04])))
+            t["bias_penalty"] = max(0.1, min(0.8, float(t.get("bias_penalty", 0.5)) + random.choice([-0.15, -0.05, 0.0, 0.05, 0.15])))
+            t["lag_penalty_1step"] = max(0.5, min(2.5, float(t.get("lag_penalty_1step", 1.3)) + random.choice([-0.3, -0.15, 0.0, 0.15, 0.3])))
+            t["lag_sign_penalty"] = max(0.1, min(1.2, float(t.get("lag_sign_penalty", 0.5)) + random.choice([-0.15, -0.1, 0.0, 0.1, 0.15])))
+            t["grad_loss_weight"] = max(0.0, min(0.5, float(t.get("grad_loss_weight", 0.15)) + random.choice([-0.1, -0.05, 0.0, 0.05, 0.1])))
+            t["focus_only_loss"] = random.choice([1, 1, 1, 0])  # favour 1
 
             key = json.dumps(t, sort_keys=True)
             if key in seen:
@@ -99,37 +100,41 @@ def expand_local_trials(base_trials, extra_per_base=6, seed=123):
 def build_seed_trials(seed=42, count=60):
     random.seed(seed)
 
+    # Anchors based on best-performing runs (run7, run14, run25 patterns)
     anchors = [
-        {"lr": 2.0e-4, "dropout": 0.02, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 20, "node_dim": 50, "seq_in_len": 60, "seq_out_len": 12, "ss_prob": 0.04, "focus_target_gain": 80.0, "anchor_focus_to_last": 0.08, "bias_penalty": 0.4, "lag_penalty_1step": 0.8, "lag_sign_penalty": 0.4, "focus_only_loss": 1},
-        {"lr": 3.0e-4, "dropout": 0.03, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 40, "node_dim": 30, "seq_in_len": 36, "seq_out_len": 12, "ss_prob": 0.05, "focus_target_gain": 60.0, "anchor_focus_to_last": 0.10, "bias_penalty": 0.3, "lag_penalty_1step": 0.6, "lag_sign_penalty": 0.3, "focus_only_loss": 1},
-        {"lr": 1.5e-4, "dropout": 0.01, "layers": 3, "conv_channels": 32, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 30, "node_dim": 40, "seq_in_len": 48, "seq_out_len": 12, "ss_prob": 0.03, "focus_target_gain": 100.0, "anchor_focus_to_last": 0.06, "bias_penalty": 0.5, "lag_penalty_1step": 1.0, "lag_sign_penalty": 0.5, "focus_only_loss": 1},
+        # run7-style: best overall RSE=0.67 (layers=2, seq=24, focus_only=1, strong lag)
+        {"lr": 1.5e-4, "dropout": 0.02, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 30, "node_dim": 30, "seq_in_len": 24, "seq_out_len": 12, "ss_prob": 0.05, "focus_target_gain": 80.0, "anchor_focus_to_last": 0.06, "bias_penalty": 0.5, "lag_penalty_1step": 1.3, "lag_sign_penalty": 0.5, "focus_only_loss": 1, "grad_loss_weight": 0.15},
+        # run14-style: best focus_rrse=2.34 (layers=3, seq=48, conv=24)
+        {"lr": 2.7e-4, "dropout": 0.01, "layers": 3, "conv_channels": 24, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 30, "node_dim": 50, "seq_in_len": 24, "seq_out_len": 12, "ss_prob": 0.04, "focus_target_gain": 60.0, "anchor_focus_to_last": 0.04, "bias_penalty": 0.25, "lag_penalty_1step": 0.6, "lag_sign_penalty": 0.15, "focus_only_loss": 1, "grad_loss_weight": 0.15},
+        # run25-style: RSE=0.98 (layers=2, conv=32, high focus_gain)
+        {"lr": 1.125e-4, "dropout": 0.01, "layers": 2, "conv_channels": 16, "residual_channels": 128, "skip_channels": 256, "end_channels": 1024, "subgraph_size": 30, "node_dim": 30, "seq_in_len": 24, "seq_out_len": 12, "ss_prob": 0.05, "focus_target_gain": 110.0, "anchor_focus_to_last": 0.04, "bias_penalty": 0.55, "lag_penalty_1step": 1.5, "lag_sign_penalty": 0.6, "focus_only_loss": 1, "grad_loss_weight": 0.1},
     ]
 
-    seq_choices = [24, 36, 48, 60, 72]
+    seq_choices = [24, 24, 24, 36]  # heavily favour 24
     trials = []
 
     for i in range(count):
         a = dict(anchors[i % len(anchors)])
         t = dict(a)
-        t["lr"] = max(6e-5, min(5e-4, a["lr"] * random.choice([0.75, 0.9, 1.0, 1.1, 1.25])))
-        t["dropout"] = max(0.0, min(0.20, a["dropout"] + random.choice([-0.02, 0.0, 0.01, 0.02, 0.04])))
-        t["layers"] = random.choice([2, 3])
-        t["conv_channels"] = random.choice([16, 24, 32])
+        t["lr"] = max(6e-5, min(4e-4, a["lr"] * random.choice([0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3])))
+        t["dropout"] = max(0.0, min(0.08, a["dropout"] + random.choice([-0.02, -0.01, 0.0, 0.01, 0.02])))
+        t["layers"] = random.choice([2, 2, 2, 3])  # favour 2
+        t["conv_channels"] = random.choice([16, 16, 24])
         t["residual_channels"] = 128
         t["skip_channels"] = 256
         t["end_channels"] = 1024
-        t["subgraph_size"] = random.choice([20, 30, 40])
-        t["node_dim"] = random.choice([30, 40, 50])
+        t["subgraph_size"] = random.choice([20, 30, 30])
+        t["node_dim"] = random.choice([30, 30, 40])
         t["seq_in_len"] = random.choice(seq_choices)
         t["seq_out_len"] = 12
-        t["ss_prob"] = max(0.0, min(0.12, a["ss_prob"] + random.choice([-0.03, -0.01, 0.0, 0.02])))
-        t["focus_target_gain"] = max(20.0, min(140.0, a["focus_target_gain"] * random.choice([0.8, 0.9, 1.0, 1.1, 1.2])))
-        t["anchor_focus_to_last"] = max(0.0, min(0.40, a["anchor_focus_to_last"] + random.choice([-0.06, -0.03, 0.0, 0.03, 0.06, 0.10, 0.15])))
-        t["bias_penalty"] = max(0.0, min(1.0, a["bias_penalty"] + random.choice([-0.15, -0.05, 0.0, 0.05, 0.15])))
-        t["lag_penalty_1step"] = max(0.0, min(2.0, a.get("lag_penalty_1step", 0.5) + random.choice([-0.3, -0.15, 0.0, 0.15, 0.3])))
-        t["lag_sign_penalty"] = max(0.0, min(1.0, a.get("lag_sign_penalty", 0.3) + random.choice([-0.15, -0.1, 0.0, 0.1, 0.15])))
-        t["grad_loss_weight"] = max(0.0, min(1.0, a.get("grad_loss_weight", 0.3) + random.choice([-0.15, -0.1, 0.0, 0.1, 0.15])))
-        t["focus_only_loss"] = random.choice([0, 0, 0, 1])
+        t["ss_prob"] = max(0.0, min(0.08, a["ss_prob"] + random.choice([-0.02, -0.01, 0.0, 0.01])))
+        t["focus_target_gain"] = max(40.0, min(160.0, a["focus_target_gain"] * random.choice([0.8, 0.9, 1.0, 1.1, 1.2, 1.4])))
+        t["anchor_focus_to_last"] = max(0.0, min(0.12, a["anchor_focus_to_last"] + random.choice([-0.04, -0.02, 0.0, 0.02, 0.04])))
+        t["bias_penalty"] = max(0.1, min(0.8, a["bias_penalty"] + random.choice([-0.15, -0.05, 0.0, 0.05, 0.15])))
+        t["lag_penalty_1step"] = max(0.3, min(2.5, a.get("lag_penalty_1step", 1.3) + random.choice([-0.4, -0.2, 0.0, 0.2, 0.4])))
+        t["lag_sign_penalty"] = max(0.1, min(1.2, a.get("lag_sign_penalty", 0.5) + random.choice([-0.2, -0.1, 0.0, 0.1, 0.2])))
+        t["grad_loss_weight"] = max(0.0, min(0.4, a.get("grad_loss_weight", 0.15) + random.choice([-0.1, -0.05, 0.0, 0.05, 0.1])))
+        t["focus_only_loss"] = random.choice([1, 1, 1, 0])  # favour 1
         trials.append(t)
 
     unique = []

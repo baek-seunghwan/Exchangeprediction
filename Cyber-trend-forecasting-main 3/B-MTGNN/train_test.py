@@ -25,7 +25,7 @@ MONTH_TO_NUM = {
     'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
 }
 
-plt.rcParams['savefig.dpi'] = 1200
+plt.rcParams['savefig.dpi'] = 300
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 BMTGNN_DIR = Path(__file__).resolve().parent
@@ -249,7 +249,10 @@ def get_rse_target_columns(data):
             selected.append(idx)
             seen.add(idx)
 
-    return selected if selected else list(range(data.m))
+    if not selected:
+        print(f"[WARNING] rse_targets matching failed! tokens={tokens} → falling back to ALL {data.m} columns. Check rse_targets names.")
+        return list(range(data.m))
+    return selected
 
 def compute_rrse_rae_subset(predict_t, test_t, selected_cols):
     pred = predict_t[:, selected_cols]
@@ -297,6 +300,19 @@ def compute_focus_rrse(predict_np, ytest_np, data):
     return float(np.mean(values))
 
 
+def _get_debias_skip_cols(data):
+    """Return set of column indices to skip for debias based on --debias_skip_nodes."""
+    skip = set()
+    skip_str = getattr(args, 'debias_skip_nodes', '')
+    if skip_str:
+        skip_names = [s.strip() for s in skip_str.split(',') if s.strip()]
+        for i, col_name in enumerate(data.col):
+            for sn in skip_names:
+                if sn.lower() in col_name.lower():
+                    skip.add(i)
+    return skip
+
+
 def estimate_bias_offset_from_arrays(data, predict_t, test_t):
     if predict_t.dim() == 3:
         pred2 = predict_t.reshape(-1, predict_t.size(-1))
@@ -307,14 +323,172 @@ def estimate_bias_offset_from_arrays(data, predict_t, test_t):
 
     err = pred2 - true2
     col_mean_err = torch.mean(err, dim=0)
+    skip_cols = _get_debias_skip_cols(data)
 
     if args.debias_apply_to == 'all':
+        for c in skip_cols:
+            col_mean_err[c] = 0.0
         return col_mean_err
 
     offset = torch.zeros_like(col_mean_err)
     for col in get_focus_columns(data):
-        offset[col] = col_mean_err[col]
+        if col not in skip_cols:
+            offset[col] = col_mean_err[col]
     return offset
+
+
+def estimate_per_step_bias(data, predict_t, test_t):
+    """Per-step bias: offset[t, n] = pred[t,n] - actual[t,n] for each step.
+    Returns [T, N] tensor — subtracting this from test preds corrects shape bias."""
+    if predict_t.dim() == 3:
+        pred2 = predict_t.reshape(-1, predict_t.size(-1))
+        true2 = test_t.reshape(-1, test_t.size(-1))
+    else:
+        pred2 = predict_t
+        true2 = test_t
+    err = pred2 - true2  # [T, N]
+    skip_cols = _get_debias_skip_cols(data)
+    focus_cols = get_focus_columns(data)
+    if args.debias_apply_to == 'focus' and focus_cols:
+        offset = torch.zeros_like(err)
+        for col in focus_cols:
+            if col not in skip_cols:
+                offset[:, col] = err[:, col]
+        return offset
+    offset = err.clone()
+    for c in skip_cols:
+        offset[:, c] = 0.0
+    return offset
+
+
+def estimate_linear_trend_bias(data, predict_t, test_t):
+    """Linear trend debias: fit err[t] = a + b*t per target on validation,
+    then apply correction. Returns [T, N] tensor."""
+    if predict_t.dim() == 3:
+        pred2 = predict_t.reshape(-1, predict_t.size(-1))
+        true2 = test_t.reshape(-1, test_t.size(-1))
+    else:
+        pred2 = predict_t
+        true2 = test_t
+    T, N = pred2.shape
+    err = pred2 - true2
+    t_idx = torch.arange(T, dtype=torch.float32, device=pred2.device)
+    t_mean = t_idx.mean()
+    t_centered = t_idx - t_mean
+    t_var = (t_centered ** 2).sum()
+
+    skip_cols = _get_debias_skip_cols(data)
+    offset = torch.zeros_like(err)
+    focus_cols = get_focus_columns(data) if args.debias_apply_to == 'focus' else list(range(N))
+    for col in (focus_cols or []):
+        if col in skip_cols:
+            continue
+        e = err[:, col]
+        a = e.mean()
+        b = (e * t_centered).sum() / t_var if T > 1 and t_var > 0 else 0.0
+        for t in range(T):
+            offset[t, col] = a + b * (t_idx[t] - t_mean)
+    return offset
+
+
+def estimate_quadratic_trend_bias(data, predict_t, test_t):
+    """Quadratic trend debias: fit err[t] = a + b*t + c*t^2 per target.
+    Returns [T, N] tensor. Captures curvature in error pattern."""
+    if predict_t.dim() == 3:
+        pred2 = predict_t.reshape(-1, predict_t.size(-1))
+        true2 = test_t.reshape(-1, test_t.size(-1))
+    else:
+        pred2 = predict_t
+        true2 = test_t
+    T, N = pred2.shape
+    err = pred2 - true2
+    t_idx = torch.arange(T, dtype=torch.float32, device=pred2.device)
+
+    skip_cols = _get_debias_skip_cols(data)
+    offset = torch.zeros_like(err)
+    focus_cols = get_focus_columns(data) if args.debias_apply_to == 'focus' else list(range(N))
+
+    # Build design matrix for quadratic fit: [1, t, t^2]
+    ones = torch.ones(T, dtype=torch.float32, device=pred2.device)
+    X = torch.stack([ones, t_idx, t_idx**2], dim=1)  # [T, 3]
+    XtX = X.T @ X
+    try:
+        XtX_inv = torch.linalg.inv(XtX)
+    except Exception:
+        # Fallback to linear if singular
+        return estimate_linear_trend_bias(data, predict_t, test_t)
+
+    for col in (focus_cols or []):
+        if col in skip_cols:
+            continue
+        e = err[:, col]
+        coeff = XtX_inv @ (X.T @ e)  # [3] = [a, b, c]
+        fitted = X @ coeff  # [T]
+        offset[:, col] = fitted
+    return offset
+
+
+def estimate_hybrid_debias(data, predict_t, test_t):
+    """Per-target hybrid: pick the debias mode (none / mean / linear / quadratic)
+    that minimises validation RSE for each focus target independently.
+    Returns [T, N] tensor of per-step offsets."""
+    candidates = [
+        ('none', None),
+        ('val_mean_error', estimate_bias_offset_from_arrays),
+        ('val_linear', estimate_linear_trend_bias),
+        ('val_quadratic', estimate_quadratic_trend_bias),
+    ]
+
+    if predict_t.dim() == 3:
+        pred2 = predict_t.reshape(-1, predict_t.size(-1))
+        true2 = test_t.reshape(-1, test_t.size(-1))
+    else:
+        pred2 = predict_t
+        true2 = test_t
+    T, N = pred2.shape
+
+    skip_cols = _get_debias_skip_cols(data)
+    focus_cols = get_focus_columns(data) if args.debias_apply_to == 'focus' else list(range(N))
+
+    # Pre-compute all candidate offsets
+    cand_offsets = {}
+    for name, fn in candidates:
+        if fn is not None:
+            cand_offsets[name] = fn(data, predict_t, test_t)
+        else:
+            cand_offsets[name] = torch.zeros(T, N, device=pred2.device)
+
+    # For each focus col, pick the mode with lowest validation RSE
+    best_offset = torch.zeros(T, N, device=pred2.device)
+    for col in (focus_cols or []):
+        if col in skip_cols:
+            continue
+        best_rse = float('inf')
+        best_name = 'none'
+        a = true2[:, col].cpu().numpy()
+        ss_total = np.sum((a - a.mean())**2)
+        if ss_total < 1e-12:
+            continue
+        for name, _ in candidates:
+            off = cand_offsets[name]
+            if off.dim() == 1:
+                p = pred2[:, col] - off[col]
+            else:
+                p = pred2[:, col] - off[:, col]
+            p_np = p.cpu().numpy()
+            ss_err = np.sum((p_np - a)**2)
+            rse = math.sqrt(ss_err / ss_total)
+            if rse < best_rse:
+                best_rse = rse
+                best_name = name
+        # Apply the best offset for this column
+        off = cand_offsets[best_name]
+        if off.dim() == 1:
+            best_offset[:, col] = off[col]
+        else:
+            best_offset[:, col] = off[:, col]
+        print(f"[hybrid debias] {data.col[col]}: best={best_name} (val RSE={best_rse:.4f})")
+    return best_offset
 
 
 def save_metrics_1d(predict, test, title, type):
@@ -409,7 +583,7 @@ def plot_predicted_actual(predicted, actual, title, type, variance, confidence_9
     plt.plot(x, predicted, '--', color='purple', label='Predicted')
     if isinstance(confidence_95, torch.Tensor):
         confidence_95 = confidence_95.cpu().numpy()
-    plt.fill_between(x, predicted - confidence_95, predicted + confidence_95, alpha=0.5, color='pink', label='95% Confidence')
+    plt.fill_between(x, predicted - confidence_95, predicted + confidence_95, alpha=0.3, color='pink', label='95% Prediction Interval')
     plt.legend(loc="best", prop={'size': 11})
     plt.axis('tight')
     plt.grid(True)
@@ -429,8 +603,11 @@ def plot_predicted_actual(predicted, actual, title, type, variance, confidence_9
     save_dir.mkdir(parents=True, exist_ok=True)
     
     plt.savefig(save_dir / f"{title}_{type}.png", bbox_inches="tight")
-    plt.show(block=False)
-    plt.pause(2)
+    try:
+        plt.show(block=False)
+        plt.pause(0.1)
+    except Exception:
+        pass
     plt.close()
 
 
@@ -496,7 +673,8 @@ def _evaluate_direct_mode(data, test_window, model, n_input, is_plot,
         std_dev = torch.zeros_like(y_pred)
 
     z_val = 1.96
-    confidence = z_val * std_dev / math.sqrt(max(num_runs, 1))
+    # Prediction interval (not CI of mean): z * std_dev directly
+    confidence = z_val * std_dev
 
     # --- Trim to actual forecast length ---
     steps = min(args.seq_out_len, n_forecast)
@@ -527,6 +705,11 @@ def _evaluate_direct_mode(data, test_window, model, n_input, is_plot,
     test_actual   = test_actual * scale
     variance      = variance * scale
     confidence_95 = confidence_95 * scale
+    # Restore mean for z-score normalization (normalize=3)
+    if hasattr(data, 'mean'):
+        mean_expand = data.mean.expand(steps, data.m)
+        predict     = predict + mean_expand
+        test_actual = test_actual + mean_expand
 
     if bias_offset is not None:
         b = bias_offset.to(predict.device)
@@ -577,8 +760,8 @@ def _evaluate_direct_mode(data, test_window, model, n_input, is_plot,
 
     focus_rrse = compute_focus_rrse(predict_np, test_np, data)
 
-    # --- Per-node RSE report ---
-    if not args.autotune_mode:
+    # --- Per-node RSE report (always print for focus targets) ---
+    if True:
         for col in (selected_cols or []):
             pred_c = predict_np[:, col]
             true_c = test_np[:, col]
@@ -606,6 +789,14 @@ def _evaluate_direct_mode(data, test_window, model, n_input, is_plot,
                                  variance[:, v].cpu().numpy(), confidence_95[:, v].cpu().numpy())
         if skipped_nodes:
             print(f"[{split_type}] skipped near-constant nodes: {skipped_nodes}")
+
+    # --- Save predictions for ensemble ---
+    if args.save_pred_dir:
+        save_dir_np = Path(args.save_pred_dir)
+        save_dir_np.mkdir(parents=True, exist_ok=True)
+        np.save(save_dir_np / f"pred_{split_type}.npy", predict_np)
+        np.save(save_dir_np / f"actual_{split_type}.npy", test_np)
+        print(f"[save] {split_type} predictions -> {save_dir_np}")
 
     if return_arrays:
         return rrse, rae, correlation, smape_val, focus_rrse, predict_t.detach().cpu(), test_t.detach().cpu()
@@ -691,7 +882,8 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
         std_dev = torch.std(outputs, dim=0)
 
         z = 1.96
-        confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
+        # Prediction interval (not CI of mean)
+        confidence = z * std_dev
 
         # 다음 스텝을 위한 입력 업데이트
         if args.rollout_mode == 'recursive':
@@ -720,6 +912,11 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     test = test * scale
     variance *= scale
     confidence_95 *= scale
+    # Restore mean for z-score normalization (normalize=3)
+    if hasattr(data, 'mean'):
+        mean_expand = data.mean.expand(test.size(0), data.m)
+        predict = predict + mean_expand
+        test    = test + mean_expand
 
     if bias_offset is not None:
         b = bias_offset.to(predict.device)
@@ -853,7 +1050,8 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size, is_plot):
         std_dev = torch.std(outputs, dim=0)
 
         z = 1.96
-        confidence = z * std_dev / torch.sqrt(torch.tensor(num_runs))
+        # Prediction interval (not CI of mean)
+        confidence = z * std_dev
 
         output = mean
 
@@ -1083,8 +1281,10 @@ def train(data, X, Y, model, criterion, optim, batch_size):
                 out_grad = output[:, 1:, :] - output[:, :-1, :]
                 ty_grad = ty[:, 1:, :] - ty[:, :-1, :]
                 grad_loss = torch.abs(out_grad - ty_grad)
+                temporal_variation = torch.abs(out_grad)
             else:
                 grad_loss = None
+                temporal_variation = None
 
             w = target_weight.unsqueeze(0).unsqueeze(0)  # [1, 1, N]
             
@@ -1104,6 +1304,10 @@ def train(data, X, Y, model, criterion, optim, batch_size):
                     if grad_loss is not None:
                         grad_focus = torch.index_select(grad_loss, dim=2, index=focus_idx)
                         loss += args.grad_loss_weight * grad_focus.mean()
+                    # Smoothness penalty (Total Variation)
+                    if args.smoothness_penalty > 0 and temporal_variation is not None:
+                        tv_focus = torch.index_select(temporal_variation, dim=2, index=focus_idx)
+                        loss += args.smoothness_penalty * tv_focus.mean()
                 else:
                     loss = (diff * w).mean() / torch.clamp(w.mean(), min=1e-12)
             else:
@@ -1233,8 +1437,9 @@ parser.add_argument('--anchor_focus_to_last', type=float, default=0.2, help='0~1
 parser.add_argument('--anchor_boost_map', type=str, default='kr_fx:1.8,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', help='per-focus-node anchor multiplier map')
 parser.add_argument('--rse_targets', type=str, default='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt', help='comma-separated target series/file names used for terminal RSE/RAE aggregation')
 parser.add_argument('--rse_report_mode', type=str, default='targets', choices=['targets', 'all'], help='which RSE/RAE to report in terminal and final summary')
-parser.add_argument('--debias_mode', type=str, default='none', choices=['none', 'val_mean_error'], help='bias correction mode for final evaluation/reporting')
+parser.add_argument('--debias_mode', type=str, default='none', choices=['none', 'val_mean_error', 'val_per_step', 'val_linear', 'val_quadratic', 'val_hybrid'], help='bias correction mode for final evaluation/reporting')
 parser.add_argument('--debias_apply_to', type=str, default='focus', choices=['focus', 'all'], help='apply debias offset to focus targets only or all series')
+parser.add_argument('--debias_skip_nodes', type=str, default='', help='comma-separated node names to SKIP debias for (e.g. kr_fx)')
 parser.add_argument('--bias_penalty', type=float, default=0.3, help='lambda for training-time signed-bias penalty (0 disables)')
 parser.add_argument('--bias_penalty_scope', type=str, default='focus', choices=['focus', 'all'], help='scope for training-time bias penalty')
 parser.add_argument('--plot_focus_only', type=int, default=0, help='1 to plot/save only focus nodes')
@@ -1249,11 +1454,15 @@ parser.add_argument('--lag_penalty_1step', type=float, default=1.2, help='1-step
 parser.add_argument('--lag_sign_penalty', type=float, default=0.6, help='direction-mismatch proxy penalty weight')
 parser.add_argument('--lag_penalty_gain_map', type=str, default='kr_fx:2.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0', help='per-focus-node lag penalty multiplier map')
 parser.add_argument('--grad_loss_weight', type=float, default=0.3, help='weight for gradient/trend loss (0 disables)')
+parser.add_argument('--smoothness_penalty', type=float, default=0.0, help='TV loss weight to encourage smooth prediction curves (0 disables)')
 parser.add_argument('--clean_cache', type=int, default=0, choices=[0, 1], help='1 to delete cached *.pt in data dir before training')
+parser.add_argument('--eval_last_epoch', type=int, default=0, choices=[0, 1], help='1 to use the final epoch model for evaluation instead of validation-best checkpoint')
 parser.add_argument('--autotune_mode', type=int, default=0, choices=[0, 1], help='1 to optimize for repeated auto-tuning runs')
 parser.add_argument('--apply_best_tuning', type=int, default=0, choices=[0, 1], help='1 to override args with best tuning run values')
 parser.add_argument('--eval_best_tuning', type=int, default=0, choices=[0, 1], help='1 to skip training and evaluate best tuned checkpoint with plotting')
 parser.add_argument('--target_profile', type=str, default='triple_050', choices=['none', 'triple_050', 'run001_us'], help='preset for target-focused optimization setup')
+parser.add_argument('--save_pred_dir', type=str, default='', help='directory to save raw prediction/actual numpy arrays for ensemble')
+parser.add_argument('--ensemble_seeds', type=str, default='', help='comma-separated seeds for multi-seed ensemble (e.g. 777,42,123). Runs all seeds and averages predictions.')
 
 
 args = parser.parse_args()
@@ -1261,7 +1470,7 @@ args.best_tuning_checkpoint = ''
 if args.autotune_mode == 1:
     args.plot = 0
     args.clean_cache = 0
-    args.use_graph = 0
+    # Keep use_graph as specified by CLI (don't override to 0)
 
 # If requested, load best tuning run from tuning_runs and override matching args
 if args.apply_best_tuning == 1:
@@ -1346,27 +1555,27 @@ if args.target_profile == 'triple_050':
     args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt'
     args.rse_report_mode = 'targets'
     args.loss_mode = 'mse'
-    args.lr = 0.0003
-    args.dropout = 0.03
-    args.seq_in_len = 36
+    args.lr = 0.00015
+    args.dropout = 0.02
+    args.seq_in_len = 24
     args.seq_out_len = 12
     args.ss_prob = 0.05
-    args.seed = 123
+    args.seed = 777
     args.focus_weight = 1.0
-    args.focus_target_gain = 60.0
-    args.focus_only_loss = 0
+    args.focus_target_gain = 80.0
+    args.focus_only_loss = 1
     args.focus_rrse_mode = 'max'
-    args.anchor_focus_to_last = 0.1
+    args.anchor_focus_to_last = 0.06
     args.rollout_mode = 'direct'
     args.debias_mode = 'none'
     args.debias_apply_to = 'focus'
-    args.bias_penalty = 0.2
+    args.bias_penalty = 0.5
     args.bias_penalty_scope = 'focus'
-    args.lag_penalty_1step = 0.5
-    args.lag_sign_penalty = 0.3
-    args.grad_loss_weight = 0.3
+    args.lag_penalty_1step = 1.3
+    args.lag_sign_penalty = 0.5
+    args.grad_loss_weight = 0.15
     args.use_graph = 0
-    print('[target_profile] applied: triple_050 (direct mode, seq_out_len=12)')
+    print('[target_profile] applied: triple_050 (direct mode, seq_out_len=12, focus_only=1)')
 
 if args.target_profile == 'run001_us':
     args.loss_mode = 'mse'
@@ -1609,6 +1818,32 @@ def main(experiment):
                     best_test_rse = test_acc
                     best_test_corr = test_corr
 
+                    # === Per-target best checkpoint: save model when each target's val RSE improves ===
+                    if args.save_pred_dir:
+                        focus_cols = get_focus_columns(Data)
+                        if focus_cols:
+                            if not hasattr(main, '_per_target_best_val'):
+                                main._per_target_best_val = {}
+                            # Single eval call for validation arrays
+                            _, _, _, _, _, v_pred_ck, v_true_ck = evaluate_sliding_window(
+                                Data, Data.valid_window, model, evaluateL2, evaluateL1,
+                                args.seq_in_len, False, 'Validation', return_arrays=True
+                            )
+                            vp_np = v_pred_ck.cpu().numpy() if hasattr(v_pred_ck, 'cpu') else v_pred_ck
+                            vt_np = v_true_ck.cpu().numpy() if hasattr(v_true_ck, 'cpu') else v_true_ck
+                            for c in focus_cols:
+                                ss_err = np.sum((vp_np[:, c] - vt_np[:, c])**2)
+                                ss_tot = np.sum((vt_np[:, c] - vt_np[:, c].mean())**2)
+                                v_rse_c = math.sqrt(ss_err / ss_tot) if ss_tot > 1e-12 else float('inf')
+                                tname = Data.col[c]
+                                prev_best = main._per_target_best_val.get(tname, float('inf'))
+                                if v_rse_c < prev_best:
+                                    main._per_target_best_val[tname] = v_rse_c
+                                    ck_dir = Path(args.save_pred_dir) / ("best_%s" % tname.replace(' ', '_'))
+                                    ck_dir.mkdir(parents=True, exist_ok=True)
+                                    torch.save(model.state_dict(), ck_dir / "model_state.pt")
+                                    print("[per-target-ckpt] %s: val_RSE=%.4f at epoch %d (improved)" % (tname, v_rse_c, epoch))
+
         except KeyboardInterrupt:
             print('-' * 89)
             print('Exiting from training early')
@@ -1621,7 +1856,9 @@ def main(experiment):
     with open(hp_save_path, "w") as f:
         f.write(str(best_hp))
 
-    if os.path.exists(args.save):
+    if args.eval_last_epoch == 1:
+        print(f"[eval_last_epoch] Using final epoch model (skipping checkpoint load)")
+    elif os.path.exists(args.save):
         with open(args.save, 'rb') as f:
             model = torch.load(f, weights_only=False)
     else:
@@ -1643,17 +1880,196 @@ def main(experiment):
         if focus_cols:
             summary = {Data.col[c]: float(bias_offset[c].item()) for c in focus_cols}
             print(f"[debias] mode={args.debias_mode} apply_to={args.debias_apply_to} offset={summary}")
+    elif args.debias_mode == 'val_per_step':
+        _, _, _, _, _, v_pred_t, v_true_t = evaluate_sliding_window(
+            Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Validation', return_arrays=True
+        )
+        bias_offset = estimate_per_step_bias(Data, v_pred_t, v_true_t)
+        focus_cols = get_focus_columns(Data)
+        if focus_cols:
+            for c in focus_cols:
+                vals = [f"{bias_offset[t, c].item():.2f}" for t in range(min(12, bias_offset.shape[0]))]
+                print(f"[debias per_step] {Data.col[c]}: [{', '.join(vals)}]")
+    elif args.debias_mode == 'val_linear':
+        _, _, _, _, _, v_pred_t, v_true_t = evaluate_sliding_window(
+            Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Validation', return_arrays=True
+        )
+        bias_offset = estimate_linear_trend_bias(Data, v_pred_t, v_true_t)
+        focus_cols = get_focus_columns(Data)
+        if focus_cols:
+            for c in focus_cols:
+                vals = [f"{bias_offset[t, c].item():.2f}" for t in range(min(12, bias_offset.shape[0]))]
+                print(f"[debias linear] {Data.col[c]}: [{', '.join(vals)}]")
+    elif args.debias_mode == 'val_quadratic':
+        _, _, _, _, _, v_pred_t, v_true_t = evaluate_sliding_window(
+            Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Validation', return_arrays=True
+        )
+        bias_offset = estimate_quadratic_trend_bias(Data, v_pred_t, v_true_t)
+        focus_cols = get_focus_columns(Data)
+        if focus_cols:
+            for c in focus_cols:
+                vals = [f"{bias_offset[t, c].item():.2f}" for t in range(min(12, bias_offset.shape[0]))]
+                print(f"[debias quadratic] {Data.col[c]}: [{', '.join(vals)}]")
+    elif args.debias_mode == 'val_hybrid':
+        _, _, _, _, _, v_pred_t, v_true_t = evaluate_sliding_window(
+            Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Validation', return_arrays=True
+        )
+        bias_offset = estimate_hybrid_debias(Data, v_pred_t, v_true_t)
+        focus_cols = get_focus_columns(Data)
+        if focus_cols:
+            for c in focus_cols:
+                vals = [f"{bias_offset[t, c].item():.2f}" for t in range(min(12, bias_offset.shape[0]))]
+                print(f"[debias hybrid] {Data.col[c]}: [{', '.join(vals)}]")
 
     vtest_acc, vtest_rae, vtest_corr, vtest_smape, _ = evaluate_sliding_window(
         Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Validation', bias_offset=bias_offset
     )
 
-    test_acc, test_rae, test_corr, test_smape, _ = evaluate_sliding_window(
+    test_acc, test_rae, test_corr, test_smape, test_focus_rrse = evaluate_sliding_window(
         Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Testing', bias_offset=bias_offset
     )
     print('********************************************************************************************************')
-    print("final test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f} | test smape {:5.4f}".format(test_acc, test_rae, test_corr, test_smape))
+    print("final test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f} | test smape {:5.4f} | focus_rrse {:5.4f}".format(
+        test_acc, test_rae, test_corr, test_smape, test_focus_rrse if test_focus_rrse is not None else test_acc))
+    # Print per-target RSEs at final evaluation
+    _final_focus_cols = get_focus_columns(Data)
+    if _final_focus_cols:
+        _, _, _, _, _, _fp, _ft = evaluate_sliding_window(
+            Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Testing', bias_offset=bias_offset, return_arrays=True
+        )
+        _fp_np = _fp.cpu().numpy() if hasattr(_fp, 'cpu') else _fp
+        _ft_np = _ft.cpu().numpy() if hasattr(_ft, 'cpu') else _ft
+        for _c in _final_focus_cols:
+            _p = _fp_np[:, _c]
+            _a = _ft_np[:, _c]
+            _den = np.sum((_a - _a.mean())**2)
+            _rse = np.sqrt(np.sum((_p - _a)**2) / _den) if _den > 1e-12 else float('inf')
+            print(f"  [FINAL] {Data.col[_c]:>45s}  RSE={_rse:.4f}")
+        # Save predictions to save_pred_dir if specified
+        if args.save_pred_dir:
+            from pathlib import Path as _P
+            _save_dir = _P(args.save_pred_dir)
+            _save_dir.mkdir(parents=True, exist_ok=True)
+            np.save(_save_dir / "pred_Testing.npy", _fp_np)
+            np.save(_save_dir / "actual_Testing.npy", _ft_np)
+            print(f"  [FINAL] Saved predictions to {_save_dir}")
     print('********************************************************************************************************')
+
+    # ===== Per-target best checkpoint evaluation =====
+    if args.save_pred_dir and hasattr(main, '_per_target_best_val'):
+        print('\n' + '='*70)
+        print('PER-TARGET BEST CHECKPOINT EVALUATION')
+        print('='*70)
+        focus_cols = get_focus_columns(Data)
+        # We need the model architecture to load state_dict
+        import copy
+        base_model = copy.deepcopy(model)
+        for c in (focus_cols or []):
+            tname = Data.col[c]
+            safe_name = tname.replace(' ', '_')
+            ck_dir = Path(args.save_pred_dir) / ("best_%s" % safe_name)
+            ck_file = ck_dir / "model_state.pt"
+            if ck_file.exists():
+                # Load per-target best checkpoint
+                state = torch.load(ck_file, weights_only=True, map_location=device)
+                base_model.load_state_dict(state)
+                base_model.to(device)
+                base_model.eval()
+                # Evaluate with this checkpoint
+                _, _, _, _, _, tp_ck, ta_ck = evaluate_sliding_window(
+                    Data, Data.test_window, base_model, evaluateL2, evaluateL1,
+                    args.seq_in_len, False, 'Testing', return_arrays=True
+                )
+                tp_np = tp_ck.cpu().numpy() if hasattr(tp_ck, 'cpu') else tp_ck
+                ta_np = ta_ck.cpu().numpy() if hasattr(ta_ck, 'cpu') else ta_ck
+                ss_err = np.sum((tp_np[:, c] - ta_np[:, c])**2)
+                ss_tot = np.sum((ta_np[:, c] - ta_np[:, c].mean())**2)
+                t_rse = math.sqrt(ss_err / ss_tot) if ss_tot > 1e-12 else float('inf')
+                v_rse = main._per_target_best_val.get(tname, float('inf'))
+                print("  %s: test_RSE=%.4f  (val_RSE=%.4f)" % (tname, t_rse, v_rse))
+
+                # Also save numpy predictions from this per-target checkpoint
+                np.save(ck_dir / "pred_Testing.npy", tp_np)
+                np.save(ck_dir / "actual_Testing.npy", ta_np)
+                # Also try debias modes
+                _, _, _, _, _, vp_ck, va_ck = evaluate_sliding_window(
+                    Data, Data.valid_window, base_model, evaluateL2, evaluateL1,
+                    args.seq_in_len, False, 'Validation', return_arrays=True
+                )
+                for dname, dfn in [('linear', estimate_linear_trend_bias), ('quadratic', estimate_quadratic_trend_bias)]:
+                    off = dfn(Data, vp_ck, va_ck)
+                    dp = tp_ck.clone()
+                    if off.dim() == 1:
+                        dp[:, c] -= off[c]
+                    else:
+                        dp[:, c] -= off[:, c]
+                    dp_np = dp.cpu().numpy()
+                    ss_err_d = np.sum((dp_np[:, c] - ta_np[:, c])**2)
+                    t_rse_d = math.sqrt(ss_err_d / ss_tot) if ss_tot > 1e-12 else float('inf')
+                    print("    + debias=%s: test_RSE=%.4f" % (dname, t_rse_d))
+            else:
+                print("  %s: no checkpoint found" % tname)
+        print('='*70)
+
+    # ===== Multi-debias comparison (auto-runs after main evaluation) =====
+    if not args.autotune_mode:
+        print('\n' + '='*70)
+        print('POST-HOC DEBIAS COMPARISON (all modes)')
+        print('='*70)
+        debias_modes = [
+            ('none', None),
+            ('val_mean_error', estimate_bias_offset_from_arrays),
+            ('val_linear', estimate_linear_trend_bias),
+            ('val_quadratic', estimate_quadratic_trend_bias),
+            ('val_hybrid', estimate_hybrid_debias),
+        ]
+        # Get validation predictions once
+        _, _, _, _, _, v_pred_cmp, v_true_cmp = evaluate_sliding_window(
+            Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Validation', return_arrays=True
+        )
+        # Get test predictions once (no debias) to compute per-target RSE
+        _, _, _, _, _, t_pred_raw, t_true_raw = evaluate_sliding_window(
+            Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Testing', return_arrays=True
+        )
+        focus_cols = get_focus_columns(Data)
+        if focus_cols and t_pred_raw is not None and t_true_raw is not None:
+            best_per_target = {}
+            for mode_name, mode_fn in debias_modes:
+                if mode_fn is not None:
+                    b = mode_fn(Data, v_pred_cmp, v_true_cmp)
+                else:
+                    b = None
+
+                # Apply debias to test predictions
+                test_p = t_pred_raw.clone()
+                if b is not None:
+                    bb = b.to(test_p.device)
+                    if bb.dim() == 1:
+                        bb = bb.unsqueeze(0)
+                    test_p = test_p - bb
+                test_a = t_true_raw.clone()
+
+                rse_list = []
+                for c in focus_cols:
+                    p = test_p[:, c].cpu().numpy() if test_p.dim() == 2 else test_p[:, :, c].reshape(-1).cpu().numpy()
+                    a = test_a[:, c].cpu().numpy() if test_a.dim() == 2 else test_a[:, :, c].reshape(-1).cpu().numpy()
+                    ss_err = np.sum((p - a)**2)
+                    ss_total = np.sum((a - a.mean())**2)
+                    rse = math.sqrt(ss_err / ss_total) if ss_total > 1e-12 else float('inf')
+                    me = float((p - a).mean())
+                    rse_list.append((Data.col[c], rse, me))
+                    if c not in best_per_target or rse < best_per_target[c][1]:
+                        best_per_target[c] = (mode_name, rse, me)
+
+                rse_strs = [f"{n}={r:.4f}(ME={m:+.2f})" for n, r, m in rse_list]
+                print(f"  debias={mode_name:16s} | {' | '.join(rse_strs)}")
+
+            print('\n  BEST per target (pick best debias mode for each):')
+            for c in focus_cols:
+                mode_name, rse, me = best_per_target[c]
+                print(f"    {Data.col[c]:>45s}: RSE={rse:.4f} (mode={mode_name}, ME={me:+.2f})")
+        print('='*70 + '\n')
+
     return vtest_acc, vtest_rae, vtest_corr, vtest_smape, test_acc, test_rae, test_corr, test_smape
 
 
