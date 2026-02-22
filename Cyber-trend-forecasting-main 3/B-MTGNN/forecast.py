@@ -87,12 +87,24 @@ def plot_forecast(data, forecast, confidence, col_name, dates_hist, dates_future
     f = forecast
     c = confidence
     
+    # 선 두께 결정 (US는 2, 나머지는 1)
+    if 'us_' in col_name.lower() or 'dollar' in col_name.lower():
+        line_width = 2
+    else:
+        line_width = 1
+    
     # Historical 플롯 (인덱스 기반)
-    ax.plot(range(len(d)), d, '-', color=color, label=consistent_name(col_name), linewidth=3)
+    ax.plot(range(len(d)), d, '-', color=color, label=consistent_name(col_name), linewidth=line_width)
     
     # Forecast 플롯 (Historical 끝에서 이어서)
     forecast_range = range(len(d)-1, (len(d)+len(f))-1)
-    ax.plot(forecast_range, f, '-', color=color, linewidth=3)
+    ax.plot(forecast_range, f, '-', color=color, linewidth=line_width)
+    
+    # 95% Confidence Interval
+    ax.fill_between(forecast_range, 
+                     f - c, 
+                     f + c,
+                     color=color, alpha=0.3, label='95% CI')
     
     # X축 년도 레이블 (2011~2027, 2011-01부터 시작)
     # 데이터: 180개월 (2011-01 ~ 2025-12) + 12개월 예측 (2026-01 ~ 2026-12)
@@ -172,50 +184,72 @@ def plot_multi_node(data, forecast, confidence, target_indices, col, dates_hist,
         c_normalized = c_relative * 3.0
         
         # Historical 플롯 (인덱스 기반, normalized)
-        line_width = 3.0  # 모든 국가 동일한 두께
+        line_width = 2 if idx == 0 else 1  # 첫 번째 국가는 굵게
         ax.plot(range(len(d_normalized)), d_normalized, '-', color=color, label=col_name, linewidth=line_width, zorder=3)
         
         # Forecast 플롯 (Historical 끝에서 연결, normalized)
         forecast_range = range(len(d_normalized)-1, (len(d_normalized)+len(f_normalized))-1)
-        forecast_x = list(forecast_range)
-        forecast_y = f_normalized.cpu().numpy()
+        ax.plot(forecast_range, f_normalized, '-', color=color, linewidth=line_width, zorder=3)
         
-        # 2단 음영: 0.00-0.03은 주황색, 0.03-y는 핑크색 (곡선 아래만 채움)
-        # 임계값 설정
-        thr = 0.03
+        # 95% Confidence Interval (각 국가별로)
+        ax.fill_between(forecast_range,
+                        f_normalized - c_normalized,
+                        f_normalized + c_normalized,
+                        color=color, alpha=0.25, zorder=3)
+    
+    # 모든 국가 플롯 후 음영 적용: US선~KR선은 US색, KR선~JP선은 KR색
+    if len(target_indices) > 2:
+        # US (첫 번째 - 가장 아래)
+        us_idx = target_indices[0]
+        d_us = torch.cat((data[:, us_idx], forecast[0:1, us_idx]), dim=0)
+        f_us = forecast[:, us_idx]
+        base_us = d_us[0].item()
+        full_us = torch.cat((d_us, f_us[1:]), dim=0)
+        full_us_norm = full_us / base_us
         
-        # numpy array로 변환
-        import numpy as np
-        y_forecast = np.array(forecast_y)
-        x_forecast = np.array(forecast_x)
+        # KR (두 번째 - 중간)
+        kr_idx = target_indices[1]
+        d_kr = torch.cat((data[:, kr_idx], forecast[0:1, kr_idx]), dim=0)
+        f_kr = forecast[:, kr_idx]
+        base_kr = d_kr[0].item()
+        full_kr = torch.cat((d_kr, f_kr[1:]), dim=0)
+        full_kr_norm = full_kr / base_kr
         
-        # 마스크 생성
-        mask_pos = ~np.isnan(y_forecast) & (y_forecast > 0)
-        mask_hi = ~np.isnan(y_forecast) & (y_forecast > thr)
+        # JP (세 번째 - 가장 위)
+        jp_idx = target_indices[2]
+        d_jp = torch.cat((data[:, jp_idx], forecast[0:1, jp_idx]), dim=0)
+        f_jp = forecast[:, jp_idx]
+        base_jp = d_jp[0].item()
+        full_jp = torch.cat((d_jp, f_jp[1:]), dim=0)
+        full_jp_norm = full_jp / base_jp
         
-        # 주황색 음영: 0부터 min(y, 0.03)까지
-        y_orange = np.minimum(y_forecast, thr)
+        # Forecast 구간만 추출 (180~191)
+        forecast_start_idx = len(d_us) - 1  # 179
+        forecast_x = np.arange(forecast_start_idx, forecast_start_idx + len(f_us))
+        forecast_y_us = full_us_norm[forecast_start_idx:forecast_start_idx + len(f_us)].cpu().numpy()
+        forecast_y_kr = full_kr_norm[forecast_start_idx:forecast_start_idx + len(f_kr)].cpu().numpy()
+        forecast_y_jp = full_jp_norm[forecast_start_idx:forecast_start_idx + len(f_jp)].cpu().numpy()
+        
+        # 색상 팔레트 (RoyalBlue=US, Crimson=KR)
+        colours_shading = ["RoyalBlue", "Crimson", "DarkOrange"]
+        
+        # KR 색깔 음영: US선부터 KR선까지
         ax.fill_between(
-            x_forecast, 0, y_orange,
-            where=mask_pos,
+            forecast_x, forecast_y_us, forecast_y_kr,
             interpolate=True,
-            color="orange",
-            alpha=0.18,
+            color=colours_shading[1],  # Crimson (KR 색)
+            alpha=0.3,
             zorder=1
         )
         
-        # 핑크색 음영: 0.03부터 y까지 (y > 0.03일 때만)
+        # US 색깔 음영: KR선부터 JP선까지
         ax.fill_between(
-            x_forecast, thr, y_forecast,
-            where=mask_hi,
+            forecast_x, forecast_y_kr, forecast_y_jp,
             interpolate=True,
-            color="hotpink",
-            alpha=0.18,
+            color=colours_shading[0],  # RoyalBlue (US 색)
+            alpha=0.3,
             zorder=2
         )
-        
-        # Forecast 선 그리기 (음영 위로)
-        ax.plot(forecast_range, f_normalized, '-', color=color, linewidth=line_width, zorder=3)
     
     # X축 년도 레이블 (2011~2027, 2011-01부터 시작)
     x = ['2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027']
