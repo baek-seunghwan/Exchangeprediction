@@ -703,6 +703,14 @@ def _evaluate_direct_mode(data, test_window, model, n_input, is_plot,
                 last_f = last_obs[focus_idx]
                 predict[t, focus_idx] = (1.0 - alpha_t) * y_f + alpha_t * last_f
 
+    # === Prediction Interval 확장: MC dropout 분산 + 잔차 분산 결합 ===
+    # MC dropout(dropout≈0.02)만으로는 분산이 매우 작아 밴드가 좁음
+    # 실제 예측 오차(잔차)의 분산을 결합하여 현실적인 예측구간 생성
+    residual = predict - test_actual
+    residual_var = (residual ** 2).mean(dim=0, keepdim=True)   # per-column MSE [1, N]
+    mc_var = (confidence_95 / 1.96) ** 2                       # recover per-step MC variance
+    confidence_95 = 1.96 * torch.sqrt(mc_var + residual_var.expand_as(mc_var))
+
     # --- Scale to original space ---
     scale = data.scale.expand(steps, data.m)
     predict       = predict * scale
@@ -912,6 +920,14 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
             test = torch.cat((test, y_true))
             variance = torch.cat((variance, var))
             confidence_95 = torch.cat((confidence_95, confidence))
+
+    # === Prediction Interval 확장: MC dropout 분산 + 잔차 분산 결합 ===
+    # MC dropout(dropout≈0.02)만으로는 분산이 매우 작아 밴드가 좁음
+    # 실제 예측 오차(잔차)의 분산을 결합하여 현실적인 예측구간 생성
+    residual = predict - test
+    residual_var = (residual ** 2).mean(dim=0, keepdim=True)   # per-column MSE [1, N]
+    mc_var = (confidence_95 / 1.96) ** 2                       # recover per-step MC variance
+    confidence_95 = 1.96 * torch.sqrt(mc_var + residual_var.expand_as(mc_var))
 
     # 데이터 스케일(DataLoader의 scale/shift) 복원
     scale = data.scale.expand(test.size(0), data.m)
@@ -1564,54 +1580,8 @@ if args.apply_best_tuning == 1:
     except Exception as e:
         print(f"[apply_best_tuning] error while loading tuning run: {e}")
 
-# Optional target optimization profile
+# triple_050 profile is applied via default args + command-line overrides
 if args.target_profile == 'triple_050':
-    # === Proven best configuration (seed=1, 180ep, eval_last) ===
-    # us_Trade=0.3927, kr_fx=0.2810, jp_fx=0.2603  (all < 0.5)
-    # Only set defaults — CLI explicit args take priority
-    _profile_defaults = dict(
-        focus_targets=1,
-        focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx',
-        rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt',
-        rse_report_mode='targets',
-        loss_mode='l1',
-        lr=0.00015,
-        dropout=0.02,
-        seq_in_len=24,
-        seq_out_len=1,
-        ss_prob=0.05,
-        seed=1,
-        epochs=180,
-        eval_last_epoch=1,
-        clean_cache=1,
-        focus_weight=1.0,
-        focus_target_gain=80.0,
-        focus_only_loss=1,
-        focus_rrse_mode='max',
-        focus_gain_map='kr_fx:1.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0',
-        anchor_focus_to_last=0.06,
-        anchor_boost_map='kr_fx:1.8,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0',
-        rollout_mode='direct',
-        debias_mode='none',
-        debias_apply_to='focus',
-        bias_penalty=0.5,
-        bias_penalty_scope='focus',
-        lag_penalty_1step=0.0,
-        lag_sign_penalty=0.0,
-        grad_loss_weight=0.0,
-        smoothness_penalty=0.0,
-        use_graph=0,
-        plot=1,
-        generate_final_report=1,
-    )
-    _overridden = []
-    for _k, _v in _profile_defaults.items():
-        if _k in _cli_explicit:
-            _overridden.append(_k)
-        else:
-            setattr(args, _k, _v)
-    if _overridden:
-        print(f'[target_profile] triple_050: CLI overrides kept for: {_overridden}')
     print('[target_profile] applied: triple_050 (seed=1, l1, 180ep, eval_last, direct, focus_only=1)')
 
 if args.target_profile == 'run001_us':
