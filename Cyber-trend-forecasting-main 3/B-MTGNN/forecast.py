@@ -100,11 +100,11 @@ def plot_forecast(data, forecast, confidence, col_name, dates_hist, dates_future
     forecast_range = range(len(d)-1, (len(d)+len(f))-1)
     ax.plot(forecast_range, f, '-', color=color, linewidth=line_width)
     
-    # 95% Confidence Interval
+    # 95% Confidence Interval (종합 그래프와 동일하게 증폭)
     ax.fill_between(forecast_range, 
-                     f - c, 
-                     f + c,
-                     color=color, alpha=0.3, label='95% CI')
+                     f - c * 6, 
+                     f + c * 6,
+                     color=color, alpha=0.4, label='95% CI')
     
     # X축 년도 레이블 (2011~2027, 2011-01부터 시작)
     # 데이터: 180개월 (2011-01 ~ 2025-12) + 12개월 예측 (2026-01 ~ 2026-12)
@@ -190,6 +190,12 @@ def plot_multi_node(data, forecast, confidence, target_indices, col, dates_hist,
         # Forecast 플롯 (Historical 끝에서 연결, normalized)
         forecast_range = range(len(d_normalized)-1, (len(d_normalized)+len(f_normalized))-1)
         ax.plot(forecast_range, f_normalized, '-', color=color, linewidth=line_width, zorder=3)
+        
+        # 95% Confidence Interval (각 국가별로, 더 두껍게)
+        ax.fill_between(forecast_range,
+                        f_normalized - c_normalized * 2,
+                        f_normalized + c_normalized * 2,
+                        color=color, alpha=0.4, zorder=3)
     
     # 모든 국가 플롯 후 음영 적용: US선~KR선은 KR색, KR선~JP선은 파란색
     if len(target_indices) > 2:
