@@ -709,7 +709,7 @@ def _evaluate_direct_mode(data, test_window, model, n_input, is_plot,
     residual = predict - test_actual
     residual_var = (residual ** 2).mean(dim=0, keepdim=True)   # per-column MSE [1, N]
     mc_var = (confidence_95 / 1.96) ** 2                       # recover per-step MC variance
-    confidence_95 = 1.96 * torch.sqrt(mc_var + residual_var.expand_as(mc_var))
+    confidence_95 = 1.96 * torch.sqrt(mc_var + residual_var.expand_as(mc_var)) * 0.5
 
     # --- Scale to original space ---
     scale = data.scale.expand(steps, data.m)
@@ -927,7 +927,7 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     residual = predict - test
     residual_var = (residual ** 2).mean(dim=0, keepdim=True)   # per-column MSE [1, N]
     mc_var = (confidence_95 / 1.96) ** 2                       # recover per-step MC variance
-    confidence_95 = 1.96 * torch.sqrt(mc_var + residual_var.expand_as(mc_var))
+    confidence_95 = 1.96 * torch.sqrt(mc_var + residual_var.expand_as(mc_var)) * 0.5
 
     # 데이터 스케일(DataLoader의 scale/shift) 복원
     scale = data.scale.expand(test.size(0), data.m)
