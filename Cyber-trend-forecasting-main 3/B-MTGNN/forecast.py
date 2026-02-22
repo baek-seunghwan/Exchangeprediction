@@ -188,7 +188,7 @@ def plot_forecast(data, forecast, confidence, name, dates_hist, dates_future, ou
 def plot_multi_node(dates_hist, dates_future, smoothed_hist, smoothed_fut, smoothed_conf_fut,
                     target_indices, col, index_idx, plot_colours, out_path,
                     x_start=None, x_end=None, add_last_month_tick=True):
-    """다중 노드 플롯 - 하나의 그림에 5개 노드"""
+    """다중 노드 플롯 - 하나의 그림에 3개 타겟 노드 (US, KR, JP)"""
     fig, ax = pyplot.subplots(figsize=(15, 10))
 
     connect_date = dates_future[0]
@@ -237,7 +237,7 @@ def plot_multi_node(dates_hist, dates_future, smoothed_hist, smoothed_fut, smoot
 
     ax.legend(loc="upper left", bbox_to_anchor=(1, 1.03))
     ax.grid(True, linestyle=':', alpha=0.6)
-    pyplot.title("US Index & FX Rate Forecast (Normalized to 1.0)", fontsize=18)
+    pyplot.title("3-Country FX Forecast: US Trade Dollar Index, KR, JP (Normalized)", fontsize=18)
     pyplot.savefig(out_path, bbox_inches="tight")
     pyplot.close()
 
@@ -249,7 +249,7 @@ def plot_multi_node(dates_hist, dates_future, smoothed_hist, smoothed_fut, smoot
 parser = argparse.ArgumentParser(description='Forecast plotting and export')
 parser.add_argument('--model', type=str, default='', help='optional model checkpoint path (.pt)')
 parser.add_argument('--mc_runs', type=int, default=20)
-parser.add_argument('--horizon', type=int, default=36)
+parser.add_argument('--horizon', type=int, default=12, help='forecast horizon in months (default: 12 for 1 year)')
 parser.add_argument('--hist_alpha', type=float, default=0.3, help='history smoothing alpha')
 parser.add_argument('--future_alpha', type=float, default=1.0, help='future smoothing alpha (1.0 means no smoothing)')
 args = parser.parse_args()
@@ -299,7 +299,7 @@ try:
 
     # 날짜 설정
     if dates_all is None:
-        LAST_OBS = pd.Timestamp("2025-07-01")
+        LAST_OBS = pd.Timestamp("2025-12-01")  # 2025년 12월까지 학습
         dates_all = pd.date_range(end=LAST_OBS, periods=len(df), freq="MS").tolist()
     else:
         dates_all = pd.Series(dates_all).ffill()
@@ -448,33 +448,38 @@ fut_plot = torch.tensor(np.array(fut_plot_list)).T
 conf_plot_fut = torch.tensor(np.array(conf_plot_list)).T
 
 # 날짜 설정
-HIST_END = pd.Timestamp("2025-07-01")
+HIST_END = pd.Timestamp("2025-12-01")  # 2025년 12월까지 히스토리
 dates_hist = pd.date_range(end=HIST_END, periods=len(df), freq="MS").tolist()
 
-FORECAST_START = HIST_END + pd.DateOffset(months=1)
+FORECAST_START = HIST_END + pd.DateOffset(months=1)  # 2026년 1월부터 예측
 dates_future = pd.date_range(start=FORECAST_START, periods=horizon, freq="MS").tolist()
 
 print(f"Forecast range: {dates_future[0].strftime('%Y-%m')} ~ {dates_future[-1].strftime('%Y-%m')}")
 
-# 플롯 대상 선택 (US Trade Weighted Dollar Index + 주요 FX)
+# 플롯 대상 선택 (US Trade Weighted Dollar Index + 주요 FX) - 3개국만
 preferred_names = [
     'us_Trade Weighted Dollar Index',
     'kr_fx',
     'jp_fx',
-    'cn_fx',
-    'uk_fx',
 ]
 target_indices = [i for i, name in enumerate(col) if name in preferred_names]
 
 # 대소문자/표기 차이 대비 fallback
 if not target_indices:
-    fallback_tokens = ['trade weighted dollar index', 'kr_fx', 'jp_fx', 'cn_fx', 'uk_fx']
+    fallback_tokens = ['trade weighted dollar index', 'kr_fx', 'jp_fx']
     target_indices = sorted(list(set([
         i for token in fallback_tokens for i, n in enumerate(col)
         if token in n.lower() and 'trade_balance' not in n.lower() and 'balanced_of_trade' not in n.lower()
     ])))
 
+print(f"Selected target indices: {target_indices}")
+print(f"Target names: {[col[i] for i in target_indices]}")
+
+print(f"Selected target indices: {target_indices}")
+print(f"Target names: {[col[i] for i in target_indices]}")
+
 if not target_indices:
+    print("⚠️  Warning: No target indices found. Using all columns.")
     target_indices = list(range(m))
 
 plot_colours = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
@@ -488,7 +493,7 @@ for idx, i in enumerate(target_indices):
                   linestyle='--',
                   is_index=False)
 
-# Multi-Node Plot - FULL
+# Multi-Node Plot - FULL (2011~2026년 전체)
 print("Generating multi-node plots...")
 plot_multi_node(
     dates_hist=dates_hist,
@@ -500,12 +505,12 @@ plot_multi_node(
     col=col,
     index_idx=index_idx,
     plot_colours=plot_colours,
-    out_path=os.path.join(plot_dir, "Multi_Node_Index_FULL.png"),
+    out_path=os.path.join(plot_dir, "3Countries_Forecast_FULL_2026.png"),
     x_start=dates_hist[0],
-    x_end=pd.Timestamp("2028-07-31"),
+    x_end=dates_future[-1] + pd.DateOffset(months=1),
 )
 
-# Multi-Node Plot - ZOOM
+# Multi-Node Plot - ZOOM (2022~2026년)
 plot_multi_node(
     dates_hist=dates_hist,
     dates_future=dates_future,
@@ -516,10 +521,12 @@ plot_multi_node(
     col=col,
     index_idx=index_idx,
     plot_colours=plot_colours,
-    out_path=os.path.join(plot_dir, "Multi_Node_Index_ZOOM.png"),
-    x_start=pd.Timestamp("2022-08-01"),
-    x_end=pd.Timestamp("2028-07-31"),
+    out_path=os.path.join(plot_dir, "3Countries_Forecast_ZOOM_2026.png"),
+    x_start=pd.Timestamp("2022-01-01"),
+    x_end=dates_future[-1] + pd.DateOffset(months=1),
 )
 
 print("=== 최종 완료 ===")
-print(f"All outputs saved to: {plot_dir}")
+print(f"Forecast plots saved to: {plot_dir}")
+print(f"Individual plots saved to: {pt_plots_dir}")
+print(f"Forecast data saved to: {data_out_dir}")

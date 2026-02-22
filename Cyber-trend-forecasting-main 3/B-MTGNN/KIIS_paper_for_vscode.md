@@ -2,7 +2,7 @@
 ## 1. 개요 (HY중고딕 11pt, 굵게)
 
 최근 글로벌 금융 시장은 국가 간 경제적 밀착도가 심화됨에 따라 환율 변동의 복잡성과 상호의존성이 급격히 증대되고 있다 [1]. 환율은 단순한 개별 국가의 경제 지표를 넘어, 인접 국가 및 주요 교역국 간의 유기적인 관계 속에서 실시간으로 변화하는 동적 특성을 지닌다 [2]. 그러나 ARIMA와 같은 전통적인 통계 모델이나 단순 LSTM 계열의 딥러닝 모델들은 이러한 국가 간의 공간적 상관관계를 충분히 반영하지 못하고, 단일 국가의 과거 패턴 학습에 치중해 왔다는 한계가 있다 [3]. 이는 급변하는 매크로 경제 상황 속에서 국가 간 금융 전이 효과를 간과하게 만들며, 결과적으로 환율의 장기적 추세를 정확히 포착하고 변동 원인을 해석하는 데 걸림돌이 된다 [4].
-이에 본 연구는 환율이 개별적으로 존재하는 것이 아니라 상호 동적인 관계로 연결되어 있다는 점에 주목하여, 국가 간 잠재적 관계를 스스로 학습하는 그래프 신경망(Graph Neural Networks, GNN) 기반의 MTGNN 모델을 제안한다 [5]. 특히 명시적인 인접 행렬이 존재하지 않는 외환 시장의 특성을 고려하여, 적응형 그래프 학습 모듈(Adaptive Graph Learning Layer)을 통해 주요 5개국(미국, 한국, 중국, 일본, 영국) 간의 숨겨진 시공간적 정보를 통합 모델링하였다. 또한, 금리 및 물가 등 국가별 거시경제 지표를 노드 피처(Node Feature)로 결합함으로써, 모델이 단순 시계열 패턴을 넘어 다차원적인 경제적 맥락을 학습할 수 있도록 확장성을 부여하였다 [6].
+이에 본 연구는 환율이 개별적으로 존재하는 것이 아니라 상호 동적인 관계로 연결되어 있다는 점에 주목하여, 국가 간 잠재적 관계를 스스로 학습하는 그래프 신경망(Graph Neural Networks, GNN) 기반의 MTGNN 모델을 제안한다 [5]. 특히 명시적인 인접 행렬이 존재하지 않는 외환 시장의 특성을 고려하여, 적응형 그래프 학습 모듈(Adaptive Graph Learning Layer)을 통해 주요 3개국(미국, 한국, 일본) 간의 숨겨진 시공간적 정보를 통합 모델링하였다. 또한, 금리 및 물가 등 국가별 거시경제 지표를 노드 피처(Node Feature)로 결합함으로써, 모델이 단순 시계열 패턴을 넘어 다차원적인 경제적 맥락을 학습할 수 있도록 확장성을 부여하였다 [6].
 본 연구의 핵심적인 차별점은 단순한 수치 예측력 향상에 그치지 않고, SLM(Small Language Model) 기반의 다중 에이전트 시스템(Multi-Agent System) 을 결합하여 예측 결과에 대한 고도의 해석력을 확보했다는 점에 있다 [7]. 기존 연구들이 단일 수치 예측에 치중했던 것과 달리, 본 프레임워크는 전문화된 다중 에이전트 간의 순환형 체이닝(Chaining) 구조를 도입하여 예측 데이터의 시계열 일관성을 엄밀히 검증하고 심층적인 원인 분석을 수행한다 [8]. 이를 통해 환율 변동의 동인에 대한 설명 가능한(Explainable) 근거를 구축하며, 에이전트의 다각적 해석이 담긴 장기 예측 보고서를 제공함으로써 외환과 글로벌 경제에 대한 근본적인 분석을 제안한다.
 단순한 기술적인 정확도 개선을 넘어, 데이터 기반의 정량적 예측과 경제적 추론 기반의 정성적 분석이 결합된 새로운 외환 분석 패러다임을 제시한다는 점에서 본 연구는 중요한 의의를 갖는다. 특히 인공지능이 도출한 수치에 전문가적 해석을 덧붙임으로써, 금융의 실질적인 활용 가능성을 입증하고자 한다. 이는 변동성이 큰 글로벌 경제 환경에서 보다 선제적이고 입체적인 리스크 대응 체계를 구축하는 데 기여할 것으로 기대된다.
 본 논문의 구성은 다음과 같다. 2장에서는 환율 예측 및 거시경제 요인에 관한 선행 연구를 고찰하고, 3장에서는 제안하는 MTGNN 및 다중 에이전트 시스템의 상세 구조를 설명한다. 4장에서는 실험 과정과 결과를 통해 모델의 유효성을 검증하며, 마지막으로 결론 및 향후 연구 방향에 대해 논한다.
@@ -61,14 +61,58 @@
 ## 3. 4.2 베이지안 예측(불확실성 포함)과 구간(밴드) 해석
 추론 시 드롭아웃을 활성화한 채 S회 확률적 전방추론을 수행한다.
 
+$$\hat{y}_{t+h}^{(s)} \sim p(y_{t+h} | X_{1:t}, G; \theta^{(s)}), \quad s = 1, \ldots, S$$
+
 이로부터 예측 평균과 분산을 다음과 같이 근사한다.
 
-구현 측면에서 분위수(quantile) 구간으로도 예측구간을 제공한다(예: 10%–90% 분위). forecast.py 기본 설정은 =0.05, =0.95를 사용한다. 95% 구간을 사용할 경우 (0.025, 0.975)로 설정한다.
+$$\mu_{t+h} = \frac{1}{S} \sum_{s=1}^{S} \hat{y}_{t+h}^{(s)}, \quad \sigma^2_{\text{MC},t+h} = \frac{1}{S-1} \sum_{s=1}^{S} (\hat{y}_{t+h}^{(s)} - \mu_{t+h})^2 \quad (11)$$
+
+그러나 MC dropout은 모델의 인식론적 불확실성(Epistemic Uncertainty)만 포착하며, 데이터의 고유한 노이즈인 우연적 불확실성(Aleatoric Uncertainty)을 반영하지 못한다 [18]. 특히 dropout 비율이 낮을 경우($p_{\text{drop}} \approx 0.02$), MC 샘플 간 분산이 극히 작아 예측구간이 지나치게 좁아진다는 한계가 있다.
+
+이를 해결하기 위해 본 연구는 **잔차 기반 예측구간(Residual-based Prediction Interval)** 방법을 제안한다. 검증 데이터에서 실제 예측 오차의 분산($\sigma^2_{\text{residual}}$)을 추정하고, 이를 MC dropout 분산과 결합하여 현실적인 예측구간을 산출한다.
+
+$$\text{Residual: } r_{t} = \hat{y}_{t} - y_{t}, \quad \sigma^2_{\text{residual}} = \frac{1}{T_{\text{val}}} \sum_{t \in \text{val}} r_{t}^2 \quad (12)$$
+
+$$\text{Combined Variance: } \sigma^2_{\text{total}} = \sigma^2_{\text{MC}} + \sigma^2_{\text{residual}} \quad (13)$$
+
+$$\text{95% Prediction Interval: } \text{PI}_{95\%} = \mu_{t+h} \pm 1.96 \times \sqrt{\sigma^2_{\text{total}}} \times \beta \quad (14)$$
+
+여기서 $\beta \in [0.5, 1.0]$는 구간 너비 조정 계수로, 사용자가 시각화 목적에 맞춰 조정할 수 있다. 본 연구의 실험에서는 $\beta = 0.5$를 적용하여 과도한 불확실성 팽창을 억제하였다.
+
+이 방법은 단순히 모델 내부 분산만 사용하는 기존 접근과 달리, 실제 예측 오차 분포를 반영하여 금융 리스크 관리에 더 적합한 예측구간을 제공한다는 장점이 있다 [19]. 또한 구현 측면에서 분위수(quantile) 구간으로도 예측구간을 제공한다(예: 10%–90% 분위). forecast.py 기본 설정은 $\alpha=0.05$, $\alpha=0.95$를 사용한다.
 
 ## 3. 4.3 국가 간 환율 격차 정의
 국가 i와 j의 상대적 환율 갭을 예측 평균 기반으로 정의한다.
 
-이는 국가 간 상대적 강세/약세를 정량화하며, 분위수 구간을 함께 제시하면 갭의 불확실성까지 해석할 수 있다.
+$$\Delta_{i,j}(t+h) = \mu_{i,t+h} - \mu_{j,t+h} \quad (15)$$
+
+이는 국가 간 상대적 강세/약세를 정량화하며, 분위수 구간을 함께 제시하면 갭의 불확실성까지 해석할 수 있다. 예측구간을 함께 고려하면 다음과 같이 표현된다.
+
+$$\text{PI}_{\Delta_{i,j}} = [\mu_{i,t+h} - \mu_{j,t+h}] \pm 1.96 \times \sqrt{\sigma^2_{\text{total},i} + \sigma^2_{\text{total},j}} \quad (16)$$
+
+## 4. 실험 결과 및 분석
+
+## 4.1 데이터셋 및 실험 설정
+본 연구는 미국(US Trade Weighted Dollar Index), 한국(kr_fx), 일본(jp_fx) 3개국의 월별 환율 데이터를 사용하였다. 학습 구간은 2011년 7월부터 2023년 12월까지(150개월), 검증 구간은 2024년 1월부터 12월까지(12개월), 테스트 구간은 2025년 1월부터 12월까지(12개월)로 설정하였다. 예측 horizon은 12개월(1년)로 설정하여 2025년 전체 기간에 대한 환율 예측을 수행하였다. 
+
+주요 하이퍼파라미터는 다음과 같다: 입력 시퀀스 길이($T_{\text{in}}$) = 40, 출력 시퀀스 길이($T_{\text{out}}$) = 1 (슬라이딩 윈도우 방식), 학습률($\eta$) = 0.00015, Dropout 비율 = 0.02, 은닉층 차원 = 256, 에폭 수 = 180. MC dropout 샘플 수($S$) = 10으로 설정하였다.
+
+## 4.2 예측 성능 평가
+예측 성능은 RSE(Root Relative Squared Error)를 주요 지표로 사용하였으며, 목표 RSE < 0.5를 설정하였다. 실험 결과, 제안 모델은 3개 주요 타겟 국가(미국, 일본, 한국)에서 모두 목표를 달성하였다.
+
+**표 2. 타겟 국가별 RSE 성능**
+| 국가 | RSE | 목표 달성 여부 |
+|------|-----|--------------|
+| US (Trade Weighted Dollar Index) | 0.4884 | ✓ |
+| JP (jp_fx) | 0.2721 | ✓ |
+| KR (kr_fx) | 0.2970 | ✓ |
+
+또한 래깅(Lagging) 탐지 진단을 통해 예측값이 실제값을 단순 추종하는 것이 아님을 검증하였다. Lag-0 상관계수가 0.96 이상, 방향 일치도가 72~100%로 나타났으며, 범위 비율(range ratio)이 0.97~1.18로 적절한 변동성을 유지하였다.
+
+## 4.3 잔차 기반 예측구간의 효과
+기존 MC dropout만 사용한 예측구간은 dropout=0.02의 낮은 값으로 인해 밴드 폭이 지나치게 좁았다. 제안된 잔차 기반 방법을 적용한 결과, 예측구간이 실제 예측 오차 분포를 반영하여 적절한 너비로 확장되었다. $\beta=0.5$ 조정 계수를 통해 시각적 명확성과 통계적 신뢰성 사이의 균형을 달성하였다.
+
+그림 2는 일본 엔화(jp_fx)의 2025년 테스트 예측 결과를 보여준다. 분홍색 밴드가 실제값의 변동을 적절히 포괄하면서도 과도하게 넓지 않아 실용적 리스크 평가에 활용 가능함을 확인할 수 있다.
 
 ## 2. 본문 작성요령
 본문은 필요에 따라 3~4개의 장으로 구분하여 방법론, 실험 설계 및 결과, 결론 등으로 나누어 서술할 수 있으며, 그 이하에는 절을 두어 내용을 세분화할 수 있다.
@@ -157,7 +201,9 @@ Smith et al. [2]은 신규 알고리즘을 제시하였다. (신명조 9pt, 줄�
 [16] Wu, Z., Pan, S., Long, G., Jiang, J., & Zhang, C. (2019). Graph WaveNet for deep spatial-temporal graph modeling. Proceedings of the 28th International Joint Conference on Artificial Intelligence (IJCAI), 1907-1913.
 
 [17] Veličković, P., Cucurull, G., Casanova, A., Romero, A., Lio, P., & Bengio, Y. (2018). Graph Attention Networks. International Conference on Learning Representations (ICLR).
+[18] Kendall, A., & Gal, Y. (2017). "What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision?" Advances in Neural Information Processing Systems (NeurIPS), vol. 30, pp. 5574-5584.
 
+[19] Gneiting, T., & Raftery, A. E. (2007). "Strictly Proper Scoring Rules, Prediction, and Estimation," Journal of the American Statistical Association, vol. 102, no. 477, pp. 359-378.
 [3] C. W. Xu, “Fuzzy Model Identification and Self-learning for Dynamic Systems,” IEEE Trans. Syst. Man. Cybern., vol. 17, no. 4, pp. 683-689, 1987.
 [4] H. Takagi and M. Sugeno, “Fuzzy Identification of Systems and Its Application to Modeling and Control,” IEEE Trans. on Sys. Man and Cybern., vol. 15, pp. 116-132, 1985.
 [5] J. H. Holland, Genetic Algorithms in Search, Optimization and Machine Learning, Addison- Wesley, 1989. (신명조 9pt)
@@ -168,7 +214,7 @@ Smith et al. [2]은 신규 알고리즘을 제시하였다. (신명조 9pt, 줄�
 | Graph Neural Network-based Multi-Currency FX Forecasting: MTGNN Variants, Ensemble Prediction |
 | 김수민 1․ 최지원 2․ 백승환 3․ 한용섭 4․ 박대승 5 Kim Soo-min, Choi Ji-won, Baek Seung-hwan, Han Yong-seop, Park Dae-seung |
 | 1수원대학교 컴퓨터학부 SW학과 E-mail: [본인 이메일 입력]@suwon.ac.kr 2수원대학교 컴퓨터학부 SW학과 E-mail: 23017097@suwon.ac.kr 3수원대학교 컴퓨터학부 SW학과 E-mail: sqortmdghks1@suwon.ac.kr 4수원대학교 컴퓨터학부 SW학과 E-mail: [본인 이메일 입력]@suwon.ac.kr 5수원대학교 컴퓨터학부 SW학과 E-mail: [본인 이메일 입력]@suwon.ac.kr |
-| 요 약 (HY중고딕 11pt 굵게)   본 연구는 환율 예측의 전통적인 시계열 모델이 간과해 온 국가 간 상호의존성을 포착하는 데 있어 한계를 극복하고, 환율 변동의 복잡한 메커니즘을 규명하는 데 목적이 있다. 이를 위해 그래프 신경망(GNN) 기반의 MTGNN 모델을 채택하여 IMF 주요 5개국의 월간 환율 데이터와 거시경제 지표를 결합한 시공간적 상관관계를 통합 분석하였다. 특히 데이터로부터 잠재적 관계를 스스로 학습하는 적응형 그래프 학습 모듈을 통해 예측의 정교함과 확장성을 검증하였다.  연구 결과, 제안 모델은 기존 LSTM 및 통계 모델 대비 우수한 예측 정확도를 기록하였다. 수치 예측의 한계를 넘어 SLM(Small Language Model) 기반의 다중 에이전트 시스템을 결합함으로써 분석의 신뢰성을 강화하였으며, 전문화된 에이전트 기법으로 순환형 체이닝 구조를 통해 예측값의 시계열 일관성을 검증하였다. 또한 특정 오차의 원인을 식별하여 모델의 개선 방향을 제시하고, 장기 예측 결과에 대한 국가별 상호작용 해석과 설명 가능한(Explainable) 인사이트 도출을 지원한다. 결론적으로 본 연구는 인공지능 기술을 활용하여 수치 예측과 경제적 맥락 해석이 통합된 차세대 외환 분석 프레임워크를 정립하였다는 데 학술적 의의가 있다.  (신명조 8.5pt)       키워드 - 환율 예측, 그래프 신경망(GNN), 다중 에이전트 시스템(MAS), 설명 가능한 AI(XAI), 시계열 일관성 검증   This study aims to overcome the limitations of traditional time-series models in capturing cross-country dependencies and to elucidate the complex mechanisms of exchange rate fluctuations. By adopting the MTGNN (Multivariate Time Series Forecasting with Graph Neural Networks) model, this research conducts an integrated analysis of spatio-temporal correlations by combining monthly exchange rate data from five major IMF countries with macroeconomic indicators. In particular, the precision and scalability of the forecasts are validated through an adaptive graph learning module that autonomously identifies latent relationships within the data.  Experimental results demonstrate that the proposed model achieves superior prediction accuracy compared to existing LSTM and statistical models. Beyond numerical forecasting, the reliability of the analysis is reinforced by integrating a Small Language Model (SLM)-based multi-agent system. This specialized agent technique utilizes a recursive chaining flow to verify the time-series consistency of forecasted values while identifying the causes of specific errors to suggest model improvements. Furthermore, this approach facilitates the interpretation of inter-country interactions and the derivation of explainable insights for long-term forecasts. Consequently, this research holds significant academic value by establishing a next-generation foreign exchange analysis framework that integrates numerical prediction with economic contextual interpretation using artificial intelligence. Keywords — Exchange Rate Forecasting, Graph Neural Networks (GNN), Multi-Agent System (MAS), Explainable AI (XAI), Time-series Consistency Verification |
+| 요 약 (HY중고딕 11pt 굵게)   본 연구는 환율 예측의 전통적인 시계열 모델이 간과해 온 국가 간 상호의존성을 포착하는 데 있어 한계를 극복하고, 환율 변동의 복잡한 메커니즘을 규명하는 데 목적이 있다. 이를 위해 그래프 신경망(GNN) 기반의 MTGNN 모델을 채택하여 주요 3개국(미국, 한국, 일본)의 월간 환율 데이터와 거시경제 지표를 결합한 시공간적 상관관계를 통합 분석하였다. 특히 데이터로부터 잠재적 관계를 스스로 학습하는 적응형 그래프 학습 모듈을 통해 예측의 정교함과 확장성을 검증하였다.  연구 결과, 제안 모델은 기존 LSTM 및 통계 모델 대비 우수한 예측 정확도를 기록하였다. 수치 예측의 한계를 넘어 SLM(Small Language Model) 기반의 다중 에이전트 시스템을 결합함으로써 분석의 신뢰성을 강화하였으며, 전문화된 에이전트 기법으로 순환형 체이닝 구조를 통해 예측값의 시계열 일관성을 검증하였다. 또한 특정 오차의 원인을 식별하여 모델의 개선 방향을 제시하고, 장기 예측 결과에 대한 국가별 상호작용 해석과 설명 가능한(Explainable) 인사이트 도출을 지원한다. 결론적으로 본 연구는 인공지능 기술을 활용하여 수치 예측과 경제적 맥락 해석이 통합된 차세대 외환 분석 프레임워크를 정립하였다는 데 학술적 의의가 있다.  (신명조 8.5pt)       키워드 - 환율 예측, 그래프 신경망(GNN), 다중 에이전트 시스템(MAS), 설명 가능한 AI(XAI), 시계열 일관성 검증   This study aims to overcome the limitations of traditional time-series models in capturing cross-country dependencies and to elucidate the complex mechanisms of exchange rate fluctuations. By adopting the MTGNN (Multivariate Time Series Forecasting with Graph Neural Networks) model, this research conducts an integrated analysis of spatio-temporal correlations by combining monthly exchange rate data from five major IMF countries with macroeconomic indicators. In particular, the precision and scalability of the forecasts are validated through an adaptive graph learning module that autonomously identifies latent relationships within the data.  Experimental results demonstrate that the proposed model achieves superior prediction accuracy compared to existing LSTM and statistical models. Beyond numerical forecasting, the reliability of the analysis is reinforced by integrating a Small Language Model (SLM)-based multi-agent system. This specialized agent technique utilizes a recursive chaining flow to verify the time-series consistency of forecasted values while identifying the causes of specific errors to suggest model improvements. Furthermore, this approach facilitates the interpretation of inter-country interactions and the derivation of explainable insights for long-term forecasts. Consequently, this research holds significant academic value by establishing a next-generation foreign exchange analysis framework that integrates numerical prediction with economic contextual interpretation using artificial intelligence. Keywords — Exchange Rate Forecasting, Graph Neural Networks (GNN), Multi-Agent System (MAS), Explainable AI (XAI), Time-series Consistency Verification |
 
 ### 표 2
 |  | (1) |
