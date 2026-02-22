@@ -227,20 +227,20 @@ def plot_multi_node(data, forecast, confidence, target_indices, col, dates_hist,
         # 색상 팔레트 (RoyalBlue=US, Crimson=KR)
         colours_shading = ["RoyalBlue", "Crimson", "DarkOrange"]
         
-        # KR 색깔 음영: US선부터 KR선까지
+        # 파란색 음영: US선부터 JP선까지 (전체 배경)
         ax.fill_between(
-            forecast_x, forecast_y_us, forecast_y_kr,
+            forecast_x, forecast_y_us, forecast_y_jp,
             interpolate=True,
-            color=colours_shading[1],  # Crimson (KR 색)
+            color=colours_shading[0],  # RoyalBlue (파란색)
             alpha=0.3,
             zorder=1
         )
         
-        # US 색깔 음영: KR선부터 JP선까지
+        # KR 색깔 음영: US선부터 KR선까지 (위에 덮기)
         ax.fill_between(
-            forecast_x, forecast_y_kr, forecast_y_jp,
+            forecast_x, forecast_y_us, forecast_y_kr,
             interpolate=True,
-            color=colours_shading[0],  # RoyalBlue (US 색)
+            color=colours_shading[1],  # Crimson (KR 색)
             alpha=0.3,
             zorder=2
         )
