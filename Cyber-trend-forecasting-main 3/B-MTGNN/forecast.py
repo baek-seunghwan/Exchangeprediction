@@ -190,14 +190,8 @@ def plot_multi_node(data, forecast, confidence, target_indices, col, dates_hist,
         # Forecast 플롯 (Historical 끝에서 연결, normalized)
         forecast_range = range(len(d_normalized)-1, (len(d_normalized)+len(f_normalized))-1)
         ax.plot(forecast_range, f_normalized, '-', color=color, linewidth=line_width, zorder=3)
-        
-        # 95% Confidence Interval (각 국가별로)
-        ax.fill_between(forecast_range,
-                        f_normalized - c_normalized,
-                        f_normalized + c_normalized,
-                        color=color, alpha=0.25, zorder=3)
     
-    # 모든 국가 플롯 후 음영 적용: US선~KR선은 US색, KR선~JP선은 KR색
+    # 모든 국가 플롯 후 음영 적용: US선~KR선은 KR색, KR선~JP선은 파란색
     if len(target_indices) > 2:
         # US (첫 번째 - 가장 아래)
         us_idx = target_indices[0]
