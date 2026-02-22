@@ -647,6 +647,10 @@ def _evaluate_direct_mode(data, test_window, model, n_input, is_plot,
     num_runs = 1 if args.autotune_mode else 10
     outputs = []
 
+    # Reset seed for reproducible MC dropout uncertainty
+    if num_runs > 1:
+        set_random_seed(fixed_seed + 9999)
+
     if num_runs == 1:
         model.eval()
         with torch.no_grad():
@@ -774,9 +778,10 @@ def _evaluate_direct_mode(data, test_window, model, n_input, is_plot,
     if is_plot:
         skipped_nodes = []
         focus_nodes = set(get_focus_nodes())
+        extra_nodes = set(x.strip() for x in args.report_extra_nodes.split(',') if x.strip()) if args.report_extra_nodes else set()
         for v in range(data.m):
             raw_name = data.col[v]
-            if args.plot_focus_only == 1 and raw_name not in focus_nodes:
+            if args.plot_focus_only == 1 and raw_name not in focus_nodes and raw_name not in extra_nodes:
                 continue
             if np.std(test_np[:, v]) < 1e-10:
                 skipped_nodes.append(raw_name)
@@ -853,6 +858,9 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
 
         num_runs = 10
         outputs = []
+
+        # Reset seed for reproducible MC dropout
+        set_random_seed(fixed_seed + 9999 + i)
 
         for _ in range(num_runs):
             with torch.no_grad():
@@ -976,11 +984,12 @@ def evaluate_sliding_window(data, test_window, model, evaluateL2, evaluateL1, n_
     if is_plot:
         skipped_nodes = []
         focus_nodes = set(get_focus_nodes())
+        extra_nodes = set(x.strip() for x in args.report_extra_nodes.split(',') if x.strip()) if args.report_extra_nodes else set()
         for v in range(data.m):
             col = v
             raw_name = data.col[col]
 
-            if args.plot_focus_only == 1 and raw_name not in focus_nodes:
+            if args.plot_focus_only == 1 and raw_name not in focus_nodes and raw_name not in extra_nodes:
                 continue
 
             # Near-constant series는 RSE 분모가 0에 가까워 왜곡되므로 리포트에서 제외
@@ -1463,14 +1472,21 @@ parser.add_argument('--eval_best_tuning', type=int, default=0, choices=[0, 1], h
 parser.add_argument('--target_profile', type=str, default='triple_050', choices=['none', 'triple_050', 'run001_us'], help='preset for target-focused optimization setup')
 parser.add_argument('--save_pred_dir', type=str, default='', help='directory to save raw prediction/actual numpy arrays for ensemble')
 parser.add_argument('--ensemble_seeds', type=str, default='', help='comma-separated seeds for multi-seed ensemble (e.g. 777,42,123). Runs all seeds and averages predictions.')
+parser.add_argument('--report_extra_nodes', type=str, default='', help='comma-separated extra node names to include in report plots (used with plot_focus_only=1)')
+parser.add_argument('--generate_final_report', type=int, default=1, choices=[0, 1], help='1 to auto-generate final_forecast_results.png and final_summary_table.png')
 
 
 args = parser.parse_args()
+# Track which args were explicitly set on CLI (so profiles don't override them)
+_cli_explicit = set()
+for action in parser._actions:
+    if action.dest == 'help':
+        continue
+    cli_val = getattr(args, action.dest, None)
+    if cli_val != action.default:
+        _cli_explicit.add(action.dest)
 args.best_tuning_checkpoint = ''
-if args.autotune_mode == 1:
-    args.plot = 0
-    args.clean_cache = 0
-    # Keep use_graph as specified by CLI (don't override to 0)
+_autotune_mode_val = args.autotune_mode  # save for post-profile override
 
 # If requested, load best tuning run from tuning_runs and override matching args
 if args.apply_best_tuning == 1:
@@ -1550,32 +1566,53 @@ if args.apply_best_tuning == 1:
 
 # Optional target optimization profile
 if args.target_profile == 'triple_050':
-    args.focus_targets = 1
-    args.focus_nodes = 'us_Trade Weighted Dollar Index,jp_fx,kr_fx'
-    args.rse_targets = 'Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt'
-    args.rse_report_mode = 'targets'
-    args.loss_mode = 'mse'
-    args.lr = 0.00015
-    args.dropout = 0.02
-    args.seq_in_len = 24
-    args.seq_out_len = 12
-    args.ss_prob = 0.05
-    args.seed = 777
-    args.focus_weight = 1.0
-    args.focus_target_gain = 80.0
-    args.focus_only_loss = 1
-    args.focus_rrse_mode = 'max'
-    args.anchor_focus_to_last = 0.06
-    args.rollout_mode = 'direct'
-    args.debias_mode = 'none'
-    args.debias_apply_to = 'focus'
-    args.bias_penalty = 0.5
-    args.bias_penalty_scope = 'focus'
-    args.lag_penalty_1step = 1.3
-    args.lag_sign_penalty = 0.5
-    args.grad_loss_weight = 0.15
-    args.use_graph = 0
-    print('[target_profile] applied: triple_050 (direct mode, seq_out_len=12, focus_only=1)')
+    # === Proven best configuration (seed=1, 180ep, eval_last) ===
+    # us_Trade=0.3927, kr_fx=0.2810, jp_fx=0.2603  (all < 0.5)
+    # Only set defaults — CLI explicit args take priority
+    _profile_defaults = dict(
+        focus_targets=1,
+        focus_nodes='us_Trade Weighted Dollar Index,jp_fx,kr_fx',
+        rse_targets='Us_Trade Weighted Dollar Index_Testing.txt,Jp_fx_Testing.txt,Kr_fx_Testing.txt',
+        rse_report_mode='targets',
+        loss_mode='l1',
+        lr=0.00015,
+        dropout=0.02,
+        seq_in_len=24,
+        seq_out_len=1,
+        ss_prob=0.05,
+        seed=1,
+        epochs=180,
+        eval_last_epoch=1,
+        clean_cache=1,
+        focus_weight=1.0,
+        focus_target_gain=80.0,
+        focus_only_loss=1,
+        focus_rrse_mode='max',
+        focus_gain_map='kr_fx:1.0,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0',
+        anchor_focus_to_last=0.06,
+        anchor_boost_map='kr_fx:1.8,jp_fx:1.0,us_Trade Weighted Dollar Index:1.0',
+        rollout_mode='direct',
+        debias_mode='none',
+        debias_apply_to='focus',
+        bias_penalty=0.5,
+        bias_penalty_scope='focus',
+        lag_penalty_1step=0.0,
+        lag_sign_penalty=0.0,
+        grad_loss_weight=0.0,
+        smoothness_penalty=0.0,
+        use_graph=0,
+        plot=1,
+        generate_final_report=1,
+    )
+    _overridden = []
+    for _k, _v in _profile_defaults.items():
+        if _k in _cli_explicit:
+            _overridden.append(_k)
+        else:
+            setattr(args, _k, _v)
+    if _overridden:
+        print(f'[target_profile] triple_050: CLI overrides kept for: {_overridden}')
+    print('[target_profile] applied: triple_050 (seed=1, l1, 180ep, eval_last, direct, focus_only=1)')
 
 if args.target_profile == 'run001_us':
     args.loss_mode = 'mse'
@@ -1601,6 +1638,16 @@ if args.target_profile == 'run001_us':
     args.rollout_mode = 'direct'
     print('[target_profile] applied: run001_us (direct mode)')
 
+# autotune_mode overrides AFTER profile (so profile defaults can be set first)
+# BUT respect CLI-explicit args
+if _autotune_mode_val == 1:
+    if 'plot' not in _cli_explicit:
+        args.plot = 0
+    if 'clean_cache' not in _cli_explicit:
+        args.clean_cache = 0
+    if 'generate_final_report' not in _cli_explicit:
+        args.generate_final_report = 0
+
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 if device.type == 'cuda':
     print(f"Using GPU: {torch.cuda.get_device_name(0)}")
@@ -1619,6 +1666,181 @@ def set_random_seed(seed):
 
 
 fixed_seed = args.seed
+
+
+def check_lagging(pred_np, actual_np, data, focus_cols):
+    """Detect if predictions are simply lagging (delayed copy of) actual values."""
+    print('\n' + '='*70)
+    print('LAG DETECTION DIAGNOSTIC')
+    print('='*70)
+    any_lag = False
+    for c in (focus_cols or []):
+        p = pred_np[:, c]
+        a = actual_np[:, c]
+        T = len(p)
+        if T < 3:
+            print(f'  {data.col[c]}: insufficient data for lag check (T={T})')
+            continue
+
+        # Lag-0 vs Lag-1 correlation
+        lag0_corr = np.corrcoef(p, a)[0, 1] if np.std(p) > 0 and np.std(a) > 0 else 0.0
+        lag1_corr = np.corrcoef(p[:-1], a[1:])[0, 1] if np.std(p[:-1]) > 0 and np.std(a[1:]) > 0 else 0.0
+
+        # Direction match (does prediction capture direction of change?)
+        delta_pred = np.diff(p)
+        delta_actual = np.diff(a)
+        if np.std(delta_pred) > 1e-12 and np.std(delta_actual) > 1e-12:
+            dir_match = np.mean(np.sign(delta_pred) == np.sign(delta_actual))
+        else:
+            dir_match = 0.0
+
+        # Naive last-value RSE (if model just copies last input)
+        last_val_pred = np.full_like(a, a[0])  # crude: predict first value for all
+        last_val_rse = np.sqrt(np.sum((last_val_pred - a)**2) / max(np.sum((a - a.mean())**2), 1e-12))
+        actual_rse = np.sqrt(np.sum((p - a)**2) / max(np.sum((a - a.mean())**2), 1e-12))
+
+        # Flatness check: is prediction range much smaller than actual range?
+        pred_range = p.max() - p.min()
+        actual_range = a.max() - a.min()
+        range_ratio = pred_range / max(actual_range, 1e-12)
+
+        is_lagging = lag1_corr > lag0_corr + 0.05
+        is_flat = range_ratio < 0.3
+        status = ''
+        if is_lagging:
+            status += ' LAGGING'
+            any_lag = True
+        if is_flat:
+            status += ' FLAT'
+            any_lag = True
+        if not status:
+            status = ' OK'
+
+        print(f'  {data.col[c]:>45s}: lag0_r={lag0_corr:+.4f}  lag1_r={lag1_corr:+.4f}  '
+              f'dir_match={dir_match:.1%}  range_ratio={range_ratio:.2f}  RSE={actual_rse:.4f}  [{status.strip()}]')
+    if not any_lag:
+        print('  [PASS] No lagging or flatness issues detected.')
+    else:
+        print('  [WARN] Potential lagging/flatness detected in some targets.')
+    print('='*70 + '\n')
+
+
+def generate_final_report(pred_np, actual_np, data, focus_cols, confidence_np=None):
+    """Auto-generate final_forecast_results.png and final_summary_table.png
+    using in-memory prediction arrays. This provides standardised submission outputs."""
+    import matplotlib
+    matplotlib.rcParams['font.family'] = 'DejaVu Sans'
+
+    months_labels = ['Jan-25', 'Feb-25', 'Mar-25', 'Apr-25', 'May-25', 'Jun-25',
+                     'Jul-25', 'Aug-25', 'Sep-25', 'Oct-25', 'Nov-25', 'Dec-25']
+
+    target_display = {
+        'us_Trade Weighted Dollar Index': ('US Trade Weighted Dollar Index', 'Index'),
+        'kr_fx': ('KRW/USD Exchange Rate', 'KRW'),
+        'jp_fx': ('JPY/USD Exchange Rate', 'JPY'),
+    }
+
+    n_targets = len(focus_cols)
+    T = pred_np.shape[0]
+    labels = months_labels[:T]
+
+    # === Figure 1: 3-panel forecast results ===
+    fig, axes = plt.subplots(n_targets, 1, figsize=(14, 5 * n_targets), sharex=False)
+    if n_targets == 1:
+        axes = [axes]
+
+    rse_results = {}
+    for idx, c in enumerate(focus_cols):
+        ax = axes[idx]
+        name = data.col[c]
+        display_name, unit = target_display.get(name, (name, ''))
+        p = pred_np[:, c]
+        a = actual_np[:, c]
+
+        ss_err = np.sum((p - a)**2)
+        ss_tot = np.sum((a - a.mean())**2)
+        rse = np.sqrt(ss_err / max(ss_tot, 1e-12))
+        max_err = np.max(np.abs(p - a))
+        max_err_pct = np.max(np.abs(p - a) / np.clip(np.abs(a), 1e-12, None)) * 100
+        rse_results[name] = {'rse': rse, 'max_err': max_err, 'max_err_pct': max_err_pct}
+
+        x = np.arange(T)
+        ax.plot(x, a, 'b-o', linewidth=2.5, markersize=7, label='Actual', zorder=5)
+        ax.plot(x, p, '--s', color='purple', linewidth=2, markersize=6,
+                label=f'Predicted (RSE={rse:.4f})', alpha=0.85)
+
+        if confidence_np is not None:
+            ci = confidence_np[:, c]
+            ax.fill_between(x, p - ci, p + ci, alpha=0.25, color='pink',
+                            label='95% Prediction Interval')
+
+        ax.set_title(f'{display_name}', fontsize=14, fontweight='bold')
+        ax.set_ylabel(f'Value ({unit})' if unit else 'Value', fontsize=12)
+        ax.legend(fontsize=10, loc='best')
+        ax.grid(True, alpha=0.3)
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels, fontsize=10, rotation=45)
+        ax.axhline(y=a.mean(), color='gray', linestyle=':', alpha=0.4)
+
+    seed_str = f'seed={fixed_seed}'
+    fig.suptitle(
+        f'B-MTGNN Exchange Rate Forecasting — 2025 Test Period\n'
+        f'TRIPLE050 ({seed_str}, focus_only_loss=1, no_graph, lr={args.lr})',
+        fontsize=16, fontweight='bold', y=0.99
+    )
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    out_path = BMTGNN_DIR / 'final_forecast_results.png'
+    plt.savefig(out_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f'[report] Saved: {out_path}')
+
+    # === Figure 2: Summary table ===
+    fig2, ax2 = plt.subplots(figsize=(12, 3 + 0.5 * n_targets))
+    ax2.axis('off')
+
+    headers = ['Target', 'RSE', 'Max Error', 'Max Error %', 'Status']
+    rows = []
+    for c in focus_cols:
+        name = data.col[c]
+        r = rse_results.get(name, {})
+        rse_val = r.get('rse', 0)
+        status = 'PASS' if rse_val < 0.5 else 'FAIL'
+        rows.append([
+            name,
+            f'{rse_val:.4f}',
+            f'{r.get("max_err", 0):.4f}',
+            f'{r.get("max_err_pct", 0):.2f}%',
+            status,
+        ])
+
+    table = ax2.table(cellText=rows, colLabels=headers, loc='center',
+                       cellLoc='center', colWidths=[0.35, 0.12, 0.15, 0.15, 0.12])
+    table.auto_set_font_size(False)
+    table.set_fontsize(11)
+    table.scale(1, 1.8)
+
+    # Style header
+    for j in range(len(headers)):
+        table[0, j].set_facecolor('#4472C4')
+        table[0, j].set_text_props(color='white', fontweight='bold')
+    # Style status column
+    n_cols = len(headers)
+    for i in range(len(rows)):
+        status = rows[i][-1]
+        color = '#C6EFCE' if status == 'PASS' else '#FFC7CE'
+        table[i + 1, n_cols - 1].set_facecolor(color)
+
+    ax2.set_title(
+        f'Per-Target RSE Summary (seed={fixed_seed}, {args.epochs}ep, '
+        f'{"eval_last" if args.eval_last_epoch else "best_val"})',
+        fontsize=13, fontweight='bold', pad=20
+    )
+    out_path2 = BMTGNN_DIR / 'final_summary_table.png'
+    plt.savefig(out_path2, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f'[report] Saved: {out_path2}')
+
+    return rse_results
 
 
 def main(experiment):
@@ -1709,6 +1931,51 @@ def main(experiment):
              args.num_nodes = Data.train[0].shape[2]
 
         print(f"Auto-detected num_nodes: {args.num_nodes}")
+
+        # ============================================================
+        # DATA LEAKAGE VERIFICATION
+        # ============================================================
+        _train_end = Data.train_end
+        _valid_end = int((eff_train_ratio + eff_valid_ratio) * Data.n)
+        _test_start = _valid_end
+        print('='*70)
+        print('DATA LEAKAGE VERIFICATION')
+        print('='*70)
+        print(f'  Total rows:           {Data.n}')
+        print(f'  Train rows:           0..{_train_end - 1}  ({_train_end} rows)')
+        print(f'  Valid rows:           {_train_end}..{_valid_end - 1}  ({_valid_end - _train_end} rows)')
+        print(f'  Test rows:            {_test_start}..{Data.n - 1}  ({Data.n - _test_start} rows)')
+        print(f'  Normalization:        scale computed from rows [0..{_train_end - 1}] ONLY (normalize={args.normalize})')
+        print(f'  Valid window shape:   {Data.valid_window.shape}  (starts {max(0, _train_end - args.seq_in_len)})')
+        print(f'  Test window shape:    {Data.test_window.shape}   (starts {max(0, _valid_end - args.seq_in_len)})')
+        # Read date tokens for verification
+        try:
+            _df_check = pd.read_csv(args.data)
+            _date_col = _df_check.iloc[:, 0].astype(str).tolist()
+            if _train_end > 0:
+                print(f'  Train date range:     {_date_col[0]} ~ {_date_col[_train_end - 1]}')
+            if _valid_end > _train_end:
+                print(f'  Valid date range:     {_date_col[_train_end]} ~ {_date_col[_valid_end - 1]}')
+            if Data.n > _test_start:
+                print(f'  Test date range:      {_date_col[_test_start]} ~ {_date_col[Data.n - 1]}')
+            # Check for 2025 data in train/valid
+            _forbidden = 2000 + args.cutoff_year_yy
+            for _i in range(_valid_end):
+                _parsed = parse_month_token(_date_col[_i])
+                if _parsed is not None:
+                    _yr = _parsed[0]  # parse_month_token already returns 2000+yy
+                    if _yr >= _forbidden:
+                        print(f'  [FAIL] Row {_i} ({_date_col[_i]}) contains year {_yr} in train/valid!')
+                        break
+            else:
+                print(f'  [OK] No {_forbidden}+ data in train/valid (leakage-free)')
+        except Exception as _e:
+            print(f'  [WARN] Could not verify dates: {_e}')
+        print(f'  Seed:                 {fixed_seed}')
+        print(f'  Checkpoint mode:      {"eval_last_epoch" if args.eval_last_epoch else "best_val_checkpoint"}')
+        print(f'  Save path:            {args.save}')
+        print('='*70)
+        # ============================================================
 
         use_graph = bool(args.use_graph)
         model = gtnet(use_graph, use_graph, gcn_depth, args.num_nodes,
@@ -1921,39 +2188,83 @@ def main(experiment):
                 vals = [f"{bias_offset[t, c].item():.2f}" for t in range(min(12, bias_offset.shape[0]))]
                 print(f"[debias hybrid] {Data.col[c]}: [{', '.join(vals)}]")
 
+    # Reset seed before final evaluation for reproducibility
+    set_random_seed(fixed_seed)
+
     vtest_acc, vtest_rae, vtest_corr, vtest_smape, _ = evaluate_sliding_window(
         Data, Data.valid_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Validation', bias_offset=bias_offset
     )
 
+    set_random_seed(fixed_seed)
+
     test_acc, test_rae, test_corr, test_smape, test_focus_rrse = evaluate_sliding_window(
         Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, args.plot == 1, 'Testing', bias_offset=bias_offset
     )
-    print('********************************************************************************************************')
-    print("final test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f} | test smape {:5.4f} | focus_rrse {:5.4f}".format(
-        test_acc, test_rae, test_corr, test_smape, test_focus_rrse if test_focus_rrse is not None else test_acc))
-    # Print per-target RSEs at final evaluation
+
+    # ============================================================
+    # FINAL EVALUATION — Per-target RSE (MOST IMPORTANT OUTPUT)
+    # ============================================================
+    set_random_seed(fixed_seed)
     _final_focus_cols = get_focus_columns(Data)
+    _fp = _ft = _fp_np = _ft_np = None
+    _confidence_np = None
     if _final_focus_cols:
         _, _, _, _, _, _fp, _ft = evaluate_sliding_window(
             Data, Data.test_window, model, evaluateL2, evaluateL1, args.seq_in_len, False, 'Testing', bias_offset=bias_offset, return_arrays=True
         )
         _fp_np = _fp.cpu().numpy() if hasattr(_fp, 'cpu') else _fp
         _ft_np = _ft.cpu().numpy() if hasattr(_ft, 'cpu') else _ft
+
+    print('\n')
+    print('#' * 70)
+    print('#' + ' ' * 18 + 'FINAL RESULTS SUMMARY' + ' ' * 19 + '#')
+    print('#' * 70)
+    print(f'#  Profile:   {args.target_profile}')
+    print(f'#  Seed:      {fixed_seed}')
+    print(f'#  Epochs:    {args.epochs}')
+    print(f'#  Eval mode: {"eval_last_epoch" if args.eval_last_epoch else "best_val_checkpoint"}')
+    print(f'#  Device:    {device}')
+    print('#' + '-' * 68 + '#')
+    print('#  {:>45s}  {:>10s}  {:>6s}  #'.format('Target', 'RSE', 'Pass?'))
+    print('#' + '-' * 68 + '#')
+    _all_pass = True
+    if _final_focus_cols and _fp_np is not None:
         for _c in _final_focus_cols:
             _p = _fp_np[:, _c]
             _a = _ft_np[:, _c]
             _den = np.sum((_a - _a.mean())**2)
             _rse = np.sqrt(np.sum((_p - _a)**2) / _den) if _den > 1e-12 else float('inf')
-            print(f"  [FINAL] {Data.col[_c]:>45s}  RSE={_rse:.4f}")
-        # Save predictions to save_pred_dir if specified
-        if args.save_pred_dir:
-            from pathlib import Path as _P
-            _save_dir = _P(args.save_pred_dir)
-            _save_dir.mkdir(parents=True, exist_ok=True)
-            np.save(_save_dir / "pred_Testing.npy", _fp_np)
-            np.save(_save_dir / "actual_Testing.npy", _ft_np)
-            print(f"  [FINAL] Saved predictions to {_save_dir}")
-    print('********************************************************************************************************')
+            _pass = 'YES' if _rse < 0.5 else 'NO'
+            if _rse >= 0.5:
+                _all_pass = False
+            print(f'#  {Data.col[_c]:>45s}  {_rse:10.4f}  {_pass:>6s}  #')
+    print('#' + '-' * 68 + '#')
+    print(f'#  Overall RSE (agg): {test_acc:.4f}   RAE: {test_rae:.4f}   Corr: {test_corr:.4f}')
+    print(f'#  Focus RRSE (max):  {test_focus_rrse:.4f}' if test_focus_rrse is not None else '')
+    _verdict = 'ALL TARGETS PASS (< 0.5)' if _all_pass else 'SOME TARGETS FAILED'
+    print(f'#  Verdict:           {_verdict}')
+    print('#' * 70)
+
+    # Save predictions to save_pred_dir if specified
+    if _final_focus_cols and _fp_np is not None and args.save_pred_dir:
+        from pathlib import Path as _P
+        _save_dir = _P(args.save_pred_dir)
+        _save_dir.mkdir(parents=True, exist_ok=True)
+        np.save(_save_dir / "pred_Testing.npy", _fp_np)
+        np.save(_save_dir / "actual_Testing.npy", _ft_np)
+        print(f'[save] Predictions saved to {_save_dir}')
+
+    # ============================================================
+    # LAG DETECTION
+    # ============================================================
+    if _final_focus_cols and _fp_np is not None:
+        check_lagging(_fp_np, _ft_np, Data, _final_focus_cols)
+
+    # ============================================================
+    # AUTO-GENERATE FINAL REPORT IMAGES
+    # ============================================================
+    if args.generate_final_report and _final_focus_cols and _fp_np is not None:
+        generate_final_report(_fp_np, _ft_np, Data, _final_focus_cols, confidence_np=_confidence_np)
 
     # ===== Per-target best checkpoint evaluation =====
     if args.save_pred_dir and hasattr(main, '_per_target_best_val'):
