@@ -71,7 +71,7 @@ def save_data(data, forecast, confidence, variance, col, output_dir=None):
             ff.write('Variance: ' + str(v.tolist()) + '\n')
 
 
-def plot_forecast(data, forecast, confidence, col_name, dates_hist, dates_future, output_dir=None):
+def plot_forecast(data, forecast, confidence, col_name, dates_hist, dates_future, output_dir=None, color='RoyalBlue'):
     """개별 국가 예측 플롯 생성 (사이버 보안 스타일)"""
     
     # 음수값 제거
@@ -88,16 +88,11 @@ def plot_forecast(data, forecast, confidence, col_name, dates_hist, dates_future
     c = confidence
     
     # Historical 플롯 (인덱스 기반)
-    ax.plot(range(len(d)), d, '-', color='RoyalBlue', label=consistent_name(col_name), linewidth=2)
+    ax.plot(range(len(d)), d, '-', color=color, label=consistent_name(col_name), linewidth=3)
     
     # Forecast 플롯 (Historical 끝에서 이어서)
     forecast_range = range(len(d)-1, (len(d)+len(f))-1)
-    ax.plot(forecast_range, f, '-', color='RoyalBlue', linewidth=2)
-    # Forecast 음영 (Confidence Interval) - alpha를 높여서 더 잘 보이도록
-    ax.fill_between(forecast_range, 
-                     f - c, 
-                     f + c,
-                     color='RoyalBlue', alpha=0.6)
+    ax.plot(forecast_range, f, '-', color=color, linewidth=3)
     
     # X축 년도 레이블 (2011~2027, 2011-01부터 시작)
     # 데이터: 180개월 (2011-01 ~ 2025-12) + 12개월 예측 (2026-01 ~ 2026-12)
@@ -170,21 +165,57 @@ def plot_multi_node(data, forecast, confidence, target_indices, col, dates_hist,
         base_value = d[0].item()
         d_normalized = d / base_value
         f_normalized = f / base_value
-        c_normalized = c / base_value
+        # Confidence는 상대적 비율로 유지 (normalize된 값의 비율로 계산)
+        # 원본 confidence를 원본 값으로 나누면 상대적 변동폭이 됨
+        c_relative = c / base_value
+        # 음영이 잘 보이도록 confidence를 3배로 증폭
+        c_normalized = c_relative * 3.0
         
         # Historical 플롯 (인덱스 기반, normalized)
-        line_width = 2 if idx == 0 else 1  # 첫 번째 국가는 굵게
-        ax.plot(range(len(d_normalized)), d_normalized, '-', color=color, label=col_name, linewidth=line_width)
+        line_width = 3.0  # 모든 국가 동일한 두께
+        ax.plot(range(len(d_normalized)), d_normalized, '-', color=color, label=col_name, linewidth=line_width, zorder=3)
         
         # Forecast 플롯 (Historical 끝에서 연결, normalized)
         forecast_range = range(len(d_normalized)-1, (len(d_normalized)+len(f_normalized))-1)
-        ax.plot(forecast_range, f_normalized, '-', color=color, linewidth=line_width)
+        forecast_x = list(forecast_range)
+        forecast_y = f_normalized.cpu().numpy()
         
-        # Forecast 음영 (Confidence Interval) - DDoS 이미지처럼 진하게
-        ax.fill_between(forecast_range,
-                        f_normalized - c_normalized,
-                        f_normalized + c_normalized,
-                        color=color, alpha=0.6)
+        # 2단 음영: 0.00-0.03은 주황색, 0.03-y는 핑크색 (곡선 아래만 채움)
+        # 임계값 설정
+        thr = 0.03
+        
+        # numpy array로 변환
+        import numpy as np
+        y_forecast = np.array(forecast_y)
+        x_forecast = np.array(forecast_x)
+        
+        # 마스크 생성
+        mask_pos = ~np.isnan(y_forecast) & (y_forecast > 0)
+        mask_hi = ~np.isnan(y_forecast) & (y_forecast > thr)
+        
+        # 주황색 음영: 0부터 min(y, 0.03)까지
+        y_orange = np.minimum(y_forecast, thr)
+        ax.fill_between(
+            x_forecast, 0, y_orange,
+            where=mask_pos,
+            interpolate=True,
+            color="orange",
+            alpha=0.18,
+            zorder=1
+        )
+        
+        # 핑크색 음영: 0.03부터 y까지 (y > 0.03일 때만)
+        ax.fill_between(
+            x_forecast, thr, y_forecast,
+            where=mask_hi,
+            interpolate=True,
+            color="hotpink",
+            alpha=0.18,
+            zorder=2
+        )
+        
+        # Forecast 선 그리기 (음영 위로)
+        ax.plot(forecast_range, f_normalized, '-', color=color, linewidth=line_width, zorder=3)
     
     # X축 년도 레이블 (2011~2027, 2011-01부터 시작)
     x = ['2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027']
@@ -429,13 +460,17 @@ if __name__ == "__main__":
     
     print(f"\n🎯 Target countries: {[col[i] for i in target_indices]}")
     
+    # 플롯 색상 팔레트 (Multi_Country와 동일)
+    plot_colours = ["RoyalBlue", "Crimson", "DarkOrange"]
+    
     # 플롯 생성
     print("\n📊 Generating plots...")
     
-    # 개별 플롯
-    for i in target_indices:
+    # 개별 플롯 (색상 매칭)
+    for idx, i in enumerate(target_indices):
+        color = plot_colours[idx % len(plot_colours)]
         plot_forecast(hist_plot[:, i], fut_plot[:, i], conf_plot[:, i],
-                     col[i], dates_hist, dates_future, plot_dir)
+                     col[i], dates_hist, dates_future, plot_dir, color)
     
     # 다국가 비교 플롯
     plot_multi_node(hist_plot, fut_plot, conf_plot,
